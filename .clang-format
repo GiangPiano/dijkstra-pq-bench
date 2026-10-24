@@ -1,0 +1,39 @@
+---
+BasedOnStyle: Google
+AllowShortCaseLabelsOnASingleLine: true
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+
+
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+
+# Forces each initializer onto a separate line regardless of column limit
+BreakConstructorInitializers: BeforeComma
+
+# Prevents clang-format from collapsing short functions/initializers into a single line
+# AllowShortFunctionsOnASingleLine: None
+
+# (Optional / Recommended) Explicitly disallow packing initializers
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+# PackConstructorInitializers: Never
+AllowAllConstructorInitializersOnNextLine: false
+
+ColumnLimit: 100
+MaxEmptyLinesToKeep: 2
+
+# Continuation lines line up with the opening bracket, as in std::format(...) calls
+AlignAfterOpenBracket: Align
+AlignOperands: true
+BreakBeforeBinaryOperators: None
+BinPackArguments: false
+BinPackParameters: false
+AlwaysBreakTemplateDeclarations: Yes
+
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
