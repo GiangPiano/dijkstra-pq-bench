@@ -1,5 +1,9 @@
 compile_flags.txt
 
+# output dirs
+build/
+bin/
+
 # Prerequisites
 *.d
 
