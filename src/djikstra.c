@@ -1,4 +1,4 @@
-#include <_stdlib.h>
+#include <stdlib.h>
 #include <limits.h>
 #include <stdlib.h>
 
@@ -13,7 +13,7 @@ int* dijkstra(Graph* g, int src) {
   dist[src] = 0;
 
   struct Heap* h = heap_create(n);
-  heap_push(h, (Item){0, src});
+  heap_push(h, (Item) { 0, src });
 
   while (!heap_empty(h)) {
     struct Item it = heap_min(h);
