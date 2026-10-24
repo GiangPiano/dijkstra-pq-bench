@@ -11,14 +11,14 @@ typedef struct Heap {
   Item i;
 } Heap;
 
-struct Heap* heap_create(size_t n) { return NULL; }
+Heap* heap_create(size_t n) { return NULL; }
 
-void heap_push(struct Heap* h, struct Item it) { }
+void heap_push(Heap* h, Item it) { }
 
-struct Item heap_min(struct Heap* h) { return (Item) { 0, 0 }; }
+Item heap_min(Heap* h) { return (Item) { 0, 0 }; }
 
-bool heap_empty(struct Heap* h) { return true; }
+bool heap_empty(Heap* h) { return true; }
 
-void heap_pop(struct Heap* h) { }
+void heap_pop(Heap* h) { }
 
-void heap_delete(struct Heap* h) { }
+void heap_delete(Heap* h) { }
