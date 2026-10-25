@@ -11,7 +11,7 @@ typedef struct Item {
   size_t vertex;
 } Item;
 
-struct Heap* heap_create(size_t n);
+struct Heap* heap_create(size_t cap);
 void heap_push(struct Heap* h, struct Item it);
 struct Item heap_min(struct Heap* h);
 bool heap_empty(struct Heap* h);
