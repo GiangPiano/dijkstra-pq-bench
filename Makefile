@@ -3,7 +3,7 @@ CC = gcc
 # Compiler flags
 CFLAGS = -Wall -Wextra -g -MMD -MP
 # Linker flags
-LDFLAGS =
+LDFLAGS = -lm
 
 # source directory
 SRC_DIR = ./src
