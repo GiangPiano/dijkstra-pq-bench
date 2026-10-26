@@ -4,6 +4,10 @@
 #include "graph.h"
 
 int main(int argc, char* argv[]) {
+  // unused
+  (void)(argc);
+  (void)(argv);
+
   printf("Hello, World\n");
 
   int num_vertices   = 4;

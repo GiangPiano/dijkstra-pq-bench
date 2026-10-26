@@ -11,14 +11,30 @@ typedef struct Heap {
   Item i;
 } Heap;
 
-Heap* heap_create(size_t n) { return NULL; }
+Heap* heap_create(size_t cap) {
+  (void)(cap);
+  return NULL;
+}
 
-void heap_push(Heap* h, Item it) { }
+void heap_push(Heap* h, Item it) {
+  (void)(h);
+  (void)(it);
+}
 
-Item heap_min(Heap* h) { return (Item) { 0, 0 }; }
+Item heap_min(Heap* h) {
+  (void)(h);
+  return (Item) {};
+}
 
-bool heap_empty(Heap* h) { return true; }
+bool heap_empty(Heap* h) {
+  (void)(h);
+  return true;
+}
 
-void heap_pop(Heap* h) { }
+void heap_pop(Heap* h) {
+  (void)(h);
+}
 
-void heap_delete(Heap* h) { }
+void heap_delete(Heap* h) {
+  (void)(h);
+}
