@@ -11,11 +11,11 @@ typedef struct Item {
   size_t vertex;
 } Item;
 
-struct Heap* heap_create(size_t cap);
-void heap_push(struct Heap* h, struct Item it);
-struct Item heap_min(struct Heap* h);
-bool heap_empty(struct Heap* h);
-void heap_pop(struct Heap* h);
-void heap_delete(struct Heap* h);
+Heap* heap_create(size_t cap);
+void heap_push(Heap* h, Item it);
+Item heap_min(Heap* h);
+bool heap_empty(Heap* h);
+void heap_pop(Heap* h);
+void heap_delete(Heap* h);
 
 #endif
