@@ -65,7 +65,7 @@ static void graph_bench(struct ubench_run_state_s* ubench_run_state,
     int* d       = dijkstra(input->g, src);
     uint64_t sum = 0;
     for (size_t i = 0; i < input->n; i++) sum += (uint64_t)(unsigned)d[i];
-    printf("[ INFO ] %s: n=%zu src=%zu checksum=%lld\n", path, input->n, src, sum);
+    printf("[   INFO   ] %s: n=%zu src=%zu checksum=%lld\n", path, input->n, src, sum);
 
     free(d);
   }
@@ -76,13 +76,13 @@ static void graph_bench(struct ubench_run_state_s* ubench_run_state,
   free(dist);
 }
 
-#define GRAPH_BENCH(SET, NAME, PATH, SRC)             \
-  UBENCH_EX(SET, NAME) {                              \
-    static Input input;                               \
-    graph_bench(ubench_run_state, &input, PATH, SRC); \
+#define GRAPH_BENCH(SET, NAME, SRC)                                            \
+  UBENCH_EX(SET, NAME) {                                                       \
+    static Input input;                                                        \
+    graph_bench(ubench_run_state, &input, "data/" #NAME ".gr", SRC);     \
   }
 
-GRAPH_BENCH(random, tiny_dense, "data/tiny_dense.gr", 0);
-GRAPH_BENCH(random, small_med, "data/small_med.gr", 0);
-GRAPH_BENCH(random, mod_sparse, "data/mod_sparse.gr", 0);
-GRAPH_BENCH(random, big_sparse, "data/big_sparse.gr", 0);
+GRAPH_BENCH(random, tiny_dense, 0);
+GRAPH_BENCH(random, small_med,  0);
+GRAPH_BENCH(random, mod_sparse, 0);
+GRAPH_BENCH(random, big_sparse, 0);
