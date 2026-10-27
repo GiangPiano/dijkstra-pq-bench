@@ -16,6 +16,10 @@ typedef struct Heap {
   size_t size;          // Total number of elements
 } Heap;
 
+// Some helper functions needed here
+static Node* meld(Node* a, Node* b);
+static void free_tree(Node* n);
+
 
 // === MAIN HEAP FUNCTION ===
 
