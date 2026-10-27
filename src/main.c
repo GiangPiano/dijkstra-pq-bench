@@ -82,6 +82,7 @@ static void graph_bench(struct ubench_run_state_s* ubench_run_state,
     graph_bench(ubench_run_state, &input, PATH, SRC); \
   }
 
-GRAPH_BENCH(random, tiny, "data/tiny.gr", 0)
-GRAPH_BENCH(random, n1000_m5000, "data/rand1000.gr", 0)
-GRAPH_BENCH(random, n2000_m20000, "data/rand2000.gr", 0)
+GRAPH_BENCH(random, tiny_dense, "data/tiny_dense.gr", 0);
+GRAPH_BENCH(random, small_med, "data/small_med.gr", 0);
+GRAPH_BENCH(random, mod_sparse, "data/mod_sparse.gr", 0);
+GRAPH_BENCH(random, big_sparse, "data/big_sparse.gr", 0);
