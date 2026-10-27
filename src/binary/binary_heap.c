@@ -51,9 +51,9 @@ Heap* heap_create(size_t cap) {
 // 5.Update i to parent(i)
 
 static inline void swap(Item* a, Item* b) {
-  Item* tmp = a;
-  a         = b;
-  b         = tmp;
+  Item tmp = *a;
+  *a       = *b;
+  *b       = tmp;
 }
 
 static void bubble(Heap* h) {
@@ -83,16 +83,17 @@ void heap_push(Heap* h, Item it) {
 }
 
 static void sink(Heap* h) {
-  int i = 0;
+  size_t i = 0;
   while (true) {
-    int l = (2 * i) + 1;
-    int r = (2 * i) + 2;
-    if (l < h->size && h->data[i].distance < h->data[l].distance)
-      swap(&h->data[i], &h->data[l]);
-    else if (r < h->size && h->data[i].distance > h->data[r].distance)
-      swap(&h->data[i], &h->data[r]);
-    else
-      break;
+    size_t l = (2 * i) + 1;
+    size_t r = l + 1;
+    size_t m = i; /* index of the smallest of i, l, r */
+    if (l < h->size && h->data[l].distance < h->data[m].distance) m = l;
+    if (r < h->size && h->data[r].distance < h->data[m].distance) m = r;
+    if (m == i) break;
+    // swap and move to the next child
+    swap(&h->data[i], &h->data[m]);
+    i = m;
   }
 }
 

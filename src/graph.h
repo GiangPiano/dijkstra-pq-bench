@@ -5,11 +5,13 @@
 #include <string.h>
 
 typedef struct {
-  int dest, weight;
+  size_t dest;
+  int weight;
 } Edge;
 
 typedef struct {
-  int src, dest, weight;
+  size_t src, dest;
+  int weight;
 } EdgeInput;
 
 // Graph representation using CSR
@@ -18,14 +20,14 @@ typedef struct {
 // - adj[]: each node u owns a range [adj_start[u], adj_start[u + 1]), storing
 //          the outgoing edges from node u in a contiguous segment
 typedef struct {
-  int num_vertices;
-  int num_edges;
-  int* adj_start;
+  size_t num_vertices;
+  size_t num_edges;
+  size_t* adj_start;
   Edge* adj;
 } Graph;
 
 void free_graph(Graph* g);
 
-Graph* build_graph(int num_vertices, int num_edges, const EdgeInput* edge_input);
+Graph* build_graph(size_t num_vertices, size_t num_edges, const EdgeInput* edge_input);
 
 #endif

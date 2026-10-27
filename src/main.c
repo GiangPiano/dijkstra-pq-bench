@@ -1,52 +1,87 @@
-
+#include <inttypes.h>
+#include <stdint.h>
 #include <stdio.h>
-#include <stdarg.h>
-#include "ubench.h"
+#include <stdlib.h>
+
 #include "dijkstra.h"
 #include "graph.h"
+#include "ubench.h"
 
 UBENCH_MAIN();
 
-static void graph_bench(
-    struct ubench_run_state_s *ubench_run_state,
-    size_t src,
-    size_t num_vertices,
-    size_t num_edges,
-    EdgeInput* edges) {
-
-  Graph* g = build_graph(num_vertices, num_edges, edges);
-  int* dist;
-
-  UBENCH_DO_BENCHMARK() { dist = dijkstra(g, src); }
-
-  free_graph(g);
-
-  for (size_t i = 0; i < num_vertices; i++) printf("%d ", dist[i]);
-  printf("\n");
+static void input_error(const char* path, const char* msg) {
+  fprintf(stderr, "%s: %s\n", path, msg);
+  exit(1);
 }
 
-
-#define GRAPH_BENCH(SET, NAME, SRC, NUM_VERTICES, NUM_EDGES, EDGES)            \
-  UBENCH_EX(SET, NAME) {                                                       \
-    graph_bench(                                                               \
-        ubench_run_state,                                                      \
-        SRC,                                                                   \
-        NUM_VERTICES,                                                          \
-        NUM_EDGES,                                                             \
-        EDGES);                                                                \
+// Read a DIMACS .gr file into a Graph.
+static Graph* load_input(const char* path, size_t* n_out) {
+  FILE* f = fopen(path, "r");
+  if (!f) {
+    perror(path);
+    exit(1);
   }
 
-// the previous demo, doesn't include io in the benchmark
-GRAPH_BENCH(
-    simple,
-    first,
-    0,
-    4,
-    5,
-    ((EdgeInput[5]) {
-     { 0, 1, 4 },
-     { 0, 2, 2 },
-     { 1, 2, 1 },
-     { 1, 3, 5 },
-     { 2, 3, 8 },
-    }))
+  char line[256];
+  size_t n = 0, m = 0, k = 0;
+  EdgeInput* edges = NULL;
+
+  while (fgets(line, sizeof line, f)) {
+    if (line[0] == 'p') {
+      if (sscanf(line, "p sp %zu %zu", &n, &m) != 2) input_error(path, "bad 'p sp' line");
+      edges = malloc((m ? m : 1) * sizeof *edges);
+      if (!edges) input_error(path, "out of memory");
+    } else if (line[0] == 'a') {
+      size_t u = 0, v = 0;
+      int w = 0;
+      if (!edges || k >= m || sscanf(line, "a %zu %zu %d", &u, &v, &w) != 3)
+        input_error(path, "bad 'a' line, or more arcs than the header says");
+      if (u > n || v > n) input_error(path, "vertex id out of range");
+      edges[k++] = (EdgeInput){u, v, w};
+    }
+  }
+  fclose(f);
+  if (!edges || k != m) input_error(path, "arc count does not match header");
+
+  Graph* g = build_graph(n, m, edges);
+  free(edges);
+  *n_out = n;
+  return g;
+}
+
+typedef struct {
+  Graph* g;
+  size_t n;
+} Input;
+
+static void graph_bench(struct ubench_run_state_s* ubench_run_state,
+                        Input* input,
+                        const char* path,
+                        size_t src) {
+  // Runs on the first call only.
+  if (!input->g) {
+    input->g = load_input(path, &input->n);
+
+    int* d       = dijkstra(input->g, src);
+    uint64_t sum = 0;
+    for (size_t i = 0; i < input->n; i++) sum += (uint64_t)(unsigned)d[i];
+    printf("[ INFO ] %s: n=%zu src=%zu checksum=%lld\n", path, input->n, src, sum);
+
+    free(d);
+  }
+
+  int* dist = NULL;
+  UBENCH_DO_BENCHMARK() { dist = dijkstra(input->g, src); }
+  UBENCH_DO_NOTHING(dist);  // prevent the compiler from removing unused variable
+  free(dist);
+}
+
+#define GRAPH_BENCH(SET, NAME, PATH, SRC)             \
+  UBENCH_EX(SET, NAME) {                              \
+    static Input input;                               \
+    graph_bench(ubench_run_state, &input, PATH, SRC); \
+  }
+
+GRAPH_BENCH(random, tiny, "data/tiny.gr", 0)
+GRAPH_BENCH(random, n1000_m5000, "data/rand1000.gr", 0)
+GRAPH_BENCH(random, n2000_m20000, "data/rand2000.gr", 0)

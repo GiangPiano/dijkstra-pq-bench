@@ -4,11 +4,11 @@
 #include "graph.h"
 #include "heap.h"
 
-int* dijkstra(Graph* g, int src) {
-  int n     = g->num_vertices;
+int* dijkstra(Graph* g, size_t src) {
+  size_t n  = g->num_vertices;
   int* dist = malloc(sizeof(int) * n);
   if (!dist) return NULL;
-  for (int i = 0; i < n; i++) dist[i] = INT_MAX;
+  for (size_t i = 0; i < n; i++) dist[i] = INT_MAX;
   dist[src] = 0;
 
   struct Heap* h = heap_create(n);
@@ -18,11 +18,12 @@ int* dijkstra(Graph* g, int src) {
     struct Item it = heap_min(h);
     heap_pop(h);
 
-    int d = it.distance, u = it.vertex;
+    int d    = it.distance;
+    size_t u = it.vertex;
 
     if (d > dist[u]) continue;
 
-    for (int idx = g->adj_start[u]; idx < g->adj_start[u + 1]; idx++) {
+    for (size_t idx = g->adj_start[u]; idx < g->adj_start[u + 1]; idx++) {
       Edge* e = &(g->adj[idx]);
       int nd  = d + e->weight;
       if (nd < dist[e->dest]) {
@@ -34,7 +35,7 @@ int* dijkstra(Graph* g, int src) {
 
   heap_delete(h);
 
-  for (int i = 0; i < g->num_vertices; i++) {
+  for (size_t i = 0; i < g->num_vertices; i++) {
     if (dist[i] == INT_MAX) dist[i] = -1;
   }
   return dist;
