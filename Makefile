@@ -1,7 +1,7 @@
 # C compiler to use, we might want to switch to Clang
 CC = gcc
 # Compiler flags
-CFLAGS = -Wall -Wextra -g -MMD -MP
+CFLAGS = -Wall -Wextra -g -MMD -MP -O3
 # Linker flags
 LDFLAGS = -lm
 
