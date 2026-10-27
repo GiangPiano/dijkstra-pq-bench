@@ -27,6 +27,15 @@ clean:
 	-rm -r $(BIN_DIR)
 	-rm -r $(BUILD_DIR)
 
+# For the latex report
+.PHONY: report clean-report
+report:
+	latexmk -pdf -cd report/report.tex || (cd report && pdflatex -interaction=nonstopmode report.tex && pdflatex -interaction=nonstopmode report.tex)
+
+clean-report:
+	latexmk -C -cd report/report.tex || rm -f report/*.aux report/*.log report/*.out report/*.toc report/*.synctex.gz
+# report ends
+
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(dir $@)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
