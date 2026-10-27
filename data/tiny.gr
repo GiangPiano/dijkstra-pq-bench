@@ -1,7 +1,0 @@
-c data/tiny.gr (n=4 m=5 maxw=100 seed=1)
-p sp 4 5
-a 0 3 64
-a 3 0 98
-a 0 2 58
-a 1 2 61
-a 3 1 84
