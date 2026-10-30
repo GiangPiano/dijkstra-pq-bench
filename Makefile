@@ -18,13 +18,18 @@ DATA_DIR = ./data
 
 # all subdirs of source
 VARIANTS = $(patsubst $(SRC_DIR)/%/,%,$(wildcard $(SRC_DIR)/*/))
-BIN_VARIANTS = $(addprefix $(BIN_DIR)/,$(VARIANTS))
+BIN_VARIANTS = $(addprefix $(BIN_DIR)/$(ALGO)/,$(VARIANTS))
 TEST_VARIANTS = $(addprefix test-,$(VARIANTS))
+
+# Which Dijkstra to link: lazy or dk (override with `make test ALGO=dk`)
+ALGO ?= lazy
+ALGOS = lazy dk
 
 # helper function
 OBJS_FOR_SRCS = $(patsubst $(SRC_DIR)$(1)/%.c,$(BUILD_DIR)$(1)/%.o,$(wildcard $(SRC_DIR)$(1)/*.c))
 
-COMMON_OBJS = $(call OBJS_FOR_SRCS,)
+COMMON_OBJS = $(filter-out $(BUILD_DIR)/dijkstra_%.o,$(call OBJS_FOR_SRCS,)) \
+              $(BUILD_DIR)/dijkstra_$(ALGO).o
 
 # generated test data vars:
 SEED = 67
@@ -39,6 +44,10 @@ DATA_FILES = $(patsubst %,$(DATA_DIR)/%.gr,$(DATA_SET))
 
 .PHONY:
 test: build data $(TEST_VARIANTS)
+
+.PHONY:
+test-all:
+	@for a in $(ALGOS); do $(MAKE) test ALGO=$$a; done
 
 .PHONY:
 data: $(DATA_FILES)
@@ -84,17 +93,17 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 # executable variants
 .SECONDEXPANSION:
-$(BIN_VARIANTS): $(BIN_DIR)/%: $(COMMON_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
+$(BIN_VARIANTS): $(BIN_DIR)/$(ALGO)/%: $(COMMON_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
 	mkdir -p $(dir $@)
-	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+	$(CC) $^ $(LDFLAGS) $(LOADLIBES) $(LDLIBS) -o $@
 
 .PHONY: $(TEST_VARIANTS)
-$(TEST_VARIANTS): test-%: $(BIN_DIR)/% data
+$(TEST_VARIANTS): test-%: $(BIN_DIR)/$(ALGO)/% data
 	@printf "$(GREEN)========================================\n"
-	@printf "Running benchmark: $(WHITE)$*$(GREEN)\n"
+	@printf "Running benchmark: $(WHITE)$(ALGO)/$*$(GREEN)\n"
 	@printf "========================================$(RESET)\n"
 	-$<
 
-DEPS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(wildcard $(SRC_DIR)/**/*.c))
+DEPS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c))
 
 -include $(DEPS)
