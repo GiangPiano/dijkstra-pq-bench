@@ -17,6 +17,6 @@ Item heap_min(Heap* h);
 bool heap_empty(Heap* h);
 void heap_pop(Heap* h);
 void heap_delete(Heap* h);
-void heap_decrease_key(Heap* h, size_t v, int d);
+void heap_decrease_key(Heap* h, Item it);
 
 #endif

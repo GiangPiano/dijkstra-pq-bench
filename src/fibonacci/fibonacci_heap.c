@@ -18,26 +18,45 @@ typedef struct Node {
 typedef struct Heap {
   Node* min;    // Point to the root node with the minimum key
   size_t size;  // Total number of node in the heap
+  Node** pos;   // Vertex -> Node mapping for decrease_key
+  size_t pos_cap; // Capacity of pos array
 } Heap;
 
 // Some helper function needed in this case
 static void link_child(Node* y, Node* x);
 static void consolidate(Heap* h);
 static void free_tree(Node* n);
+static void cut(Heap* h, Node* x, Node* y);
+static void cascading_cut(Heap* h, Node* y);
 
 // === MAIN HEAP FUNCTION ===
 
 Heap* heap_create(size_t cap) {
-  (void)cap;
+  if (cap == 0) cap = 16;
   Heap* h = malloc(sizeof(Heap));
   if (!h) return NULL;
   h->min  = NULL;
   h->size = 0;
+  h->pos_cap = cap;
+  h->pos = calloc(cap, sizeof(Node*));
+  if (!h->pos) {
+    free(h);
+    return NULL;
+  }
   return h;
 }
 
 void heap_push(Heap* h, Item it) {
   if (!h) return;
+
+  if (it.vertex >= h->pos_cap) {
+    size_t new_cap = (it.vertex + 1 > h->pos_cap * 2) ? it.vertex + 1 : h->pos_cap * 2;
+    Node** new_pos = realloc(h->pos, new_cap * sizeof(Node*));
+    if (!new_pos) return;
+    for (size_t i = h->pos_cap; i < new_cap; i++) new_pos[i] = NULL;
+    h->pos = new_pos;
+    h->pos_cap = new_cap;
+  }
 
   // 1. Allocate and initialise the new node
   Node* n = malloc(sizeof(Node));
@@ -48,6 +67,7 @@ void heap_push(Heap* h, Item it) {
   n->marked = false;
   n->parent = NULL;
   n->child  = NULL;
+  h->pos[it.vertex] = n;
     
   // 2. Add the node to the root list
   if (h->min == NULL) {
@@ -113,6 +133,9 @@ void heap_pop(Heap* h) {
   }
    
   // 3. Free memory and decrement size
+  if (z->item.vertex < h->pos_cap) {
+    h->pos[z->item.vertex] = NULL;
+  }
   free(z);
   h->size--;
 }
@@ -126,7 +149,62 @@ void heap_delete(Heap* h) {
   }
 
   // Free the heap wrapper itself
+  free(h->pos);
   free(h);
+}
+
+static void cut(Heap* h, Node* x, Node* y) {
+  // 1. Remove x from y's circular child list
+  if (x->right == x) {
+    y->child = NULL;
+  } else {
+    x->left->right = x->right;
+    x->right->left = x->left;
+    if (y->child == x) {
+      y->child = x->right;
+    }
+  }
+  y->degree--;
+
+  // 2. Add x to the root list next to h->min
+  x->right            = h->min->right;
+  x->left             = h->min;
+  h->min->right->left = x;
+  h->min->right       = x;
+
+  x->parent = NULL;
+  x->marked = false;
+}
+
+static void cascading_cut(Heap* h, Node* y) {
+  Node* z = y->parent;
+  if (z != NULL) {
+    if (!y->marked) {
+      y->marked = true;
+    } else {
+      cut(h, y, z);
+      cascading_cut(h, z);
+    }
+  }
+}
+
+void heap_decrease_key(Heap* h, Item it) {
+  if (!h || it.vertex >= h->pos_cap) return;
+  Node* x = h->pos[it.vertex];
+  if (!x) return;
+  assert(it.distance <= x->item.distance);
+
+  x->item.distance = it.distance;
+  Node* y = x->parent;
+
+  if (y != NULL && x->item.distance < y->item.distance) {
+    cut(h, x, y);
+    cascading_cut(h, y);
+  }
+
+  if (x->item.distance < h->min->item.distance) {
+    h->min = x;
+  }
 }
 
 // === HELPER FUNCTION ===
