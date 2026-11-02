@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Random directed graph generator: simple digraph, weights in [1, w], DIMACS output.
 
-  ./gen.py rand1000 -n 1000 -m 10000 -o rand1000.gr
-  ./gen.py big -n 1000000 -m 5000000 -o big.gr
+  ./gen.py rand1000 -n 1000 -m 10000 -o rand1000.c
+  ./gen.py big -n 1000000 -m 5000000 -o big.c
   ./gen.py dense -n 200 -d 50 -w 20 -s 42      # no -o: writes to stdout
 """
 import argparse
 import contextlib
 import random
 import sys
-
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
@@ -48,19 +47,55 @@ def main():
         sys.exit(f"gen.py: {e}")
 
     rng = random.Random(a.s)
-    name = " ".join(a.name.split())  # keep the comment on one line
+
+    # generate a (u, v, w) arc
+    def arc(idx):
+      u, r = divmod(idx, n - 1)
+      v = r + 1 if r >= u else r  # avoid self loop
+      return f"{{ {u}, {v}, {rng.randint(1, a.w)} }}"
+
+    # create all the arcs
+    arcs = [arc(idx) for idx in rng.sample(range(total), m)]
+    # join them all
+    arcs = ",\n    ".join(arcs)
+
+    name = " ".join(a.name.split())
 
     with ctx as out:
-        out.write(f"c {name} (n={n} m={m} maxw={a.w} seed={a.s})\n")
-        out.write(f"p sp {n} {m}\n")
-        # m distinct arc indices out of [0, total); range() is never materialized
-        for idx in rng.sample(range(total), m):
-            u, r = divmod(idx, n - 1)
-            v = r + 1 if r >= u else r  # avoid self loop
-            out.write(f"a {u} {v} {rng.randint(1, a.w)}\n")
+        # include headers
+        out.write("#include <inttypes.h>\n")
+        out.write("#include <stdint.h>\n")
+        out.write("#include <stdio.h>\n")
+        out.write("#include <stdlib.h>\n")
+        out.write("#include \"../src/dijkstra.h\"\n")
+        out.write("#include \"../src/graph.h\"\n")
+        out.write("#include \"../src/ubench.h\"\n")
+        out.write("\n")
+
+        def emit_bench(variant):
+          out.write(f"UBENCH_EX({variant}, {name}) {{\n")
+          out.write(f"  size_t n = {n};\n")
+          out.write(f"  size_t m = {m};\n")
+          out.write("\n")
+          out.write("  EdgeInput edges[] = {\n")
+          out.write("    " + arcs)
+          out.write("};\n")
+          out.write("\n")
+          out.write("  Graph* g = build_graph(n, m, edges);\n")
+          out.write("  int* dist = malloc(sizeof(int) * g->num_vertices);\n")
+          out.write("\n")
+          out.write(f"  UBENCH_DO_BENCHMARK() {{ dijkstra_{variant}(dist, g); }}\n")
+          out.write("\n")
+          out.write("  free(dist);\n")
+          out.write("}\n")
+
+        # dk
+        emit_bench("dk")
+        out.write("\n")
+        emit_bench("lazy")
+
 
     print(f"gen: n={n} m={m} ({100 * m / total:.4g}% dense) seed={a.s}", file=sys.stderr)
-
 
 if __name__ == "__main__":
     main()
