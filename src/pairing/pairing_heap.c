@@ -14,6 +14,8 @@ typedef struct Node {
 typedef struct Heap {
   Node* root;           // Point to root of the pairing heap
   size_t size;          // Total number of elements
+  Node** pos;           // Vertex -> Node mapping for decrease_key
+  size_t pos_cap;       // Capacity of pos array
 } Heap;
 
 // Some helper functions needed here
@@ -24,16 +26,31 @@ static void free_tree(Node* n);
 // === MAIN HEAP FUNCTION ===
 
 Heap* heap_create(size_t cap) {
-  (void)cap;
+  if (cap == 0) cap = 16;
   Heap* h = malloc(sizeof(Heap));
   if (!h) return NULL;
   h->root = NULL;
   h->size = 0;
+  h->pos_cap = cap;
+  h->pos = calloc(cap, sizeof(Node*));
+  if (!h->pos) {
+    free(h);
+    return NULL;
+  }
   return h;
 }
 
 void heap_push(Heap* h, Item it) {
   if (!h) return;
+
+  if (it.vertex >= h->pos_cap) {
+    size_t new_cap = (it.vertex + 1 > h->pos_cap * 2) ? it.vertex + 1 : h->pos_cap * 2;
+    Node** new_pos = realloc(h->pos, new_cap * sizeof(Node*));
+    if (!new_pos) return;
+    for (size_t i = h->pos_cap; i < new_cap; i++) new_pos[i] = NULL;
+    h->pos = new_pos;
+    h->pos_cap = new_cap;
+  }
 
   Node* n = malloc(sizeof(Node));
   if (!n) return;
@@ -43,6 +60,7 @@ void heap_push(Heap* h, Item it) {
   n->next  = NULL;
   n->prev  = NULL;
 
+  h->pos[it.vertex] = n;
   h->root = meld(h->root, n);
   h->size++;
 }
@@ -62,6 +80,9 @@ void heap_pop(Heap* h) {
   Node* old_root = h->root;
   Node* children = old_root->child;
 
+  if (old_root->item.vertex < h->pos_cap) {
+    h->pos[old_root->item.vertex] = NULL;
+  }
   free(old_root);
   h->size--;
 
@@ -132,7 +153,35 @@ void heap_delete(Heap* h) {
     free_tree(h->root);
   }
 
+  free(h->pos);
   free(h);
+}
+
+void heap_decrease_key(Heap* h, Item it) {
+  if (!h || it.vertex >= h->pos_cap) return;
+  Node* n = h->pos[it.vertex];
+  if (!n) return;
+  assert(it.distance <= n->item.distance);
+  n->item.distance = it.distance;
+
+  if (n == h->root) return;
+
+  // Cut n from its parent / sibling list
+  if (n->prev->child == n) {
+    // n is the leftmost child of its parent n->prev
+    n->prev->child = n->next;
+  } else {
+    // n is a right sibling of n->prev
+    n->prev->next = n->next;
+  }
+  if (n->next != NULL) {
+    n->next->prev = n->prev;
+  }
+
+  n->prev = NULL;
+  n->next = NULL;
+
+  h->root = meld(h->root, n);
 }
 
 // === HELPER FUNCTION ===

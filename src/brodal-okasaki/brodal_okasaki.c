@@ -297,7 +297,69 @@ void heap_pop(Heap* h) {
   h->forest = min.forest;
 }
 
+static bool decrease_tree(Tree* t, Item it) {
+  if (t->it.vertex == it.vertex) {
+    if (it.distance < t->it.distance) {
+      t->it.distance = it.distance;
+    }
+    return true;
+  }
+  TreeList* curr = t->children;
+  while (curr != NULL) {
+    if (decrease_tree(&curr->car, it)) {
+      if (lteq(curr->car.it, t->it)) {
+        Item tmp = t->it;
+        t->it = curr->car.it;
+        curr->car.it = tmp;
+      }
+      return true;
+    }
+    curr = curr->cdr;
+  }
+  curr = t->forest;
+  while (curr != NULL) {
+    if (decrease_tree(&curr->car, it)) {
+      return true;
+    }
+    curr = curr->cdr;
+  }
+  return false;
+}
+
+static bool decrease_forest(TreeList* ts, Item it, Tree** min_tree) {
+  TreeList* curr = ts;
+  while (curr != NULL) {
+    if (decrease_tree(&curr->car, it)) {
+      if (min_tree) *min_tree = &curr->car;
+      return true;
+    }
+    curr = curr->cdr;
+  }
+  return false;
+}
+
+void heap_decrease_key(Heap* h, Item it) {
+  if (!h || h->empty) return;
+  if (h->it.vertex == it.vertex) {
+    if (it.distance < h->it.distance) {
+      h->it.distance = it.distance;
+    }
+    return;
+  }
+  Tree* found_tree = NULL;
+  if (decrease_forest(h->forest, it, &found_tree)) {
+    if (found_tree && lteq(found_tree->it, h->it)) {
+      Item tmp = h->it;
+      h->it = found_tree->it;
+      found_tree->it = tmp;
+    }
+  }
+}
+
 void heap_delete(Heap* h) {
-  if (h->empty) return;
-  tree_list_delete_all(h->forest);
+  if (!h) return;
+  if (!h->empty) {
+    tree_list_delete_all(h->forest);
+  }
+  free(h);
 }

@@ -38,3 +38,8 @@ void heap_pop(Heap* h) {
 void heap_delete(Heap* h) {
   (void)(h);
 }
+
+void heap_decrease_key(Heap* h, Item it) {
+  (void)(h);
+  (void)(it);
+}

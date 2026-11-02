@@ -73,11 +73,16 @@ static void bubble(Heap* h, size_t i) {
 
 void heap_push(Heap* h, Item it) {
   if (h->size == h->cap) {
-    Item* tmp = realloc(h->data, 2 * h->cap * sizeof(Item));
+    size_t new_cap = 2 * h->cap;
+    Item* tmp = realloc(h->data, new_cap * sizeof(Item));
     if (!tmp) return;
-
-    h->cap *= 2;
     h->data = tmp;
+
+    size_t* pos_tmp = realloc(h->pos, new_cap * sizeof(size_t));
+    if (!pos_tmp) return;
+    h->pos = pos_tmp;
+
+    h->cap = new_cap;
   }
 
   h->data[h->size] = it;
@@ -126,11 +131,11 @@ Item heap_min(Heap* h) {
   return h->data[0];
 }
 
-void heap_decrease_key(Heap* h, size_t v, int d) {
-  size_t i = h->pos[v];
-  assert(i < h->size && h->data[i].vertex == v);  // v must currently be in the heap
-  assert(d <= h->data[i].distance);
-  h->data[i].distance = d;
+void heap_decrease_key(Heap* h, Item it) {
+  size_t i = h->pos[it.vertex];
+  assert(i < h->size && h->data[i].vertex == it.vertex);  // vertex must currently be in the heap
+  assert(it.distance <= h->data[i].distance);
+  h->data[i].distance = it.distance;
   bubble(h, i);
 }
 

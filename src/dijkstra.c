@@ -27,7 +27,7 @@ void dijkstra_decrease_key(int* dist, const Graph* g) {
         if (dist[e->dest] == INT_MAX)
           heap_push(h, (Item){nd, e->dest});
         else
-          heap_decrease_key(h, e->dest, nd);
+          heap_decrease_key(h, (Item){nd, e->dest});
         dist[e->dest] = nd;
       }
     }
