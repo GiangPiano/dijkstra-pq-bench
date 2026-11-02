@@ -56,8 +56,6 @@ def main():
 
     # create all the arcs
     arcs = [arc(idx) for idx in rng.sample(range(total), m)]
-    # join them all
-    arcs = ",\n    ".join(arcs)
 
     name = " ".join(a.name.split())
 
@@ -72,20 +70,21 @@ def main():
         out.write("#include \"../src/ubench.h\"\n")
         out.write("\n")
 
+        out.write(f"static const size_t n = {n};\n")
+        out.write(f"static const size_t m = {m};\n")
+        out.write("static const EdgeInput edges[] = {\n")
+        out.write("  " + ",\n  ".join(arcs))
+        out.write("};\n")
+        out.write("static const Graph* g;\n")
+        out.write("static void __attribute__((constructor)) make_graph() {\n")
+        out.write("  g = build_graph(n, m, edges);\n")
+        out.write("}\n")
+        out.write("\n")
+
         def emit_bench(variant):
           out.write(f"UBENCH_EX({variant}, {name}) {{\n")
-          out.write(f"  size_t n = {n};\n")
-          out.write(f"  size_t m = {m};\n")
-          out.write("\n")
-          out.write("  EdgeInput edges[] = {\n")
-          out.write("    " + arcs)
-          out.write("};\n")
-          out.write("\n")
-          out.write("  Graph* g = build_graph(n, m, edges);\n")
           out.write("  int* dist = malloc(sizeof(int) * g->num_vertices);\n")
-          out.write("\n")
           out.write(f"  UBENCH_DO_BENCHMARK() {{ dijkstra_{variant}(dist, g); }}\n")
-          out.write("\n")
           out.write("  free(dist);\n")
           out.write("}\n")
 

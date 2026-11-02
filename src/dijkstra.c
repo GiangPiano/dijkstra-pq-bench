@@ -4,7 +4,7 @@
 #include "graph.h"
 #include "heap.h"
 
-void dijkstra_decrease_key(int* dist, Graph* g) {
+void dijkstra_decrease_key(int* dist, const Graph* g) {
   size_t n  = g->num_vertices;
   size_t src  = 0;
   for (size_t i = 0; i < n; i++) dist[i] = INT_MAX;
@@ -40,7 +40,7 @@ void dijkstra_decrease_key(int* dist, Graph* g) {
   }
 }
 
-void dijkstra_lazy(int* dist, Graph* g) {
+void dijkstra_lazy(int* dist, const Graph* g) {
   size_t n  = g->num_vertices;
   size_t src  = 0;
   for (size_t i = 0; i < n; i++) dist[i] = INT_MAX;
