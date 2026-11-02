@@ -1,0 +1,3 @@
+name, mean (ns), stddev (%), confidence (%)
+decrease_key.small_med, 8766820, 1.925356, 0.640297,
+lazy.small_med, 2731369, 1.838954, 0.789524,

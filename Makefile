@@ -48,6 +48,10 @@ all: tests report
 tests: $(CSV_VARIANTS)
 
 .PHONY:
+plot:
+	./src/bench/plot.py -i $(DATA_OUT_DIR) -o report/figures
+
+.PHONY:
 build: $(BIN_VARIANTS)
 
 .PHONY:
