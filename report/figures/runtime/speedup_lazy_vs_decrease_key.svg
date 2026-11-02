@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 460" width="720" height="460" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+<defs>
+  <style>
+    .axis { stroke: #CBD5E1; stroke-width: 1; }
+    .grid { stroke: #F1F5F9; stroke-width: 1; stroke-dasharray: 4,4; }
+    .baseline { stroke: #EF4444; stroke-width: 1.5; stroke-dasharray: 3,3; }
+    .tick-label { font-size: 11px; fill: #64748B; }
+    .axis-title { font-size: 12px; font-weight: 600; fill: #334155; }
+    .chart-title { font-size: 16px; font-weight: 700; fill: #0F172A; }
+    .chart-subtitle { font-size: 12px; fill: #64748B; }
+    .bar-label { font-size: 10px; font-weight: 600; fill: #1E293B; text-anchor: middle; }
+    .legend-text { font-size: 12px; fill: #334155; font-weight: 500; dominant-baseline: central; }
+  </style>
+</defs>
+<text x="80" y="32" class="chart-title">Speedup Ratio: Lazy vs. Decrease-Key</text>
+<text x="80" y="50" class="chart-subtitle">T(lazy) / T(decrease-key) &gt; 1.0 means Decrease-Key is faster; &lt; 1.0 means Lazy is faster</text>
+<line x1="80" y1="270.0" x2="680" y2="270.0" class="baseline" />
+<text x="685" y="274.0" class="tick-label" fill="#EF4444" font-weight="600">1.0x (Parity)</text>
+<line x1="80" y1="320.0" x2="680" y2="320.0" class="grid" />
+<text x="70" y="324.0" class="tick-label" text-anchor="end">0.5x</text>
+<line x1="80" y1="270.0" x2="680" y2="270.0" class="grid" />
+<text x="70" y="274.0" class="tick-label" text-anchor="end">1.0x</text>
+<line x1="80" y1="220.0" x2="680" y2="220.0" class="grid" />
+<text x="70" y="224.0" class="tick-label" text-anchor="end">1.5x</text>
+<line x1="80" y1="170.0" x2="680" y2="170.0" class="grid" />
+<text x="70" y="174.0" class="tick-label" text-anchor="end">2.0x</text>
+<line x1="80" y1="120.0" x2="680" y2="120.0" class="grid" />
+<text x="70" y="124.0" class="tick-label" text-anchor="end">2.5x</text>
+<line x1="80" y1="70.0" x2="680" y2="70.0" class="grid" />
+<text x="70" y="74.0" class="tick-label" text-anchor="end">3.0x</text>
+<line x1="80" y1="70" x2="80" y2="370" class="axis" />
+<line x1="80" y1="370" x2="680" y2="370" class="axis" />
+<text x="-220.0" y="20" class="axis-title" text-anchor="middle" transform="rotate(-90)">Speedup Factor</text>
+<text x="155.0" y="395" class="axis-title" text-anchor="middle">tiny_dense</text>
+<rect x="100.8" y="213.0" width="24.1" height="157.0" fill="#2563EB" rx="3" ry="3"><title>binary on tiny_dense: 1.57x</title></rect>
+<text x="112.8" y="208.0" class="bar-label">1.57x</text>
+<rect x="157.0" y="159.7" width="24.1" height="210.3" fill="#9333EA" rx="3" ry="3"><title>fibonacci on tiny_dense: 2.10x</title></rect>
+<text x="169.1" y="154.7" class="bar-label">2.10x</text>
+<rect x="185.1" y="204.8" width="24.1" height="165.2" fill="#16A34A" rx="3" ry="3"><title>pairing on tiny_dense: 1.65x</title></rect>
+<text x="197.2" y="199.8" class="bar-label">1.65x</text>
+<text x="305.0" y="395" class="axis-title" text-anchor="middle">small_med</text>
+<rect x="250.8" y="190.1" width="24.1" height="179.9" fill="#2563EB" rx="3" ry="3"><title>binary on small_med: 1.80x</title></rect>
+<text x="262.8" y="185.1" class="bar-label">1.80x</text>
+<rect x="278.9" y="338.8" width="24.1" height="31.2" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki on small_med: 0.31x</title></rect>
+<text x="290.9" y="333.8" class="bar-label">0.31x</text>
+<rect x="307.0" y="165.5" width="24.1" height="204.5" fill="#9333EA" rx="3" ry="3"><title>fibonacci on small_med: 2.05x</title></rect>
+<text x="319.1" y="160.5" class="bar-label">2.05x</text>
+<rect x="335.1" y="215.7" width="24.1" height="154.3" fill="#16A34A" rx="3" ry="3"><title>pairing on small_med: 1.54x</title></rect>
+<text x="347.2" y="210.7" class="bar-label">1.54x</text>
+<text x="455.0" y="395" class="axis-title" text-anchor="middle">mod_sparse</text>
+<rect x="400.8" y="250.0" width="24.1" height="120.0" fill="#2563EB" rx="3" ry="3"><title>binary on mod_sparse: 1.20x</title></rect>
+<text x="412.8" y="245.0" class="bar-label">1.20x</text>
+<rect x="457.0" y="249.9" width="24.1" height="120.1" fill="#9333EA" rx="3" ry="3"><title>fibonacci on mod_sparse: 1.20x</title></rect>
+<text x="469.1" y="244.9" class="bar-label">1.20x</text>
+<rect x="485.1" y="250.6" width="24.1" height="119.4" fill="#16A34A" rx="3" ry="3"><title>pairing on mod_sparse: 1.19x</title></rect>
+<text x="497.2" y="245.6" class="bar-label">1.19x</text>
+<text x="605.0" y="395" class="axis-title" text-anchor="middle">big_sparse</text>
+<rect x="550.8" y="250.4" width="24.1" height="119.6" fill="#2563EB" rx="3" ry="3"><title>binary on big_sparse: 1.20x</title></rect>
+<text x="562.8" y="245.4" class="bar-label">1.20x</text>
+<rect x="607.0" y="246.2" width="24.1" height="123.8" fill="#9333EA" rx="3" ry="3"><title>fibonacci on big_sparse: 1.24x</title></rect>
+<text x="619.1" y="241.2" class="bar-label">1.24x</text>
+<rect x="635.1" y="240.3" width="24.1" height="129.7" fill="#16A34A" rx="3" ry="3"><title>pairing on big_sparse: 1.30x</title></rect>
+<text x="647.2" y="235.3" class="bar-label">1.30x</text>
+<rect x="80.0" y="421.0" width="14" height="14" fill="#2563EB" rx="3" ry="3" />
+<text x="100.0" y="428.0" class="legend-text">binary</text>
+<rect x="220.0" y="421.0" width="14" height="14" fill="#EA580C" rx="3" ry="3" />
+<text x="240.0" y="428.0" class="legend-text">brodal-okasaki</text>
+<rect x="360.0" y="421.0" width="14" height="14" fill="#9333EA" rx="3" ry="3" />
+<text x="380.0" y="428.0" class="legend-text">fibonacci</text>
+<rect x="500.0" y="421.0" width="14" height="14" fill="#16A34A" rx="3" ry="3" />
+<text x="520.0" y="428.0" class="legend-text">pairing</text>
+</svg>

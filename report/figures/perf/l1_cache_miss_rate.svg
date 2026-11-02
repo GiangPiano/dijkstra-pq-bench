@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" width="760" height="460" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+<defs>
+  <style>
+    .axis { stroke: #CBD5E1; stroke-width: 1; }
+    .grid { stroke: #F1F5F9; stroke-width: 1; stroke-dasharray: 4,4; }
+    .tick-label { font-size: 11px; fill: #64748B; }
+    .axis-title { font-size: 12px; font-weight: 600; fill: #334155; }
+    .chart-title { font-size: 16px; font-weight: 700; fill: #0F172A; }
+    .chart-subtitle { font-size: 12px; fill: #64748B; }
+    .bar-label { font-size: 9px; font-weight: 600; fill: #1E293B; text-anchor: middle; }
+    .legend-text { font-size: 12px; fill: #334155; font-weight: 500; dominant-baseline: central; }
+  </style>
+</defs>
+<text x="90" y="32" class="chart-title">L1-D Cache Miss Rate (%) across Priority Queues</text>
+<text x="90" y="50" class="chart-subtitle">L1-misses / L1-loads (lower is better) — Physical manifestation of pointer indirection</text>
+<line x1="90" y1="370.0" x2="720" y2="370.0" class="grid" />
+<text x="80" y="374.0" class="tick-label" text-anchor="end">0.0%</text>
+<line x1="90" y1="310.0" x2="720" y2="310.0" class="grid" />
+<text x="80" y="314.0" class="tick-label" text-anchor="end">6.0%</text>
+<line x1="90" y1="250.0" x2="720" y2="250.0" class="grid" />
+<text x="80" y="254.0" class="tick-label" text-anchor="end">12.0%</text>
+<line x1="90" y1="190.0" x2="720" y2="190.0" class="grid" />
+<text x="80" y="194.0" class="tick-label" text-anchor="end">18.0%</text>
+<line x1="90" y1="130.0" x2="720" y2="130.0" class="grid" />
+<text x="80" y="134.0" class="tick-label" text-anchor="end">24.0%</text>
+<line x1="90" y1="70.0" x2="720" y2="70.0" class="grid" />
+<text x="80" y="74.0" class="tick-label" text-anchor="end">30.0%</text>
+<line x1="90" y1="70" x2="90" y2="370" class="axis" />
+<line x1="90" y1="370" x2="720" y2="370" class="axis" />
+<text x="-220.0" y="20" class="axis-title" text-anchor="middle" transform="rotate(-90)">L1-D Miss Rate (%)</text>
+<text x="168.8" y="388" class="axis-title" font-size="11px" text-anchor="middle">Sparse (d=4)</text>
+<text x="168.8" y="402" class="tick-label" font-weight="600" text-anchor="middle">Decrease-Key</text>
+<rect x="114.8" y="104.4" width="24.0" height="265.6" fill="#2563EB" rx="3" ry="3"><title>binary (sparse, decrease_key): 26.6%</title></rect>
+<text x="126.8" y="100.4" class="bar-label">26.6%</text>
+<rect x="142.8" y="127.1" width="24.0" height="242.9" fill="#16A34A" rx="3" ry="3"><title>pairing (sparse, decrease_key): 24.3%</title></rect>
+<text x="154.8" y="123.1" class="bar-label">24.3%</text>
+<rect x="170.8" y="181.0" width="24.0" height="189.0" fill="#9333EA" rx="3" ry="3"><title>fibonacci (sparse, decrease_key): 18.9%</title></rect>
+<text x="182.8" y="177.0" class="bar-label">18.9%</text>
+<rect x="198.8" y="109.4" width="24.0" height="260.6" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (sparse, decrease_key): 26.1%</title></rect>
+<text x="210.8" y="105.4" class="bar-label">26.1%</text>
+<text x="326.2" y="388" class="axis-title" font-size="11px" text-anchor="middle">Sparse (d=4)</text>
+<text x="326.2" y="402" class="tick-label" font-weight="600" text-anchor="middle">Lazy</text>
+<rect x="272.2" y="113.6" width="24.0" height="256.4" fill="#2563EB" rx="3" ry="3"><title>binary (sparse, lazy): 25.6%</title></rect>
+<text x="284.2" y="109.6" class="bar-label">25.6%</text>
+<rect x="300.2" y="136.0" width="24.0" height="234.0" fill="#16A34A" rx="3" ry="3"><title>pairing (sparse, lazy): 23.4%</title></rect>
+<text x="312.2" y="132.0" class="bar-label">23.4%</text>
+<rect x="328.2" y="197.0" width="24.0" height="173.0" fill="#9333EA" rx="3" ry="3"><title>fibonacci (sparse, lazy): 17.3%</title></rect>
+<text x="340.2" y="193.0" class="bar-label">17.3%</text>
+<rect x="356.2" y="309.0" width="24.0" height="61.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (sparse, lazy): 6.1%</title></rect>
+<text x="368.2" y="305.0" class="bar-label">6.1%</text>
+<text x="483.8" y="388" class="axis-title" font-size="11px" text-anchor="middle">Dense (d=128)</text>
+<text x="483.8" y="402" class="tick-label" font-weight="600" text-anchor="middle">Decrease-Key</text>
+<rect x="429.8" y="120.3" width="24.0" height="249.7" fill="#2563EB" rx="3" ry="3"><title>binary (dense, decrease_key): 25.0%</title></rect>
+<text x="441.8" y="116.3" class="bar-label">25.0%</text>
+<rect x="457.8" y="130.1" width="24.0" height="239.9" fill="#16A34A" rx="3" ry="3"><title>pairing (dense, decrease_key): 24.0%</title></rect>
+<text x="469.8" y="126.1" class="bar-label">24.0%</text>
+<rect x="485.8" y="151.7" width="24.0" height="218.3" fill="#9333EA" rx="3" ry="3"><title>fibonacci (dense, decrease_key): 21.8%</title></rect>
+<text x="497.8" y="147.7" class="bar-label">21.8%</text>
+<text x="525.8" y="362" class="bar-label" fill="#94A3B8">N/A</text>
+<text x="641.2" y="388" class="axis-title" font-size="11px" text-anchor="middle">Dense (d=128)</text>
+<text x="641.2" y="402" class="tick-label" font-weight="600" text-anchor="middle">Lazy</text>
+<rect x="587.2" y="148.5" width="24.0" height="221.5" fill="#2563EB" rx="3" ry="3"><title>binary (dense, lazy): 22.1%</title></rect>
+<text x="599.2" y="144.5" class="bar-label">22.1%</text>
+<rect x="615.2" y="164.0" width="24.0" height="206.0" fill="#16A34A" rx="3" ry="3"><title>pairing (dense, lazy): 20.6%</title></rect>
+<text x="627.2" y="160.0" class="bar-label">20.6%</text>
+<rect x="643.2" y="217.1" width="24.0" height="152.9" fill="#9333EA" rx="3" ry="3"><title>fibonacci (dense, lazy): 15.3%</title></rect>
+<text x="655.2" y="213.1" class="bar-label">15.3%</text>
+<rect x="671.2" y="196.3" width="24.0" height="173.7" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (dense, lazy): 17.4%</title></rect>
+<text x="683.2" y="192.3" class="bar-label">17.4%</text>
+<rect x="90.0" y="425.0" width="14" height="14" fill="#2563EB" rx="3" ry="3" />
+<text x="110.0" y="432.0" class="legend-text">binary</text>
+<rect x="235.0" y="425.0" width="14" height="14" fill="#16A34A" rx="3" ry="3" />
+<text x="255.0" y="432.0" class="legend-text">pairing</text>
+<rect x="380.0" y="425.0" width="14" height="14" fill="#9333EA" rx="3" ry="3" />
+<text x="400.0" y="432.0" class="legend-text">fibonacci</text>
+<rect x="525.0" y="425.0" width="14" height="14" fill="#EA580C" rx="3" ry="3" />
+<text x="545.0" y="432.0" class="legend-text">brodal-okasaki</text>
+</svg>

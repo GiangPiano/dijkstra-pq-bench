@@ -3,6 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "bench/bench0.h"
+#include "bench/bench0/bench0.h"
 
 UBENCH_MAIN();
