@@ -20,7 +20,7 @@ TEST_SRC_DIR = $(DATA_DIR)/src
 TEST_BUILD_DIR = $(DATA_DIR)/build
 
 # all subdirs of source
-VARIANTS = $(patsubst $(SRC_DIR)/%/,%,$(filter %/, $(wildcard $(SRC_DIR)/*/)))
+VARIANTS = $(filter-out bench, $(patsubst $(SRC_DIR)/%/,%,$(filter %/, $(wildcard $(SRC_DIR)/*/))))
 BIN_VARIANTS = $(addprefix $(BIN_DIR)/,$(VARIANTS))
 CSV_VARIANTS = $(VARIANTS:%=$(DATA_OUT_DIR)/%.csv)
 
