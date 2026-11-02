@@ -96,7 +96,7 @@ def main():
         out.write("#include <stdlib.h>\n")
         out.write("#include \"../../src/dijkstra.h\"\n")
         out.write("#include \"../../src/graph.h\"\n")
-        out.write("#include \"../../src/ubench.h\"\n")
+        out.write("#include \"../../src/bench/bench0.h\"\n")
         out.write("\n")
 
         out.write(f"static const size_t n = {n};\n")
