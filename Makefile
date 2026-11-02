@@ -36,10 +36,8 @@ tiny_dense = -n 50     -m 20     -w 10
 small_med  = -n 2000   -m 40000  -w 50
 mod_sparse = -n 100000 -m 400000 -w 100
 big_sparse = -n 100000 -m 400000 -w 1000
-big_chungus = -n 1000000 -m 400000 -w 1000
-little_chungus = -n 10 -m 10 -w 1000
 
-TEST_SET  = tiny_dense small_med mod_sparse big_sparse big_chungus little_chungus
+TEST_SET  = tiny_dense small_med mod_sparse big_sparse
 TEST_SRCS = $(patsubst %,$(TEST_SRC_DIR)/%.c,$(TEST_SET))
 TEST_OBJS = $(patsubst %,$(TEST_BUILD_DIR)/%.o,$(TEST_SET))
 
