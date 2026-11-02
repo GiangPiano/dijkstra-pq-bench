@@ -32,7 +32,7 @@ COMMON_OBJS = $(call OBJS_FOR_SRCS,)
 # generated test data vars:
 SEED = 67
 
-tiny_dense = -n 50     -m 20     -w 10
+tiny_dense = -n 50     -m 1000   -w 10
 small_med  = -n 2000   -m 40000  -w 50
 mod_sparse = -n 100000 -m 400000 -w 100
 big_sparse = -n 100000 -m 400000 -w 1000
