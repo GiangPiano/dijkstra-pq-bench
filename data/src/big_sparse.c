@@ -400009,19 +400009,49 @@ static const EdgeInput edges[] = {
   { 49749, 45878, 349 },
   { 52518, 29886, 770 },
   { 20611, 22146, 361 }};
+static const uint64_t expected_checksum = 8375459939588ULL;
+
 static const Graph* g;
 static void __attribute__((constructor)) make_graph() {
   g = build_graph(n, m, edges);
 }
 
-UBENCH_EX(decrease_key, big_sparse) {
+static inline uint64_t calc_checksum(const int* dist, size_t num_nodes) {
+  uint64_t sum = 0;
+  for (size_t i = 0; i < num_nodes; i++) sum += (uint64_t)(unsigned)dist[i];
+  return sum;
+}
+
+static inline void run_bench(struct ubench_run_state_s* ubench_run_state,
+                             void (*dijkstra_fn)(int*, const Graph*),
+                             const char* mode_name,
+                             const char* test_name) {
   int* dist = malloc(sizeof(int) * g->num_vertices);
-  UBENCH_DO_BENCHMARK() { dijkstra_decrease_key(dist, g); }
+  if (!dist) {
+    UBENCH_FAIL();
+    return;
+  }
+  /* Step 1: Correctness verification pass against precomputed checksum */
+  dijkstra_fn(dist, g);
+  uint64_t actual_checksum = calc_checksum(dist, g->num_vertices);
+  if (actual_checksum != expected_checksum) {
+    fprintf(stderr, "[ERROR] %s.%s: checksum mismatch! Got %" PRIu64 ", expected %" PRIu64 "\n",
+            mode_name, test_name, actual_checksum, expected_checksum);
+    free(dist);
+    UBENCH_FAIL();
+    return;
+  }
+  /* Step 2: Pure timing benchmark loop (no checksum overhead) */
+  UBENCH_DO_BENCHMARK() {
+    dijkstra_fn(dist, g);
+  }
   free(dist);
 }
 
+UBENCH_EX(decrease_key, big_sparse) {
+  run_bench(ubench_run_state, dijkstra_decrease_key, "decrease_key", "big_sparse");
+}
+
 UBENCH_EX(lazy, big_sparse) {
-  int* dist = malloc(sizeof(int) * g->num_vertices);
-  UBENCH_DO_BENCHMARK() { dijkstra_lazy(dist, g); }
-  free(dist);
+  run_bench(ubench_run_state, dijkstra_lazy, "lazy", "big_sparse");
 }
