@@ -15,21 +15,17 @@ SRC_DIR = ./src
 BUILD_DIR = ./build
 BIN_DIR = ./bin
 DATA_DIR = ./data
+TESTS_DIR = ./tests
 
 # all subdirs of source
 VARIANTS = $(patsubst $(SRC_DIR)/%/,%,$(wildcard $(SRC_DIR)/*/))
-BIN_VARIANTS = $(addprefix $(BIN_DIR)/$(ALGO)/,$(VARIANTS))
+BIN_VARIANTS = $(addprefix $(BIN_DIR)/,$(VARIANTS))
 TEST_VARIANTS = $(addprefix test-,$(VARIANTS))
-
-# Which Dijkstra to link: lazy or dk (override with `make test ALGO=dk`)
-ALGO ?= lazy
-ALGOS = lazy dk
 
 # helper function
 OBJS_FOR_SRCS = $(patsubst $(SRC_DIR)$(1)/%.c,$(BUILD_DIR)$(1)/%.o,$(wildcard $(SRC_DIR)$(1)/*.c))
 
-COMMON_OBJS = $(filter-out $(BUILD_DIR)/dijkstra_%.o,$(call OBJS_FOR_SRCS,)) \
-              $(BUILD_DIR)/dijkstra_$(ALGO).o
+COMMON_OBJS = $(call OBJS_FOR_SRCS,)
 
 # generated test data vars:
 SEED = 67
@@ -40,14 +36,14 @@ mod_sparse = -n 100000 -m 400000 -w 100
 big_sparse = -n 100000 -m 400000 -w 1000
 
 DATA_SET   = tiny_dense small_med mod_sparse big_sparse
-DATA_FILES = $(patsubst %,$(DATA_DIR)/%.gr,$(DATA_SET))
+DATA_SRCS = $(patsubst %,$(DATA_DIR)/%.c,$(DATA_SET))
+DATA_OBJS = $(patsubst %,$(DATA_DIR)/%.o,$(DATA_SET))
+
+.PHONY:
+all: test
 
 .PHONY:
 test: build data $(TEST_VARIANTS)
-
-.PHONY:
-test-all:
-	@for a in $(ALGOS); do $(MAKE) test ALGO=$$a; done
 
 .PHONY:
 data: $(DATA_FILES)
@@ -81,10 +77,14 @@ report:
 
 # generated data files
 .SECONDEXPANSION:
-$(DATA_FILES): $(DATA_DIR)/%.gr:
-	@printf "$(GREEN)generating $(WHITE)$*$(GREEN) data set $(RESET)\n"
+$(DATA_SRCS): $(DATA_DIR)/%.c:
+	@printf "$(GREEN)generating $(WHITE)$*$(GREEN) tests $(RESET)\n"
 	mkdir -p $(dir $@)
 	./gen.py $* $($(*)) -s "$(SEED)" -o "$@"
+
+$(DATA_OBJS): $(DATA_DIR)/%.o: $(DATA_DIR)/%.c
+	mkdir -p $(dir $@)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 
 # object files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
@@ -93,17 +93,17 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 # executable variants
 .SECONDEXPANSION:
-$(BIN_VARIANTS): $(BIN_DIR)/$(ALGO)/%: $(COMMON_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
+$(BIN_VARIANTS): $(BIN_DIR)/%: $(COMMON_OBJS) $(DATA_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
 	mkdir -p $(dir $@)
-	$(CC) $^ $(LDFLAGS) $(LOADLIBES) $(LDLIBS) -o $@
+	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 .PHONY: $(TEST_VARIANTS)
-$(TEST_VARIANTS): test-%: $(BIN_DIR)/$(ALGO)/% data
+$(TEST_VARIANTS): test-%: $(BIN_DIR)/% data
 	@printf "$(GREEN)========================================\n"
-	@printf "Running benchmark: $(WHITE)$(ALGO)/$*$(GREEN)\n"
+	@printf "Running benchmark: $(WHITE)$*$(GREEN)\n"
 	@printf "========================================$(RESET)\n"
 	-$<
 
-DEPS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c))
+DEPS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(wildcard $(SRC_DIR)/**/*.c))
 
 -include $(DEPS)

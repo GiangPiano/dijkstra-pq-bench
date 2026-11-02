@@ -5,6 +5,7 @@
 
 #include "graph.h"
 
-int* dijkstra(Graph* g, size_t src);
+void dijkstra_dk(int* dist, Graph* g);
+void dijkstra_lazy(int* dist, Graph* g);
 
 #endif
