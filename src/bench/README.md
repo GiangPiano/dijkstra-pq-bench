@@ -15,6 +15,10 @@ src/bench/
 │   ├── bench1.c              # C runner with warm-up loop & isolated perf-stat execution
 │   ├── bench1.py             # Orchestrator: runs taskset -c 0 perf stat across all variants
 │   └── plot1.py              # Visualizer: generates L1 miss rate, IPC SVGs & summary tables
+├── bench2/                   # Experiment 3: Memory Footprint & Allocator Pressure
+│   ├── bench2.c              # C runner using linker wrapping (-Wl,--wrap) for malloc/free tracking
+│   ├── bench2.py             # Orchestrator: runs memory profiling across variants and modes
+│   └── plot2.py              # Visualizer: generates peak heap, allocator pressure SVGs & tables
 ├── gen.py                    # Procedural synthetic graph generator (C code + checksums)
 └── README.md                 # This documentation
 ```
@@ -22,6 +26,7 @@ src/bench/
 All generated visual artifacts and tables are written to:
 - `report/figures/runtime/` — Wall-clock runtime plots and summary tables
 - `report/figures/perf/` — Hardware counter plots and microarchitectural summary tables
+- `report/figures/memory/` — Memory footprint, allocator pressure SVGs and summary tables
 
 ---
 
@@ -118,6 +123,51 @@ Invokes `src/bench/bench1/plot1.py`, producing:
 make perf
 ```
 Executes `perf-run` followed by `perf-plot`.
+
+---
+
+## Experiment 3: Memory Footprint & Allocator Pressure
+
+Quantifies the physical "memory tax" paid per element across priority queue architectures and isolates dynamic allocator churn (`malloc`/`free` calls) during Dijkstra execution.
+
+### Metrics Captured
+- **Peak Live Heap Memory (KiB / MiB)**: The exact high-water mark of live bytes allocated simultaneously by the priority queue during shortest-path discovery.
+- **Dynamic Allocator Pressure (Calls)**: Total invocations of `malloc()`, `free()`, and `realloc()`.
+- **Peak Resident Set Size (RSS in MiB)**: Physical RAM footprint (`VmHWM`) committed by the OS kernel.
+- **Memory Tax per Vertex (Bytes/Node)**: Average peak memory allocated per graph vertex.
+- **Leak Detection**: Verification that live bytes return to 0 upon `heap_delete()`.
+
+### 1. Build Memory Profiling Binaries
+```bash
+make mem-build
+```
+Builds `bin/mem_binary`, `bin/mem_pairing`, `bin/mem_fibonacci`, `bin/mem_brodal-okasaki` with linker interposition flags (`-Wl,--wrap=malloc -Wl,--wrap=free -Wl,--wrap=calloc -Wl,--wrap=realloc`).
+
+### 2. Run Memory Profiling
+```bash
+make mem-run
+```
+Or run `src/bench/bench2/bench2.py` directly:
+```bash
+./src/bench/bench2/bench2.py -o data/out/memory/memory_footprint.csv
+```
+
+### 3. Generate Memory Plots & Tables
+```bash
+make mem-plot
+```
+Invokes `src/bench/bench2/plot2.py`, producing:
+- `report/figures/memory/peak_heap_memory.svg`
+- `report/figures/memory/allocator_pressure.svg`
+- `report/figures/memory/peak_rss_footprint.svg`
+- `report/figures/memory/memory_summary_table.md`
+- `report/figures/memory/memory_summary_table.tex`
+
+### 4. One-Shot Memory Shortcut
+```bash
+make mem
+```
+Executes `mem-run` followed by `mem-plot`.
 
 ---
 
