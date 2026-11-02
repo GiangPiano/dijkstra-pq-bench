@@ -1,0 +1,9 @@
+name, mean (ns), stddev (%), confidence (%)
+decrease_key.tiny_dense, 137, 9.369773, 1.079419,
+lazy.tiny_dense, 137, 8.478724, 0.976768,
+decrease_key.small_med, 641325, 2.575719, 0.571054,
+lazy.small_med, 996762, 0.686782, 0.179630,
+decrease_key.mod_sparse, 47636930, 1.408065, 1.147013,
+lazy.mod_sparse, 58012168, 1.706626, 1.390222,
+decrease_key.big_sparse, 51459310, 0.688147, 0.560567,
+lazy.big_sparse, 62877186, 0.635149, 0.517394,
