@@ -89,9 +89,10 @@ def main():
           out.write("  free(dist);\n")
           out.write("}\n")
 
-        # dk
-        emit_bench("dk")
+        # decrease_key
+        emit_bench("decrease_key")
         out.write("\n")
+        # lazy
         emit_bench("lazy")
 
 

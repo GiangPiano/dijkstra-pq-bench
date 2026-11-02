@@ -15,10 +15,9 @@ SRC_DIR = ./src
 BUILD_DIR = ./build
 BIN_DIR = ./bin
 DATA_DIR = ./data
-TESTS_DIR = ./tests
 
 # all subdirs of source
-VARIANTS = $(patsubst $(SRC_DIR)/%/,%,$(wildcard $(SRC_DIR)/*/))
+VARIANTS = $(patsubst $(SRC_DIR)/%/,%,$(filter %/, $(wildcard $(SRC_DIR)/*/)))
 BIN_VARIANTS = $(addprefix $(BIN_DIR)/,$(VARIANTS))
 TEST_VARIANTS = $(addprefix test-,$(VARIANTS))
 
@@ -35,7 +34,7 @@ small_med  = -n 2000   -m 40000  -w 50
 mod_sparse = -n 100000 -m 400000 -w 100
 big_sparse = -n 100000 -m 400000 -w 1000
 
-DATA_SET   = tiny_dense small_med mod_sparse big_sparse
+DATA_SET  = tiny_dense small_med mod_sparse big_sparse
 DATA_SRCS = $(patsubst %,$(DATA_DIR)/%.c,$(DATA_SET))
 DATA_OBJS = $(patsubst %,$(DATA_DIR)/%.o,$(DATA_SET))
 
@@ -107,3 +106,5 @@ $(TEST_VARIANTS): test-%: $(BIN_DIR)/% data
 DEPS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(wildcard $(SRC_DIR)/**/*.c))
 
 -include $(DEPS)
+
+-include $(patsubst %,$(DATA_DIR)/%.d,$(DATA_SET))
