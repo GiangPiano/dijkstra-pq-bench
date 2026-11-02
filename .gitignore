@@ -1,15 +1,15 @@
 compile_flags.txt
 
 # output dirs
-# build/
-# bin/
-# data/
+build/
+bin/
+data/
 
 # Prerequisites
-# *.d
+*.d
 
 # Object files
-# *.o
+*.o
 *.ko
 *.obj
 *.elf

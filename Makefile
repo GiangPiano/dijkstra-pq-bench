@@ -23,7 +23,10 @@ TEST_BUILD_DIR = $(DATA_DIR)/build
 VARIANTS = $(filter-out bench, $(patsubst $(SRC_DIR)/%/,%,$(filter %/, $(wildcard $(SRC_DIR)/*/))))
 BIN_VARIANTS = $(addprefix $(BIN_DIR)/,$(VARIANTS))
 PERF_BIN_VARIANTS = $(VARIANTS:%=$(BIN_DIR)/perf_%)
+MEM_BIN_VARIANTS = $(VARIANTS:%=$(BIN_DIR)/mem_%)
 CSV_VARIANTS = $(VARIANTS:%=$(DATA_OUT_DIR)/%.csv)
+
+MEM_LDFLAGS = $(LDFLAGS) -Wl,--wrap=malloc -Wl,--wrap=free -Wl,--wrap=calloc -Wl,--wrap=realloc
 
 # helper function
 OBJS_FOR_SRCS = $(patsubst $(SRC_DIR)$(1)/%.c,$(BUILD_DIR)$(1)/%.o,$(wildcard $(SRC_DIR)$(1)/*.c))
@@ -74,6 +77,20 @@ perf-plot:
 
 .PHONY:
 perf: perf-run perf-plot
+
+.PHONY:
+mem-build: $(MEM_BIN_VARIANTS)
+
+.PHONY:
+mem-run: mem-build
+	./src/bench/bench2/bench2.py -o data/out/memory/memory_footprint.csv
+
+.PHONY:
+mem-plot:
+	./src/bench/bench2/plot2.py -i data/out/memory/memory_footprint.csv -o report/figures/memory
+
+.PHONY:
+mem: mem-run mem-plot
 
 .PHONY:
 build: $(BIN_VARIANTS)
@@ -132,6 +149,11 @@ $(BIN_VARIANTS): $(BIN_DIR)/%: $(COMMON_OBJS) $(TEST_OBJS) $$(call OBJS_FOR_SRCS
 $(PERF_BIN_VARIANTS): $(BIN_DIR)/perf_%: $(BUILD_DIR)/dijkstra.o $(BUILD_DIR)/graph.o $(BUILD_DIR)/bench/bench1/bench1.o $(PERF_TEST_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
 	mkdir -p $(dir $@)
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+.SECONDEXPANSION:
+$(MEM_BIN_VARIANTS): $(BIN_DIR)/mem_%: $(BUILD_DIR)/dijkstra.o $(BUILD_DIR)/graph.o $(BUILD_DIR)/bench/bench2/bench2.o $(PERF_TEST_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
+	mkdir -p $(dir $@)
+	$(CC) $(MEM_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 $(CSV_VARIANTS): $(DATA_OUT_DIR)/%.csv: $(BIN_DIR)/% $(TEST_OBJS)
 	@printf "$(GREEN)========================================\n"
