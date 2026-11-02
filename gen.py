@@ -65,9 +65,9 @@ def main():
         out.write("#include <stdint.h>\n")
         out.write("#include <stdio.h>\n")
         out.write("#include <stdlib.h>\n")
-        out.write("#include \"../src/dijkstra.h\"\n")
-        out.write("#include \"../src/graph.h\"\n")
-        out.write("#include \"../src/ubench.h\"\n")
+        out.write("#include \"../../src/dijkstra.h\"\n")
+        out.write("#include \"../../src/graph.h\"\n")
+        out.write("#include \"../../src/ubench.h\"\n")
         out.write("\n")
 
         out.write(f"static const size_t n = {n};\n")

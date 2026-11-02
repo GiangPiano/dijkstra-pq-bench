@@ -15,11 +15,14 @@ SRC_DIR = ./src
 BUILD_DIR = ./build
 BIN_DIR = ./bin
 DATA_DIR = ./data
+DATA_OUT_DIR = $(DATA_DIR)/out
+TEST_SRC_DIR = $(DATA_DIR)/src
+TEST_BUILD_DIR = $(DATA_DIR)/build
 
 # all subdirs of source
 VARIANTS = $(patsubst $(SRC_DIR)/%/,%,$(filter %/, $(wildcard $(SRC_DIR)/*/)))
 BIN_VARIANTS = $(addprefix $(BIN_DIR)/,$(VARIANTS))
-TEST_VARIANTS = $(addprefix test-,$(VARIANTS))
+CSV_VARIANTS = $(VARIANTS:%=$(DATA_OUT_DIR)/%.csv)
 
 # helper function
 OBJS_FOR_SRCS = $(patsubst $(SRC_DIR)$(1)/%.c,$(BUILD_DIR)$(1)/%.o,$(wildcard $(SRC_DIR)$(1)/*.c))
@@ -33,19 +36,18 @@ tiny_dense = -n 50     -m 20     -w 10
 small_med  = -n 2000   -m 40000  -w 50
 mod_sparse = -n 100000 -m 400000 -w 100
 big_sparse = -n 100000 -m 400000 -w 1000
+big_chungus = -n 1000000 -m 400000 -w 1000
+little_chungus = -n 10 -m 10 -w 1000
 
-DATA_SET  = tiny_dense small_med mod_sparse big_sparse
-DATA_SRCS = $(patsubst %,$(DATA_DIR)/%.c,$(DATA_SET))
-DATA_OBJS = $(patsubst %,$(DATA_DIR)/%.o,$(DATA_SET))
-
-.PHONY:
-all: test report
-
-.PHONY:
-test: build data $(TEST_VARIANTS)
+TEST_SET  = tiny_dense small_med mod_sparse big_sparse big_chungus little_chungus
+TEST_SRCS = $(patsubst %,$(TEST_SRC_DIR)/%.c,$(TEST_SET))
+TEST_OBJS = $(patsubst %,$(TEST_BUILD_DIR)/%.o,$(TEST_SET))
 
 .PHONY:
-data: $(DATA_FILES)
+all: tests report
+
+.PHONY:
+tests: $(CSV_VARIANTS)
 
 .PHONY:
 build: $(BIN_VARIANTS)
@@ -63,6 +65,10 @@ clean-data:
 	-rm -r $(DATA_DIR)
 
 .PHONY:
+clean-output-data:
+	-rm -r $(DATA_OUT_DIR)
+
+.PHONY:
 clean-report:
 	$(MAKE) -C ./report clean
 
@@ -76,12 +82,12 @@ report:
 
 # generated data files
 .SECONDEXPANSION:
-$(DATA_SRCS): $(DATA_DIR)/%.c:
+$(TEST_SRCS): $(TEST_SRC_DIR)/%.c:
 	@printf "$(GREEN)generating $(WHITE)$*$(GREEN) tests $(RESET)\n"
 	mkdir -p $(dir $@)
 	./gen.py $* $($(*)) -s "$(SEED)" -o "$@"
 
-$(DATA_OBJS): $(DATA_DIR)/%.o: $(DATA_DIR)/%.c
+$(TEST_OBJS): $(TEST_BUILD_DIR)/%.o: $(TEST_SRC_DIR)/%.c
 	mkdir -p $(dir $@)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 
@@ -92,19 +98,19 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 # executable variants
 .SECONDEXPANSION:
-$(BIN_VARIANTS): $(BIN_DIR)/%: $(COMMON_OBJS) $(DATA_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
+$(BIN_VARIANTS): $(BIN_DIR)/%: $(COMMON_OBJS) $(TEST_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
 	mkdir -p $(dir $@)
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-.PHONY: $(TEST_VARIANTS)
-$(TEST_VARIANTS): test-%: $(BIN_DIR)/% data
+$(CSV_VARIANTS): $(DATA_OUT_DIR)/%.csv: $(BIN_DIR)/% $(TEST_OBJS)
 	@printf "$(GREEN)========================================\n"
 	@printf "Running benchmark: $(WHITE)$*$(GREEN)\n"
 	@printf "========================================$(RESET)\n"
-	-$<
+	mkdir -p $(dir $@)
+	-$< --output=$@
 
 DEPS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(wildcard $(SRC_DIR)/**/*.c))
 
 -include $(DEPS)
 
--include $(patsubst %,$(DATA_DIR)/%.d,$(DATA_SET))
+-include $(patsubst %,$(TEST_BUILD_DIR)/%.d,$(TEST_SET))
