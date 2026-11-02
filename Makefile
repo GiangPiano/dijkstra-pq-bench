@@ -39,7 +39,7 @@ DATA_SRCS = $(patsubst %,$(DATA_DIR)/%.c,$(DATA_SET))
 DATA_OBJS = $(patsubst %,$(DATA_DIR)/%.o,$(DATA_SET))
 
 .PHONY:
-all: test
+all: test report
 
 .PHONY:
 test: build data $(TEST_VARIANTS)
