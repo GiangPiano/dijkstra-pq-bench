@@ -122,15 +122,16 @@ decrease. The tree structure is based on indices arithmetic rather than poinster
 
 \vspace{0.2cm}
 \noindent
-TODO
-
+A pairing heap is a self-adjusting multi-way tree implemented using a Left-Child Right-Sibling (LCRS) layout. Each node stores three pointers: \code{child}, \code{next}, and \code{prev} (points to its left sibling, or to its parent if it is the first child, allowing $O(1)$ detachment). Tree combinations rely on \textsc{Meld}, which attaches the root with the larger key as the leftmost child of the smaller root in $O(1)$ time. Consequently, \textsc{Push} melds a newly allocated node into the root, and \textsc{Decrease-Key} cuts the target node from its siblings via $\texttt{pos}[v]$ and melds it into the root in $O(1)$ worst-case time without disturbing other nodes' handles. 
+All structural rebalancing is deferred lazily to \textsc{Pop}: after removing the root, its orphaned children are merged via a \emph{two-pass pairing} scheme (pairing adjacent siblings left-to-right, then accumulating them right-to-left) to achieve $O(\log n)$ extraction. Compared to the array-backed binary heap, the pairing heap trades cache locality and per-node dynamic allocation overhead for trivial, $O(1)$-like decrease-key operations.
 \subsubsection{Fibonacci heap}
 \vspace{-0.2cm}
 {\small \textbf{Author:} Tung Nguyen} 
 
 \vspace{0.2cm}
 \noindent
-TODO
+A Fibonacci heap is a collection of min-heap-ordered trees, maintained in a circular doubly-linked root list, with a direct pointer to the minimum root. Each node stores four pointers (\code{parent}, \code{child}, \code{left}, \code{right}), an integer \code{degree}, and a boolean \code{marked} flag indicating whether it has lost a child since becoming a child of its current parent. 
+Operations are designed around lazy consolidation. \textsc{Push} inserts a new node into the root list in $O(1)$ worst-case time. When \textsc{Decrease-Key} violates heap order, the node is severed and moved to the root list via \textsc{Cut}. If its parent was already marked, a \emph{cascading cut} recurses up the ancestor chain until an unmarked node is found and marked. This mechanism preserves an exponential lower bound on tree size relative to degree, achieving $O(1)$ decrease-key. All cleanup occurs during \textsc{Pop}, where the root's children are promoted to the root list, and trees of identical degree are pairwise linked using an auxiliary degree array (\code{A[MAX\_DEGREE]}), yielding $O(\log n)$ extraction. This provides Dijkstra's theoretically optimal $O(m + n \log n)$ bound. However, it carries heavy node structures (4 pointers plus metadata), complex cascading cuts, and poor cache locality.
 
 \subsubsection{Brodal--Okasaki heap}
 \vspace{-0.2cm}
