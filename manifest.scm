@@ -1,5 +1,8 @@
 (specifications->manifest
   '("gcc-toolchain"
+		"coreutils"
+		"bash"
+		"perf"
 		"python"
 		"texlive-scheme-basic"
 		"texlive-collection-latexrecommended"
