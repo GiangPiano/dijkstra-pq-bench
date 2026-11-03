@@ -9,47 +9,80 @@ import argparse
 import csv
 import json
 import os
-import re
+import platform
+import shutil
 import subprocess
 import sys
 
 MODES = ["decrease_key", "lazy"]
 
-# P-core hardware events
-EVENTS = [
-    "cpu_core/L1-dcache-loads/",
-    "cpu_core/L1-dcache-load-misses/",
-    "cpu_core/LLC-loads/",
-    "cpu_core/LLC-load-misses/",
-    "cpu_core/branch-instructions/",
-    "cpu_core/branch-misses/",
-    "cpu_core/cycles/",
-    "cpu_core/instructions/",
-]
+EVENTS = {
+    "cycles": "cycles",
+    "instructions": "instructions",
+    "branches": "branches",
+    "branch_misses": "branch-misses",
+    "L1_loads": "L1-dcache-loads",
+    "L1_misses": "L1-dcache-load-misses",
+    "LLC_loads": "LLC-loads",
+    "LLC_misses": "LLC-load-misses",
+}
+REQUIRED_EVENTS = ("cycles", "instructions", "branches", "branch_misses")
+OPTIONAL_EVENTS = ("L1_loads", "L1_misses", "LLC_loads", "LLC_misses")
 
 
-def run_perf_stat(binary_path, config, mode, iters=1, core_id=0):
+def listed_event_names(listing):
+    names = set()
+    for line in listing.splitlines():
+        event_part = line.split("[", 1)[0]
+        for name in event_part.split(" OR "):
+            name = name.strip().lower()
+            if name:
+                names.add(name)
+    return names
+
+
+def discover_events(perf):
+    try:
+        proc = subprocess.run(
+            [perf, "list"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return [], f"unable to inspect perf events: {exc}"
+
+    names = listed_event_names(proc.stdout)
+    available = [
+        key for key, event in EVENTS.items()
+        if event.lower() in names
+    ]
+    missing = [key for key in EVENTS if key not in available]
+    return available, (
+        f"unsupported events omitted: {', '.join(missing)}" if missing else ""
+    )
+
+
+def run_perf_stat(perf, taskset, binary_path, config, mode, events, iters=1, core_id=0):
     """
     Executes binary under `taskset -c <core>` and `perf stat -x,`.
     Returns dict of counter values.
     """
-    events_str = ",".join(EVENTS)
-    cmd = [
-        "taskset", "-c", str(core_id),
-        "perf", "stat", "-x,",
-        "-e", events_str,
-        binary_path, config, mode, str(iters)
-    ]
+    events_str = ",".join(EVENTS[key] for key in events)
+    command = [perf, "stat", "-x,", "-e", events_str, binary_path, config, mode, str(iters)]
+    cmd = [taskset, "-c", str(core_id)] + command if taskset else command
 
     try:
-        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=120)
+        proc = subprocess.run(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=120
+        )
     except subprocess.TimeoutExpired:
-        print(f" [TIMEOUT]", file=sys.stderr)
-        return None
+        return {}, "perf timed out"
 
     if proc.returncode != 0:
-        print(f" [ERROR: code {proc.returncode}] {proc.stderr.strip()}", file=sys.stderr)
-        return None
+        detail = proc.stderr.strip().splitlines()[-1] if proc.stderr.strip() else "unknown error"
+        return {}, f"perf failed ({detail})"
 
     # Parse CSV output from stderr (perf stat -x, writes to stderr)
     stats = {}
@@ -57,14 +90,15 @@ def run_perf_stat(binary_path, config, mode, iters=1, core_id=0):
         parts = line.strip().split(",")
         if len(parts) >= 3:
             val_str, _, event_name = parts[0], parts[1], parts[2]
-            # Match event name
-            clean_event = event_name.replace("cpu_core/", "").replace("/u", "").replace("/", "")
-            try:
-                stats[clean_event] = float(val_str)
-            except ValueError:
-                pass
+            for key, event in EVENTS.items():
+                if event == event_name or event in event_name:
+                    try:
+                        stats[key] = float(val_str)
+                    except ValueError:
+                        pass
+                    break
 
-    return stats
+    return stats, ""
 
 
 def main():
@@ -73,6 +107,23 @@ def main():
     parser.add_argument("-o", "--output", default="data/out/perf/hardware_counters.csv", help="Output CSV path")
     parser.add_argument("-c", "--core", type=int, default=0, help="CPU Core to pin execution (default 0)")
     args = parser.parse_args()
+
+    if platform.system() != "Linux":
+        parser.error("perf profiling is only supported on Linux")
+
+    perf = shutil.which("perf")
+    if not perf:
+        parser.error("perf was not found; install Linux perf or omit the perf benchmark")
+
+    taskset = shutil.which("taskset")
+    available_events, event_note = discover_events(perf)
+    events = [key for key in REQUIRED_EVENTS + OPTIONAL_EVENTS if key in available_events]
+    if not events:
+        parser.error("perf reported no usable events")
+    if not taskset:
+        event_note = "; ".join(
+            part for part in (event_note, "taskset unavailable; CPU pinning disabled") if part
+        )
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     proj_root = os.path.abspath(os.path.join(script_dir, "../../.."))
@@ -111,17 +162,21 @@ def main():
                 sys.stdout.write(f"[*] Running {variant:<15} [{config:<6} | {mode:<12}] (iters={iters}) ... ")
                 sys.stdout.flush()
 
-                stats = run_perf_stat(binary_path, config, mode, iters=iters, core_id=args.core)
+                stats, run_note = run_perf_stat(
+                    perf, taskset, binary_path, config, mode, events, iters=iters, core_id=args.core
+                )
+                note = "; ".join(part for part in (event_note, run_note) if part)
                 if not stats:
-                    print("FAILED")
-                    continue
+                    print(f"UNAVAILABLE ({note})")
+                else:
+                    print("OK")
 
-                l1_loads = stats.get("L1-dcache-loads", 0)
-                l1_misses = stats.get("L1-dcache-load-misses", 0)
-                llc_loads = stats.get("LLC-loads", 0)
-                llc_misses = stats.get("LLC-load-misses", 0)
-                branches = stats.get("branch-instructions", 0)
-                branch_misses = stats.get("branch-misses", 0)
+                l1_loads = stats.get("L1_loads", 0)
+                l1_misses = stats.get("L1_misses", 0)
+                llc_loads = stats.get("LLC_loads", 0)
+                llc_misses = stats.get("LLC_misses", 0)
+                branches = stats.get("branches", 0)
+                branch_misses = stats.get("branch_misses", 0)
                 cycles = stats.get("cycles", 0)
                 instructions = stats.get("instructions", 0)
 
@@ -129,8 +184,6 @@ def main():
                 llc_miss_rate = (llc_misses / llc_loads * 100.0) if llc_loads > 0 else 0.0
                 branch_miss_rate = (branch_misses / branches * 100.0) if branches > 0 else 0.0
                 ipc = (instructions / cycles) if cycles > 0 else 0.0
-
-                print(f"OK [L1 Miss: {l1_miss_rate:5.2f}% | LLC Miss: {llc_miss_rate:5.2f}% | IPC: {ipc:4.2f}]")
 
                 results.append({
                     "variant": variant,
@@ -148,7 +201,7 @@ def main():
                     "cycles": int(cycles),
                     "instructions": int(instructions),
                     "IPC": f"{ipc:.2f}",
-                    "note": "",
+                    "note": note,
                 })
 
     # Write output CSV
