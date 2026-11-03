@@ -112,14 +112,14 @@ The theoretical merit of priority queues in shortest-path algorithms can be eval
   \end{tabular}
 \end{table}
 
-The choice \textsc{Decrease-Key} and lazy insertion fundamentally alters how priority queue overhead is distributed:
+The choice \textsc{Decrease-Key} and \textsc{lazy} insertion fundamentally alters how priority queue overhead is distributed:
 
 \begin{enumerate}
   \item \textbf{The Position Tracking with \textsc{Decrease-key}:} 
   While eager mode restricts the queue size to at most $n$ items, it imposes a continuous maintenance tax. For array-based binary heaps, every swap during a \code{bubble()} or \code{sink()} must perform a secondary write to update $\texttt{pos}[\code{vertex}]$. In pointer heaps, \textsc{Decrease-Key} requires unlinking and re-melding subtrees. 
   
-  \item \textbf{The Elimination of \textsc{Decrease-Key} in Lazy Mode:} 
-  Lazy Dijkstra completely bypasses the need for node handles and position synchronisation. When an edge $(u, v)$ is relaxed, a fresh \code{(distance, v)} tuple is appended with a simple \textsc{Push}. This transforms edge relaxation from a complex tree-restructuring operation into a trivial insertion.
+  \item \textbf{The Elimination of \textsc{Decrease-Key} in \textsc{Lazy} Mode:} 
+  \textsc{Lazy} completely bypasses the need for node handles and position synchronisation. When an edge $(u, v)$ is relaxed, a fresh \code{(distance, v)} tuple is appended with a simple \textsc{Push}. This transforms edge relaxation from a complex tree-restructuring operation into a trivial insertion.
 
   \item \textbf{The Penalty of Queue Bloat on Dense Graphs:} 
   The vulnerability of the lazy formulation lies in queue inflation on dense topologies ($m \gg n$). Because stale entries linger in the heap until they float to the root, the queue swells from size $n$ to $O(m)$. Consequently:
