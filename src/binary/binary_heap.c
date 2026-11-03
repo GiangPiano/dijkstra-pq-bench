@@ -133,9 +133,9 @@ static void sink(Heap* h, size_t i) {
 // sunk down to its appropriate position.
 void heap_pop(Heap* h) {
   assert(h->size > 0);
-  h->data[0] = h->data[h->size];
   h->size--;
   if (h->size > 0) {
+    h->data[0] = h->data[h->size];  // h->size is now the index of the last item
     sink(h, 0);
   }
 }
@@ -148,7 +148,8 @@ Item heap_min(Heap* h) {
 
 void heap_decrease_key(Heap* h, Item it, int new_distance) {
   size_t i = h->pos[it.vertex];
-  assert(i < h->size && h->data[i].vertex == it.vertex);  // vertex must currently be in the heap
+  assert(i < h->size);  // vertex must currently be in the heap
+  assert(h->data[i].vertex == it.vertex);
   assert(new_distance <= h->data[i].distance);
   h->data[i].distance = new_distance;
   bubble(h, i);
