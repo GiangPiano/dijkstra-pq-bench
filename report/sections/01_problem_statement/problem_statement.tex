@@ -67,6 +67,8 @@ to make this operation cheap.
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
+\vspace{-\intextsep}
+{\small \textbf{Author:} Truong Giang Nguyen} 
 
 The algorithm performs a fixed amount of work outside the queue. Each vertex is settled once and each arc is examined once, which accounts for $\Theta(n + m)$ . Everything else is queue work. A vertex's edges are scanned only the first time it is extracted, because stale entries are skipped before the loop. Every edge is therefore relaxed at most once, so there are at most $m$ pushes plus the initial one. Every pushed entry is eventually extracted, giving at most $m + 1$ pops, of which at most $n$ settle a vertex and the rest are stale. Eventually, the running time is:
 
