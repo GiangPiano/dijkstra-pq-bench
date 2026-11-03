@@ -120,10 +120,8 @@ typedef union {
   ubench_int64_t QuadPart;
 } ubench_large_integer;
 
-UBENCH_C_FUNC __declspec(dllimport) int __stdcall QueryPerformanceCounter(
-    ubench_large_integer *);
-UBENCH_C_FUNC __declspec(dllimport) int __stdcall QueryPerformanceFrequency(
-    ubench_large_integer *);
+UBENCH_C_FUNC __declspec(dllimport) int __stdcall QueryPerformanceCounter(ubench_large_integer*);
+UBENCH_C_FUNC __declspec(dllimport) int __stdcall QueryPerformanceFrequency(ubench_large_integer*);
 #elif defined(__linux__)
 
 /*
@@ -195,9 +193,8 @@ UBENCH_C_FUNC __declspec(dllimport) int __stdcall QueryPerformanceFrequency(
 #if defined(__cplusplus)
 
 #if defined(__clang__)
-#define UBENCH_INITIALIZER_BEGIN_DISABLE_WARNINGS                              \
-  _Pragma("clang diagnostic push")                                             \
-      _Pragma("clang diagnostic ignored \"-Wglobal-constructors\"")
+#define UBENCH_INITIALIZER_BEGIN_DISABLE_WARNINGS \
+  _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wglobal-constructors\"")
 
 #define UBENCH_INITIALIZER_END_DISABLE_WARNINGS _Pragma("clang diagnostic pop")
 #else
@@ -205,12 +202,12 @@ UBENCH_C_FUNC __declspec(dllimport) int __stdcall QueryPerformanceFrequency(
 #define UBENCH_INITIALIZER_END_DISABLE_WARNINGS
 #endif
 
-#define UBENCH_INITIALIZER(f)                                                  \
-  struct f##_cpp_struct {                                                      \
-    f##_cpp_struct();                                                          \
-  };                                                                           \
-  UBENCH_INITIALIZER_BEGIN_DISABLE_WARNINGS static f##_cpp_struct              \
-      f##_cpp_global UBENCH_INITIALIZER_END_DISABLE_WARNINGS;                  \
+#define UBENCH_INITIALIZER(f)                                                    \
+  struct f##_cpp_struct {                                                        \
+    f##_cpp_struct();                                                            \
+  };                                                                             \
+  UBENCH_INITIALIZER_BEGIN_DISABLE_WARNINGS static f##_cpp_struct f##_cpp_global \
+      UBENCH_INITIALIZER_END_DISABLE_WARNINGS;                                   \
   f##_cpp_struct::f##_cpp_struct()
 
 #elif defined(_MSC_VER)
@@ -222,8 +219,8 @@ UBENCH_C_FUNC __declspec(dllimport) int __stdcall QueryPerformanceFrequency(
 #endif
 
 #if defined(__clang__)
-#define UBENCH_INITIALIZER_BEGIN_DISABLE_WARNINGS                              \
-  _Pragma("clang diagnostic push")                                             \
+#define UBENCH_INITIALIZER_BEGIN_DISABLE_WARNINGS \
+  _Pragma("clang diagnostic push")                \
       _Pragma("clang diagnostic ignored \"-Wmissing-variable-declarations\"")
 
 #define UBENCH_INITIALIZER_END_DISABLE_WARNINGS _Pragma("clang diagnostic pop")
@@ -233,11 +230,11 @@ UBENCH_C_FUNC __declspec(dllimport) int __stdcall QueryPerformanceFrequency(
 #endif
 
 #pragma section(".CRT$XCU", read)
-#define UBENCH_INITIALIZER(f)                                                  \
-  static void __cdecl f(void);                                                 \
-  UBENCH_INITIALIZER_BEGIN_DISABLE_WARNINGS __pragma(                          \
-      comment(linker, "/include:" UBENCH_SYMBOL_PREFIX #f "_")) UBENCH_C_FUNC  \
-      __declspec(allocate(".CRT$XCU")) void(__cdecl * f##_)(void) = f;         \
+#define UBENCH_INITIALIZER(f)                                                 \
+  static void __cdecl f(void);                                                \
+  UBENCH_INITIALIZER_BEGIN_DISABLE_WARNINGS __pragma(                         \
+      comment(linker, "/include:" UBENCH_SYMBOL_PREFIX #f "_")) UBENCH_C_FUNC \
+      __declspec(allocate(".CRT$XCU")) void(__cdecl * f##_)(void) = f;        \
   UBENCH_INITIALIZER_END_DISABLE_WARNINGS static void __cdecl f(void)
 #else
 #if defined(__linux__)
@@ -257,8 +254,8 @@ UBENCH_C_FUNC __declspec(dllimport) int __stdcall QueryPerformanceFrequency(
 #endif
 #endif
 
-#define UBENCH_INITIALIZER(f)                                                  \
-  static void f(void) UBENCH_ATTRIBUTE(constructor);                           \
+#define UBENCH_INITIALIZER(f)                        \
+  static void f(void) UBENCH_ATTRIBUTE(constructor); \
   static void f(void)
 #endif
 
@@ -308,12 +305,10 @@ static UBENCH_INLINE ubench_int64_t ubench_ns(void) {
   return ubench_mul_div(counter.QuadPart, 1000000000, frequency.QuadPart);
 #elif defined(__linux__) && defined(__STRICT_ANSI__)
   return ubench_mul_div(clock(), 1000000000, CLOCKS_PER_SEC);
-#elif defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) ||    \
-    defined(__NetBSD__) || defined(__DragonFly__) || defined(__sun__) ||       \
-    defined(__HAIKU__)
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || \
+    defined(__DragonFly__) || defined(__sun__) || defined(__HAIKU__)
   struct timespec ts;
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) &&              \
-    !defined(__HAIKU__)
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) && !defined(__HAIKU__)
   timespec_get(&ts, TIME_UTC);
 #else
   const clockid_t cid = CLOCK_REALTIME;
@@ -335,8 +330,7 @@ static UBENCH_INLINE ubench_int64_t ubench_ns(void) {
 #endif
 #endif
 #endif
-  return UBENCH_CAST(ubench_int64_t, ts.tv_sec) * 1000 * 1000 * 1000 +
-         ts.tv_nsec;
+  return UBENCH_CAST(ubench_int64_t, ts.tv_sec) * 1000 * 1000 * 1000 + ts.tv_nsec;
 #elif __APPLE__
   return UBENCH_CAST(ubench_int64_t, clock_gettime_nsec_np(CLOCK_UPTIME_RAW));
 #elif __EMSCRIPTEN__
@@ -347,16 +341,16 @@ static UBENCH_INLINE ubench_int64_t ubench_ns(void) {
 }
 
 struct ubench_run_state_s {
-  ubench_int64_t *ns;
+  ubench_int64_t* ns;
   ubench_int64_t size;
   ubench_int64_t sample;
 };
 
-typedef void (*ubench_benchmark_t)(struct ubench_run_state_s *ubs);
+typedef void (*ubench_benchmark_t)(struct ubench_run_state_s* ubs);
 
 struct ubench_benchmark_state_s {
   ubench_benchmark_t func;
-  char *name;
+  char* name;
 };
 
 #if defined(__clang__)
@@ -364,16 +358,12 @@ struct ubench_benchmark_state_s {
 #pragma clang diagnostic ignored "-Wpadded"
 #endif
 
-enum ubench_result_e {
-  UBENCH_RESULT_PASS,
-  UBENCH_RESULT_SKIP,
-  UBENCH_RESULT_FAIL
-};
+enum ubench_result_e { UBENCH_RESULT_PASS, UBENCH_RESULT_SKIP, UBENCH_RESULT_FAIL };
 
 struct ubench_state_s {
-  struct ubench_benchmark_state_s *benchmarks;
+  struct ubench_benchmark_state_s* benchmarks;
   size_t benchmarks_length;
-  FILE *output;
+  FILE* output;
   double confidence;
   enum ubench_result_e result;
 };
@@ -396,10 +386,10 @@ UBENCH_EXTERN struct ubench_state_s ubench_state;
 #pragma clang diagnostic ignored "-Wvariadic-macros"
 #pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
 #endif
-#define UBENCH_PRINTF(...)                                                     \
-  if (ubench_state.output) {                                                   \
-    fprintf(ubench_state.output, __VA_ARGS__);                                 \
-  }                                                                            \
+#define UBENCH_PRINTF(...)                     \
+  if (ubench_state.output) {                   \
+    fprintf(ubench_state.output, __VA_ARGS__); \
+  }                                            \
   printf(__VA_ARGS__)
 #ifdef __clang__
 #pragma clang diagnostic pop
@@ -423,28 +413,26 @@ UBENCH_EXTERN struct ubench_state_s ubench_state;
 
 #if defined(__clang__)
 #if __has_warning("-Wunsafe-buffer-usage")
-#define UBENCH_SURPRESS_UNSAFE_BUFFER_USAGE                                    \
+#define UBENCH_SURPRESS_UNSAFE_BUFFER_USAGE \
   _Pragma("clang diagnostic ignored \"-Wunsafe-buffer-usage\"")
 #else
 #define UBENCH_SURPRESS_UNSAFE_BUFFER_USAGE
 #endif
 
 #if __has_warning("-Wglobal-constructors")
-#define UBENCH_SURPRESS_GLOBAL_CONSTRUCTORS                                    \
+#define UBENCH_SURPRESS_GLOBAL_CONSTRUCTORS \
   _Pragma("clang diagnostic ignored \"-Wglobal-constructors\"")
 #else
 #define UBENCH_SURPRESS_GLOBAL_CONSTRUCTORS
 #endif
 
-#define UBENCH_SURPRESS_WARNINGS_BEGIN                                         \
-  _Pragma("clang diagnostic push")                                             \
-      UBENCH_SURPRESS_UNSAFE_BUFFER_USAGE                                      \
-          UBENCH_SURPRESS_GLOBAL_CONSTRUCTORS
+#define UBENCH_SURPRESS_WARNINGS_BEGIN \
+  _Pragma("clang diagnostic push")     \
+      UBENCH_SURPRESS_UNSAFE_BUFFER_USAGE UBENCH_SURPRESS_GLOBAL_CONSTRUCTORS
 #define UBENCH_SURPRESS_WARNINGS_END _Pragma("clang diagnostic pop")
 #elif defined(__GNUC__) && __GNUC__ >= 8 && defined(__cplusplus)
-#define UBENCH_SURPRESS_WARNINGS_BEGIN                                         \
-  _Pragma("GCC diagnostic push")                                               \
-      _Pragma("GCC diagnostic ignored \"-Wclass-memaccess\"")
+#define UBENCH_SURPRESS_WARNINGS_BEGIN \
+  _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wclass-memaccess\"")
 #define UBENCH_SURPRESS_WARNINGS_END _Pragma("GCC diagnostic pop")
 #else
 #define UBENCH_SURPRESS_WARNINGS_BEGIN
@@ -453,94 +441,88 @@ UBENCH_EXTERN struct ubench_state_s ubench_state;
 
 #define UBENCH_DO_BENCHMARK() while (ubench_do_benchmark(ubench_run_state) > 0)
 
-#define UBENCH_SKIP()                                                          \
-  do {                                                                         \
-    UBENCH_PRINTF("%s:%i: Skipped\n", __FILE__, __LINE__);                     \
-    ubench_state.result = UBENCH_RESULT_SKIP;                                  \
-    return;                                                                    \
+#define UBENCH_SKIP()                                      \
+  do {                                                     \
+    UBENCH_PRINTF("%s:%i: Skipped\n", __FILE__, __LINE__); \
+    ubench_state.result = UBENCH_RESULT_SKIP;              \
+    return;                                                \
   } while (0)
 
-#define UBENCH_FAIL()                                                          \
-  do {                                                                         \
-    UBENCH_PRINTF("%s:%i: Failure\n", __FILE__, __LINE__);                     \
-    ubench_state.result = UBENCH_RESULT_FAIL;                                  \
-    return;                                                                    \
+#define UBENCH_FAIL()                                      \
+  do {                                                     \
+    UBENCH_PRINTF("%s:%i: Failure\n", __FILE__, __LINE__); \
+    ubench_state.result = UBENCH_RESULT_FAIL;              \
+    return;                                                \
   } while (0)
 
-#define UBENCH_EX(SET, NAME)                                                   \
-  UBENCH_SURPRESS_WARNINGS_BEGIN                                               \
-  UBENCH_EXTERN struct ubench_state_s ubench_state;                            \
-  static void ubench_##SET##_##NAME(struct ubench_run_state_s *ubs);           \
-  UBENCH_INITIALIZER(ubench_register_##SET##_##NAME) {                         \
-    const size_t index = ubench_state.benchmarks_length++;                     \
-    const char name_part[] = #SET "." #NAME;                                   \
-    const size_t name_size = strlen(name_part) + 1;                            \
-    char *name = UBENCH_PTR_CAST(char *, malloc(name_size));                   \
-    ubench_state.benchmarks = UBENCH_PTR_CAST(                                 \
-        struct ubench_benchmark_state_s *,                                     \
-        realloc(UBENCH_PTR_CAST(void *, ubench_state.benchmarks),              \
-                sizeof(struct ubench_benchmark_state_s) *                      \
-                    ubench_state.benchmarks_length));                          \
-    ubench_state.benchmarks[index].func = &ubench_##SET##_##NAME;              \
-    ubench_state.benchmarks[index].name = name;                                \
-    UBENCH_SNPRINTF(name, name_size, "%s", name_part);                         \
-  }                                                                            \
-  UBENCH_SURPRESS_WARNINGS_END                                                 \
-  void ubench_##SET##_##NAME(struct ubench_run_state_s *ubench_run_state)
+#define UBENCH_EX(SET, NAME)                                                                \
+  UBENCH_SURPRESS_WARNINGS_BEGIN                                                            \
+  UBENCH_EXTERN struct ubench_state_s ubench_state;                                         \
+  static void ubench_##SET##_##NAME(struct ubench_run_state_s* ubs);                        \
+  UBENCH_INITIALIZER(ubench_register_##SET##_##NAME) {                                      \
+    const size_t index      = ubench_state.benchmarks_length++;                             \
+    const char name_part[]  = #SET "." #NAME;                                               \
+    const size_t name_size  = strlen(name_part) + 1;                                        \
+    char* name              = UBENCH_PTR_CAST(char*, malloc(name_size));                    \
+    ubench_state.benchmarks = UBENCH_PTR_CAST(                                              \
+        struct ubench_benchmark_state_s*,                                                   \
+        realloc(UBENCH_PTR_CAST(void*, ubench_state.benchmarks),                            \
+                sizeof(struct ubench_benchmark_state_s) * ubench_state.benchmarks_length)); \
+    ubench_state.benchmarks[index].func = &ubench_##SET##_##NAME;                           \
+    ubench_state.benchmarks[index].name = name;                                             \
+    UBENCH_SNPRINTF(name, name_size, "%s", name_part);                                      \
+  }                                                                                         \
+  UBENCH_SURPRESS_WARNINGS_END                                                              \
+  void ubench_##SET##_##NAME(struct ubench_run_state_s* ubench_run_state)
 
-#define UBENCH(SET, NAME)                                                      \
-  static void ubench_run_##SET##_##NAME(void);                                 \
-  UBENCH_EX(SET, NAME) {                                                       \
-    UBENCH_DO_BENCHMARK() { ubench_run_##SET##_##NAME(); }                     \
-  }                                                                            \
+#define UBENCH(SET, NAME)                                  \
+  static void ubench_run_##SET##_##NAME(void);             \
+  UBENCH_EX(SET, NAME) {                                   \
+    UBENCH_DO_BENCHMARK() { ubench_run_##SET##_##NAME(); } \
+  }                                                        \
   void ubench_run_##SET##_##NAME(void)
 
-#define UBENCH_F_SETUP(FIXTURE)                                                \
-  static void ubench_f_setup_##FIXTURE(struct FIXTURE *ubench_fixture)
+#define UBENCH_F_SETUP(FIXTURE) static void ubench_f_setup_##FIXTURE(struct FIXTURE* ubench_fixture)
 
-#define UBENCH_F_TEARDOWN(FIXTURE)                                             \
-  static void ubench_f_teardown_##FIXTURE(struct FIXTURE *ubench_fixture)
+#define UBENCH_F_TEARDOWN(FIXTURE) \
+  static void ubench_f_teardown_##FIXTURE(struct FIXTURE* ubench_fixture)
 
-#define UBENCH_EX_F(FIXTURE, NAME)                                             \
-  UBENCH_SURPRESS_WARNINGS_BEGIN                                               \
-  UBENCH_EXTERN struct ubench_state_s ubench_state;                            \
-  static void ubench_f_setup_##FIXTURE(struct FIXTURE *);                      \
-  static void ubench_f_teardown_##FIXTURE(struct FIXTURE *);                   \
-  static void ubench_run_ex_##FIXTURE##_##NAME(struct FIXTURE *,               \
-                                               struct ubench_run_state_s *);   \
-  static void ubench_f_##FIXTURE##_##NAME(                                     \
-      struct ubench_run_state_s *ubench_run_state) {                           \
-    struct FIXTURE fixture;                                                    \
-    memset(&fixture, 0, sizeof(fixture));                                      \
-    ubench_f_setup_##FIXTURE(&fixture);                                        \
-    ubench_run_ex_##FIXTURE##_##NAME(&fixture, ubench_run_state);              \
-    ubench_f_teardown_##FIXTURE(&fixture);                                     \
-  }                                                                            \
-  UBENCH_INITIALIZER(ubench_register_##FIXTURE##_##NAME) {                     \
-    const size_t index = ubench_state.benchmarks_length++;                     \
-    const char name_part[] = #FIXTURE "." #NAME;                               \
-    const size_t name_size = strlen(name_part) + 1;                            \
-    char *name = UBENCH_PTR_CAST(char *, malloc(name_size));                   \
-    ubench_state.benchmarks = UBENCH_PTR_CAST(                                 \
-        struct ubench_benchmark_state_s *,                                     \
-        realloc(UBENCH_PTR_CAST(void *, ubench_state.benchmarks),              \
-                sizeof(struct ubench_benchmark_state_s) *                      \
-                    ubench_state.benchmarks_length));                          \
-    ubench_state.benchmarks[index].func = &ubench_f_##FIXTURE##_##NAME;        \
-    ubench_state.benchmarks[index].name = name;                                \
-    UBENCH_SNPRINTF(name, name_size, "%s", name_part);                         \
-  }                                                                            \
-  UBENCH_SURPRESS_WARNINGS_END                                                 \
-  void ubench_run_ex_##FIXTURE##_##NAME(                                       \
-      struct FIXTURE *ubench_fixture,                                          \
-      struct ubench_run_state_s *ubench_run_state)
+#define UBENCH_EX_F(FIXTURE, NAME)                                                           \
+  UBENCH_SURPRESS_WARNINGS_BEGIN                                                             \
+  UBENCH_EXTERN struct ubench_state_s ubench_state;                                          \
+  static void ubench_f_setup_##FIXTURE(struct FIXTURE*);                                     \
+  static void ubench_f_teardown_##FIXTURE(struct FIXTURE*);                                  \
+  static void ubench_run_ex_##FIXTURE##_##NAME(struct FIXTURE*, struct ubench_run_state_s*); \
+  static void ubench_f_##FIXTURE##_##NAME(struct ubench_run_state_s* ubench_run_state) {     \
+    struct FIXTURE fixture;                                                                  \
+    memset(&fixture, 0, sizeof(fixture));                                                    \
+    ubench_f_setup_##FIXTURE(&fixture);                                                      \
+    ubench_run_ex_##FIXTURE##_##NAME(&fixture, ubench_run_state);                            \
+    ubench_f_teardown_##FIXTURE(&fixture);                                                   \
+  }                                                                                          \
+  UBENCH_INITIALIZER(ubench_register_##FIXTURE##_##NAME) {                                   \
+    const size_t index      = ubench_state.benchmarks_length++;                              \
+    const char name_part[]  = #FIXTURE "." #NAME;                                            \
+    const size_t name_size  = strlen(name_part) + 1;                                         \
+    char* name              = UBENCH_PTR_CAST(char*, malloc(name_size));                     \
+    ubench_state.benchmarks = UBENCH_PTR_CAST(                                               \
+        struct ubench_benchmark_state_s*,                                                    \
+        realloc(UBENCH_PTR_CAST(void*, ubench_state.benchmarks),                             \
+                sizeof(struct ubench_benchmark_state_s) * ubench_state.benchmarks_length));  \
+    ubench_state.benchmarks[index].func = &ubench_f_##FIXTURE##_##NAME;                      \
+    ubench_state.benchmarks[index].name = name;                                              \
+    UBENCH_SNPRINTF(name, name_size, "%s", name_part);                                       \
+  }                                                                                          \
+  UBENCH_SURPRESS_WARNINGS_END                                                               \
+  void ubench_run_ex_##FIXTURE##_##NAME(struct FIXTURE* ubench_fixture,                      \
+                                        struct ubench_run_state_s* ubench_run_state)
 
-#define UBENCH_F(FIXTURE, NAME)                                                \
-  static void ubench_run_##FIXTURE##_##NAME(struct FIXTURE *);                 \
-  UBENCH_EX_F(FIXTURE, NAME) {                                                 \
-    UBENCH_DO_BENCHMARK() { ubench_run_##FIXTURE##_##NAME(ubench_fixture); }   \
-  }                                                                            \
-  void ubench_run_##FIXTURE##_##NAME(struct FIXTURE *ubench_fixture)
+#define UBENCH_F(FIXTURE, NAME)                                              \
+  static void ubench_run_##FIXTURE##_##NAME(struct FIXTURE*);                \
+  UBENCH_EX_F(FIXTURE, NAME) {                                               \
+    UBENCH_DO_BENCHMARK() { ubench_run_##FIXTURE##_##NAME(ubench_fixture); } \
+  }                                                                          \
+  void ubench_run_##FIXTURE##_##NAME(struct FIXTURE* ubench_fixture)
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -550,26 +532,23 @@ UBENCH_EXTERN struct ubench_state_s ubench_state;
 #endif
 #endif
 
-static UBENCH_INLINE int
-ubench_do_benchmark(struct ubench_run_state_s *const ubs) {
+static UBENCH_INLINE int ubench_do_benchmark(struct ubench_run_state_s* const ubs) {
   const ubench_int64_t curr_sample = ubs->sample++;
-  ubs->ns[curr_sample] = ubench_ns();
+  ubs->ns[curr_sample]             = ubench_ns();
 
-  if (UBENCH_RESULT_SKIP == ubench_state.result ||
-      UBENCH_RESULT_FAIL == ubench_state.result) {
+  if (UBENCH_RESULT_SKIP == ubench_state.result || UBENCH_RESULT_FAIL == ubench_state.result) {
     return 0;
   }
 
   return curr_sample < ubs->size ? 1 : 0;
 }
 
-static UBENCH_INLINE int ubench_should_filter(const char *filter,
-                                              const char *benchmark);
-int ubench_should_filter(const char *filter, const char *benchmark) {
+static UBENCH_INLINE int ubench_should_filter(const char* filter, const char* benchmark);
+int ubench_should_filter(const char* filter, const char* benchmark) {
   if (filter) {
-    const char *filter_cur = filter;
-    const char *benchmark_cur = benchmark;
-    const char *filter_wildcard = UBENCH_NULL;
+    const char* filter_cur      = filter;
+    const char* benchmark_cur   = benchmark;
+    const char* filter_wildcard = UBENCH_NULL;
 
     while (('\0' != *filter_cur) && ('\0' != *benchmark_cur)) {
       if ('*' == *filter_cur) {
@@ -620,8 +599,7 @@ int ubench_should_filter(const char *filter, const char *benchmark) {
     }
 
     if (('\0' != *filter_cur) ||
-        (('\0' != *benchmark_cur) &&
-         ((filter == filter_cur) || ('*' != filter_cur[-1])))) {
+        (('\0' != *benchmark_cur) && ((filter == filter_cur) || ('*' != filter_cur[-1])))) {
       /* we have a mismatch! */
       return 1;
     }
@@ -630,8 +608,7 @@ int ubench_should_filter(const char *filter, const char *benchmark) {
   return 0;
 }
 
-static UBENCH_INLINE int ubench_strncmp(const char *a, const char *b,
-                                        size_t n) {
+static UBENCH_INLINE int ubench_strncmp(const char* a, const char* b, size_t n) {
   /* strncmp breaks on Wall / Werror on gcc/clang, so we avoid using it */
   unsigned i;
 
@@ -646,10 +623,9 @@ static UBENCH_INLINE int ubench_strncmp(const char *a, const char *b,
   return 0;
 }
 
-static UBENCH_INLINE FILE *ubench_fopen(const char *filename,
-                                        const char *mode) {
+static UBENCH_INLINE FILE* ubench_fopen(const char* filename, const char* mode) {
 #ifdef _MSC_VER
-  FILE *file;
+  FILE* file;
   if (0 == fopen_s(&file, filename, mode)) {
     return file;
   } else {
@@ -660,19 +636,19 @@ static UBENCH_INLINE FILE *ubench_fopen(const char *filename,
 #endif
 }
 
-static UBENCH_INLINE int ubench_main(int argc, const char *const argv[]);
-int ubench_main(int argc, const char *const argv[]) {
-  ubench_uint64_t failed = 0;
-  size_t index = 0;
-  size_t *failed_benchmarks = UBENCH_NULL;
+static UBENCH_INLINE int ubench_main(int argc, const char* const argv[]);
+int ubench_main(int argc, const char* const argv[]) {
+  ubench_uint64_t failed          = 0;
+  size_t index                    = 0;
+  size_t* failed_benchmarks       = UBENCH_NULL;
   size_t failed_benchmarks_length = 0;
-  const char *filter = UBENCH_NULL;
-  ubench_uint64_t ran_benchmarks = 0;
+  const char* filter              = UBENCH_NULL;
+  ubench_uint64_t ran_benchmarks  = 0;
 
   enum colours { RESET, GREEN, RED, YELLOW };
 
   const int use_colours = UBENCH_COLOUR_OUTPUT();
-  const char *colours[] = {"\033[0m", "\033[32m", "\033[31m", "\033[33m"};
+  const char* colours[] = {"\033[0m", "\033[32m", "\033[31m", "\033[33m"};
   if (!use_colours) {
     for (index = 0; index < sizeof colours / sizeof colours[0]; index++) {
       colours[index] = "";
@@ -685,30 +661,29 @@ int ubench_main(int argc, const char *const argv[]) {
     const char help_str[] = "--help";
     const char list_str[] = "--list-benchmarks";
     /* Benchmark config switches */
-    const char filter_str[] = "--filter=";
-    const char output_str[] = "--output=";
+    const char filter_str[]     = "--filter=";
+    const char output_str[]     = "--output=";
     const char confidence_str[] = "--confidence=";
 
     if (0 == ubench_strncmp(argv[index], help_str, strlen(help_str))) {
-      printf("ubench.h - the single file benchmarking solution for C/C++!\n"
-             "Command line Options:\n");
-      printf("  --help                    Show this message and exit.\n"
-             "  --filter=<filter>         Filter the benchmarks to run (EG. "
-             "MyBench*.a would run MyBenchmark.a but not MyBenchmark.b).\n"
-             "  --list-benchmarks         List benchmarks, one per line. "
-             "Output names can be passed to --filter.\n"
-             "  --output=<output>         Output a CSV file of the results.\n"
-             "  --confidence=<confidence> Change the confidence cut-off for a "
-             "failed test. Defaults to 2.5%%\n");
+      printf(
+          "ubench.h - the single file benchmarking solution for C/C++!\n"
+          "Command line Options:\n");
+      printf(
+          "  --help                    Show this message and exit.\n"
+          "  --filter=<filter>         Filter the benchmarks to run (EG. "
+          "MyBench*.a would run MyBenchmark.a but not MyBenchmark.b).\n"
+          "  --list-benchmarks         List benchmarks, one per line. "
+          "Output names can be passed to --filter.\n"
+          "  --output=<output>         Output a CSV file of the results.\n"
+          "  --confidence=<confidence> Change the confidence cut-off for a "
+          "failed test. Defaults to 2.5%%\n");
       goto cleanup;
-    } else if (0 ==
-               ubench_strncmp(argv[index], filter_str, strlen(filter_str))) {
+    } else if (0 == ubench_strncmp(argv[index], filter_str, strlen(filter_str))) {
       /* user wants to filter what benchmarks run! */
       filter = argv[index] + strlen(filter_str);
-    } else if (0 ==
-               ubench_strncmp(argv[index], output_str, strlen(output_str))) {
-      ubench_state.output =
-          ubench_fopen(argv[index] + strlen(output_str), "w+");
+    } else if (0 == ubench_strncmp(argv[index], output_str, strlen(output_str))) {
+      ubench_state.output = ubench_fopen(argv[index] + strlen(output_str), "w+");
     } else if (0 == ubench_strncmp(argv[index], list_str, strlen(list_str))) {
       for (index = 0; index < ubench_state.benchmarks_length; index++) {
         UBENCH_PRINTF("%s\n", ubench_state.benchmarks[index].name);
@@ -716,8 +691,7 @@ int ubench_main(int argc, const char *const argv[]) {
 
       /* when printing the benchmark list, don't actually run the benchmarks */
       goto cleanup;
-    } else if (0 == ubench_strncmp(argv[index], confidence_str,
-                                   strlen(confidence_str))) {
+    } else if (0 == ubench_strncmp(argv[index], confidence_str, strlen(confidence_str))) {
       /* user wants to specify a different confidence */
       ubench_state.confidence = atof(argv[index] + strlen(confidence_str));
 
@@ -740,25 +714,25 @@ int ubench_main(int argc, const char *const argv[]) {
   }
 
   printf("%s[==========]%s Running %" UBENCH_PRIu64 " benchmarks.\n",
-         colours[GREEN], colours[RESET],
+         colours[GREEN],
+         colours[RESET],
          UBENCH_CAST(ubench_uint64_t, ran_benchmarks));
 
   if (ubench_state.output) {
-    fprintf(ubench_state.output,
-            "name, mean (ns), stddev (%%), confidence (%%)\n");
+    fprintf(ubench_state.output, "name, mean (ns), stddev (%%), confidence (%%)\n");
   }
 
   for (index = 0; index < ubench_state.benchmarks_length; index++) {
-    int result = 1;
-    size_t mndex = 0;
+    int result                 = 1;
+    size_t mndex               = 0;
     ubench_int64_t best_avg_ns = 0;
-    double best_deviation = 0;
-    double best_confidence = 101.0;
+    double best_deviation      = 0;
+    double best_confidence     = 101.0;
     struct ubench_run_state_s ubs;
 
 #define UBENCH_MIN_ITERATIONS 10
 #define UBENCH_MAX_ITERATIONS 500
-    ubench_int64_t iterations = 10;
+    ubench_int64_t iterations           = 10;
     const ubench_int64_t max_iterations = UBENCH_MAX_ITERATIONS;
     const ubench_int64_t min_iterations = UBENCH_MIN_ITERATIONS;
     /* Add one extra timestamp slot, as we save times between runs and time
@@ -771,11 +745,13 @@ int ubench_main(int argc, const char *const argv[]) {
       continue;
     }
 
-    printf("%s[ RUN      ]%s %s\n", colours[GREEN], colours[RESET],
+    printf("%s[ RUN      ]%s %s\n",
+           colours[GREEN],
+           colours[RESET],
            ubench_state.benchmarks[index].name);
 
-    ubs.ns = ns;
-    ubs.size = 1;
+    ubs.ns     = ns;
+    ubs.size   = 1;
     ubs.sample = 0;
 
     ubench_state.result = UBENCH_RESULT_PASS;
@@ -784,20 +760,24 @@ int ubench_main(int argc, const char *const argv[]) {
     ubench_state.benchmarks[index].func(&ubs);
 
     if (UBENCH_RESULT_SKIP == ubench_state.result) {
-      printf("%s[  SKIPPED ]%s %s\n", colours[YELLOW], colours[RESET],
+      printf("%s[  SKIPPED ]%s %s\n",
+             colours[YELLOW],
+             colours[RESET],
              ubench_state.benchmarks[index].name);
       ubench_state.result = UBENCH_RESULT_PASS;
       continue;
     }
 
     if (UBENCH_RESULT_FAIL == ubench_state.result) {
-      printf("%s[  FAILED  ]%s %s\n", colours[RED], colours[RESET],
+      printf("%s[  FAILED  ]%s %s\n",
+             colours[RED],
+             colours[RESET],
              ubench_state.benchmarks[index].name);
       {
         const size_t failed_benchmark_index = failed_benchmarks_length++;
-        failed_benchmarks = UBENCH_PTR_CAST(
-            size_t *, realloc(UBENCH_PTR_CAST(void *, failed_benchmarks),
-                              sizeof(size_t) * failed_benchmarks_length));
+        failed_benchmarks = UBENCH_PTR_CAST(size_t*,
+                                            realloc(UBENCH_PTR_CAST(void*, failed_benchmarks),
+                                                    sizeof(size_t) * failed_benchmarks_length));
         failed_benchmarks[failed_benchmark_index] = index;
         failed++;
       }
@@ -810,16 +790,16 @@ int ubench_main(int argc, const char *const argv[]) {
     iterations = iterations > max_iterations ? max_iterations : iterations;
 
     for (mndex = 0; (mndex < 100) && (result != 0); mndex++) {
-      ubench_int64_t kndex = 0;
+      ubench_int64_t kndex  = 0;
       ubench_int64_t avg_ns = 0;
-      double deviation = 0;
-      double confidence = 0;
+      double deviation      = 0;
+      double confidence     = 0;
 
       iterations = iterations * (UBENCH_CAST(ubench_int64_t, mndex) + 1);
       iterations = iterations > max_iterations ? max_iterations : iterations;
 
       ubs.sample = 0;
-      ubs.size = iterations;
+      ubs.size   = iterations;
       ubench_state.benchmarks[index].func(&ubs);
 
       /* Calculate benchmark run-times */
@@ -851,40 +831,43 @@ int ubench_main(int argc, const char *const argv[]) {
 
       /* If the deviation beats our previous best, record it. */
       if (confidence < best_confidence) {
-        best_avg_ns = avg_ns;
-        best_deviation = deviation;
+        best_avg_ns     = avg_ns;
+        best_deviation  = deviation;
         best_confidence = confidence;
       }
     }
 
     if (result) {
       printf("confidence interval %f%% exceeds maximum permitted %f%%\n",
-             best_confidence, ubench_state.confidence);
+             best_confidence,
+             ubench_state.confidence);
     }
 
     if (ubench_state.output) {
-      fprintf(ubench_state.output, "%s, %" UBENCH_PRId64 ", %f, %f,\n",
-              ubench_state.benchmarks[index].name, best_avg_ns, best_deviation,
+      fprintf(ubench_state.output,
+              "%s, %" UBENCH_PRId64 ", %f, %f,\n",
+              ubench_state.benchmarks[index].name,
+              best_avg_ns,
+              best_deviation,
               best_confidence);
     }
 
     {
-      const char *const colour = (0 != result) ? colours[RED] : colours[GREEN];
-      const char *const status =
-          (0 != result) ? "[  FAILED  ]" : "[       OK ]";
-      const char *unit = "us";
+      const char* const colour = (0 != result) ? colours[RED] : colours[GREEN];
+      const char* const status = (0 != result) ? "[  FAILED  ]" : "[       OK ]";
+      const char* unit         = "us";
 
       if (0 != result) {
         const size_t failed_benchmark_index = failed_benchmarks_length++;
-        failed_benchmarks = UBENCH_PTR_CAST(
-            size_t *, realloc(UBENCH_PTR_CAST(void *, failed_benchmarks),
-                              sizeof(size_t) * failed_benchmarks_length));
+        failed_benchmarks = UBENCH_PTR_CAST(size_t*,
+                                            realloc(UBENCH_PTR_CAST(void*, failed_benchmarks),
+                                                    sizeof(size_t) * failed_benchmarks_length));
         failed_benchmarks[failed_benchmark_index] = index;
         failed++;
       }
 
-      printf("%s%s%s %s (mean ", colour, status, colours[RESET],
-             ubench_state.benchmarks[index].name);
+      printf(
+          "%s%s%s %s (mean ", colour, status, colours[RESET], ubench_state.benchmarks[index].name);
 
       for (mndex = 0; mndex < 2; mndex++) {
         if (best_avg_ns <= 1000000) {
@@ -902,33 +885,43 @@ int ubench_main(int argc, const char *const argv[]) {
         }
       }
 
-      printf("%" UBENCH_PRId64 ".%03" UBENCH_PRId64
-             "%s, confidence interval +- %f%%)\n",
-             best_avg_ns / 1000, best_avg_ns % 1000, unit, best_confidence);
+      printf("%" UBENCH_PRId64 ".%03" UBENCH_PRId64 "%s, confidence interval +- %f%%)\n",
+             best_avg_ns / 1000,
+             best_avg_ns % 1000,
+             unit,
+             best_confidence);
     }
   }
 
   printf("%s[==========]%s %" UBENCH_PRIu64 " benchmarks ran.\n",
-         colours[GREEN], colours[RESET], ran_benchmarks);
-  printf("%s[  PASSED  ]%s %" UBENCH_PRIu64 " benchmarks.\n", colours[GREEN],
-         colours[RESET], ran_benchmarks - failed);
+         colours[GREEN],
+         colours[RESET],
+         ran_benchmarks);
+  printf("%s[  PASSED  ]%s %" UBENCH_PRIu64 " benchmarks.\n",
+         colours[GREEN],
+         colours[RESET],
+         ran_benchmarks - failed);
 
   if (0 != failed) {
     printf("%s[  FAILED  ]%s %" UBENCH_PRIu64 " benchmarks, listed below:\n",
-           colours[RED], colours[RESET], failed);
+           colours[RED],
+           colours[RESET],
+           failed);
     for (index = 0; index < failed_benchmarks_length; index++) {
-      printf("%s[  FAILED  ]%s %s\n", colours[RED], colours[RESET],
+      printf("%s[  FAILED  ]%s %s\n",
+             colours[RED],
+             colours[RESET],
              ubench_state.benchmarks[failed_benchmarks[index]].name);
     }
   }
 
 cleanup:
   for (index = 0; index < ubench_state.benchmarks_length; index++) {
-    free(UBENCH_PTR_CAST(void *, ubench_state.benchmarks[index].name));
+    free(UBENCH_PTR_CAST(void*, ubench_state.benchmarks[index].name));
   }
 
-  free(UBENCH_PTR_CAST(void *, failed_benchmarks));
-  free(UBENCH_PTR_CAST(void *, ubench_state.benchmarks));
+  free(UBENCH_PTR_CAST(void*, failed_benchmarks));
+  free(UBENCH_PTR_CAST(void*, ubench_state.benchmarks));
 
   if (ubench_state.output) {
     fclose(ubench_state.output);
@@ -941,31 +934,29 @@ cleanup:
 #pragma clang diagnostic pop
 #endif
 
-UBENCH_C_FUNC UBENCH_NOINLINE void ubench_do_nothing(void *const);
+UBENCH_C_FUNC UBENCH_NOINLINE void ubench_do_nothing(void* const);
 
 #define UBENCH_DO_NOTHING(x) ubench_do_nothing(x)
 
 #if defined(_MSC_VER)
 UBENCH_C_FUNC void _ReadWriteBarrier(void);
 
-#define UBENCH_DECLARE_DO_NOTHING()                                            \
-  void ubench_do_nothing(void *ptr) {                                          \
-    (void)ptr;                                                                 \
-    _ReadWriteBarrier();                                                       \
+#define UBENCH_DECLARE_DO_NOTHING()   \
+  void ubench_do_nothing(void* ptr) { \
+    (void)ptr;                        \
+    _ReadWriteBarrier();              \
   }
 #elif defined(__clang__)
-#define UBENCH_DECLARE_DO_NOTHING()                                            \
-  void ubench_do_nothing(void *ptr) {                                          \
-    _Pragma("clang diagnostic push")                                           \
-        _Pragma("clang diagnostic ignored \"-Wlanguage-extension-token\"");    \
-    __asm__ volatile("" : : "r"(ptr), "m"(ptr) : "memory");                    \
-    _Pragma("clang diagnostic pop");                                           \
+#define UBENCH_DECLARE_DO_NOTHING()                                         \
+  void ubench_do_nothing(void* ptr) {                                       \
+    _Pragma("clang diagnostic push")                                        \
+        _Pragma("clang diagnostic ignored \"-Wlanguage-extension-token\""); \
+    __asm__ volatile("" : : "r"(ptr), "m"(ptr) : "memory");                 \
+    _Pragma("clang diagnostic pop");                                        \
   }
 #else
-#define UBENCH_DECLARE_DO_NOTHING()                                            \
-  void ubench_do_nothing(void *ptr) {                                          \
-    __asm__ volatile("" : : "r"(ptr), "m"(ptr) : "memory");                    \
-  }
+#define UBENCH_DECLARE_DO_NOTHING() \
+  void ubench_do_nothing(void* ptr) { __asm__ volatile("" : : "r"(ptr), "m"(ptr) : "memory"); }
 #endif
 
 /*
@@ -977,9 +968,9 @@ UBENCH_C_FUNC void _ReadWriteBarrier(void);
    We also use this to define the 'do nothing' method that lets us keep data
    that the compiler would normally deem is dead for the purposes of timing.
 */
-#define UBENCH_STATE()                                                         \
-  UBENCH_DECLARE_DO_NOTHING()                                                  \
-  struct ubench_state_s ubench_state = {0, 0, 0, 2.5, UBENCH_RESULT_PASS}
+#define UBENCH_STATE()        \
+  UBENCH_DECLARE_DO_NOTHING() \
+  struct ubench_state_s ubench_state = {0, 0, 0, 5, UBENCH_RESULT_PASS}
 
 /*
    define a main() function to call into ubench.h and start executing
@@ -988,10 +979,8 @@ UBENCH_C_FUNC void _ReadWriteBarrier(void);
    exactly one source file, use the UBENCH_STATE macro to declare a global
    struct variable that ubench requires.
 */
-#define UBENCH_MAIN()                                                          \
-  UBENCH_STATE();                                                              \
-  int main(int argc, const char *const argv[]) {                               \
-    return ubench_main(argc, argv);                                            \
-  }
+#define UBENCH_MAIN() \
+  UBENCH_STATE();     \
+  int main(int argc, const char* const argv[]) { return ubench_main(argc, argv); }
 
 #endif /* SHEREDOM_UBENCH_H_INCLUDED */
