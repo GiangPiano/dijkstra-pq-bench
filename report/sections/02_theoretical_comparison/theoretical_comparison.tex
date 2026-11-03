@@ -133,3 +133,52 @@ The choice \textsc{Decrease-Key} and lazy insertion fundamentally alters how pri
 \noindent
 
 \subsection{Experiment hypotheses}
+\subsubsection{Hypotheses for Experiment 1: Running time}
+\begin{itemize}
+  \item \textbf{Hypothesis 1.1:} \\
+  On sparse graphs with low average degree ($\bar{d} = m/n \le 4$), edge relaxations are infrequent, meaning Dijkstra's execution is dominated by $n$ vertex extractions (\textsc{Pop}). Because binary heap elements are densely packed in contiguous arrays with zero pointer indirection, the binary heap will achieve the lowest wall-clock runtime, outperforming both pairing and Fibonacci heaps despite having an inferior theoretical decrease-key bound.
+  \item \textbf{Hypothesis 1.2:} \\
+  As graph density increases ($\bar{d} \gg 32$, $m \gg n$), the number of \textsc{Decrease-Key} operations ($m - n$) will overwhelm the $n$ extractions. 
+  \begin{itemize}
+    \item We predict that the pairing heap will cross over and beat the binary heap on dense topologies due to its lightweight $O(1)$-like cut-and-meld decrease-key.
+    \item Conversely, we predict the Fibonacci heap will fail to beat the pairing heap across all graph densities. This is due to the structural tax of maintaining circular doubly-linked lists, degree arrays, and cascading cut bookkeeping.
+  \end{itemize}
+  \item \textbf{Hypothesis 1.3:} \\
+  The relative performance of \textsc{Lazy} against \textsc{decrease-key} will depend strictly on edge density:
+  \begin{itemize}
+    \item On \emph{sparse graphs}, \textsc{Lazy} will be faster than or strictly competitive with \textsc{decrease-key} for binary heaps, because avoiding the synchronisation writes to $\texttt{pos}[]$ during \code{bubble()} outweighs the cost of processing a small number of duplicate entries.
+    \item On \emph{dense graphs}, \textsc{Lazy} will suffer severe performance degradation across all heaps. The queue will swell to size $O(m)$, forcing the algorithm to execute $m$ full $O(\log m)$ extractions instead of $n$, quickly falling behind \textsc{decrease-key}.
+  \end{itemize}
+  \item \textbf{Hypothesis 1.4:} \\
+  While purely functional priority queues offer optimal theoretical worst-case bounds, simulating \textsc{Decrease-Key} via positive/negative tree cancellation will introduce quadratic-like slowdowns on dense graphs with repeated key updates, rendering it uncompetitive with imperative heaps.
+\end{itemize}
+
+\subsubsection{Hypotheses for Experiment 2: Cache Behaviour}
+\begin{itemize}
+  \item \textbf{Hypothesis 2.1:} \\
+  We predict a pronounced gradient in cache miss rates that correlates directly with node size and layout:
+  \begin{itemize}
+    \item The \textbf{Binary Heap} will exhibit the lowest cache miss rates because traversing an array index ($2i+1, 2i+2$) exploits CPU spatial locality.
+    \item \textbf{Pairing and Brodal--Okasaki} will exhibit significantly higher $L_1$ and Last-Level Cache (LLC) miss rates due to pointer chasing. Since individual nodes are allocated arbitrarily in virtual memory, traversing child and sibling pointers will incur frequent pipeline stalls waiting for DRAM round-trips.
+    \item The \textbf{Fibonacci Heaps} will record the worst cache behavior because its 56-byte node size approaches an entire 64-byte cache line, minimising the probability that a pointer dereference hits already-cached data.
+  \end{itemize}
+  \item \textbf{Hypothesis 2.2:} \\
+  Array-based heaps will demonstrate lower Instructions per Cycle (IPC) during bubble/sink loops due to data dependency stalls, but will execute orders of magnitude fewer total retired instructions than pointer-based heaps that must maintain multi-way pointer updates per link.
+\end{itemize}
+% -----------------------------------------------------------------------------
+% EXPERIMENT 3: MEMORY FOOTPRINT & ALLOCATOR PRESSURE
+% -----------------------------------------------------------------------------
+\subsubsection{Hypotheses for Experiment 3: Memory Management}
+\begin{itemize}
+  \item \textbf{Hypothesis 3.1:} \\
+  Peak heap memory usage during eager Dijkstra will strictly mirror the analytical struct calculations:
+  \[
+    \text{Peak Memory: } \text{Binary } < \text{Brodal--Okasaki } < \text{Pairing } < \text{Fibonacci }
+  \]
+  In lazy mode, peak heap memory will scale with edge volume ($m$) rather than vertex count ($n$), consuming multiples of the eager memory footprint on dense graphs due to duplicate frontier nodes. Furthermore, pointer heaps will show disproportionately higher Peak Resident Set Size (RSS) due to heap arena fragmentation across scattered 40--56 byte allocations.
+  \item \textbf{Hypothesis 3.2:}
+  \begin{itemize}
+    \item \textbf{Buffer-backed Heaps (Binary \& Brodal--Okasaki):} Will incur $\mathcal{O}(1)$ dynamic memory allocations, relying on pre-allocated contiguous buffers and internal free-list management rather than issuing requests to the system allocator.
+    \item \textbf{Pointer Heaps (Pairing \& Fibonacci):} Will generate massive allocator churn ($\sim n$ invocations of \code{malloc()} and \code{free()} in eager mode, and $\sim m$ in lazy mode), introducing memory manager bookkeeping overhead and cache eviction during node construction.
+  \end{itemize}
+\end{itemize}
