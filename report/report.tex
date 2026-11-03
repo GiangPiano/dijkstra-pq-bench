@@ -8,23 +8,36 @@
 \usepackage{graphicx}       
 \usepackage[numbers,square,sort&compress]{natbib}
 \usepackage{algorithm}
+\usepackage{algorithmic}
 \usepackage{geometry}       
 \usepackage{listings}
-\usepackage{inconsolata}
 \usepackage{tikz}
+
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{inconsolata}
+\else
+  \usepackage{fontspec}
+\fi
+
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+
 \geometry{a4paper, margin=1in}
 
 \title{Priority queues in Dijkstra's algorithm
  \\ {\large 41052 - Advanced Algorithms – Programming Assignment 2}}
 \author{
   \textbf{Oscar Chevalier} \\
-  \texttt{Student ID: 87654321} 
+  \code{Student ID: 87654321}
   \and
   \textbf{Truong Giang Nguyen} \\
-  \texttt{Student ID: 25520038}
+  \code{Student ID: 25520038}
   \and
   \textbf{Tung Nguyen} \\
-  \texttt{Student ID: 24666048}}
+  Student ID: 24666048
+}
   \date{}
 \begin{document}
 
@@ -32,13 +45,13 @@
 \tableofcontents
 \pagebreak
 
-\section{Problem Statement \& Algorithm Choices}
-\section{Theoretical Comparison and Predictions}
-\section{Experimental Methodology}
-\section{Results and Analysis}
-\section{What surprised us}
-\section{Future Improvement}
-\section{Individual Contributions}
-\section{AI Disclosure}
+\input{sections/01_problem_statement/problem_statement}
+\input{sections/02_theoretical_comparison/theoretical_comparison}
+\input{sections/03_experimental_methodology/experimental_methodology}
+\input{sections/04_results_and_analysis/results_and_analysis}
+\input{sections/05_what_surprised_us/what_surprised_us}
+\input{sections/06_future_improvement/future_improvement}
+\input{sections/07_individual_contributions/individual_contributions}
+\input{sections/08_ai_disclosure/ai_disclosure}
 
 \end{document}

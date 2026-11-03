@@ -1,1 +1,125 @@
 \section{Problem Statement \& Algorithm Choices}
+
+\subsection{The problem}
+
+The object of study is the single-source shortest path (SSSP) problem on
+directed graphs with non-negative weights. The input is a directed graph
+$G = (V, E)$ with $n = |V|$ vertices and $m = |E|$ arcs, a weight function
+$w : E \to \mathbb{Z}^{+}$, and a source $s \in V$. The weight of
+a path $p = \langle v_0, v_1, \ldots, v_k \rangle$ is the total weight of all edges along the path:
+$w(p) = \sum_{i=1}^{k} w(v_{i-1}, v_i)$. The shortest path from
+$s$ to $v$ is
+\[
+  \mathit{dist}(s, v) =
+  \begin{cases}
+    \min \{\, w(p) : p \text{ is a path from } s \text{ to } v \,\}
+      & \text{if such a } p \text{ exists,} \\
+    \infty & \text{otherwise.}
+  \end{cases}
+\]
+The required output is the full distance vector: an array
+$\code{dist}[0 \ldots n-1]$ with $\texttt{dist}[v] = \mathit{dist}(s, v)$ for every
+reachable $v$, and the sentinel $-1$ where no $s \rightarrow v$ path
+exists. The path trace are not reconstructed, since that process is identical across every implementation and would add a constant to all
+measurements without discriminating between them.
+
+The input graph must have the following two properties for Dijkstra's algorithm to be functional. Firstly, weights are
+strictly positive integers, since Dijkstra's algorithm depends on the greedy approach that the distance to a processed node is fixed once it is relaxed. 
+
+
+The input graph must satisfy one condition for Dijkstra's algorithm to work correctly. All edge weights must be strictly positive integers. This is because the algorithm relies on a greedy approach, where it chooses the next vertex to process by their current shortest distance. This choice is guaranteed to be correct as long as there are no negative edge weights. The input graphs are generated with a fixed pseudo-random seed so that every implementation is measured on identical input.
+
+\subsection{Dijkstra's algorithm and the role of the heap}
+
+Dijkstra's algorithm maintains a distance $\code{dist}[v]$ for every vertex $v$. It initialises $\code{dist}[s] = 0$ for the source $s$ and $\code{dist}[v] = \infty$ for all other vertices. At each step it extracts the vertex $u$ with minimum distance, treats $\code{dist}[u]$ as final, and relaxes each outgoing edge $(u,v)$ if
+$\code{dist}[u] + w(u,v) < \code{dist}[v]$. The priority queue is a min-heap, which is the data structure under test in our benchmarks.
+
+We implemented two variants of Dijkstra's algorithm that differ only in how
+they update the queue after a successful relaxation. The first, \emph{lazy}
+variant inserts a new vertex--distance pair every time an edge is relaxed,
+leaving any older entries for the same vertex in the heap. When a stale entry
+is later extracted, its distance is larger than $\code{dist}[v]$, so it is skipped.
+The heap may therefore hold more than one entry per vertex.
+
+The second, \emph{eager} variant keeps at most one entry per vertex. A vertex
+is pushed when it is first reached, and later improvements call the heap's
+\code{decrease\_key()} operation to lower the key of the existing entry. We
+include this variant because some heaps, such as Fibonacci heaps, are designed
+to make this operation cheap.
+
+
+\begin{algorithm}[H]
+\caption{Dijkstra's algorithm, lazy formulation}
+\begin{algorithmic}
+\STATE $\texttt{dist}[v] \leftarrow \infty$ for all $v \in V$, \quad $\texttt{dist}[s] \leftarrow 0$
+\STATE $Q \leftarrow$ \textsc{Heap-Create}$()$, \quad \textsc{Push}$(Q, (0, s))$
+\WHILE{$Q$ is not empty}
+  \STATE $(d, u) \leftarrow$ \textsc{Min}$(Q)$, \quad \textsc{Pop}$(Q)$
+  \IF{$d > \texttt{dist}[u]$}
+    \STATE \textbf{continue} \COMMENT{stale entry}
+  \ENDIF
+  \FOR{each edge $(u, v)$ with weight $w(u,v)$}
+    \STATE $d' \leftarrow d + w(u,v)$
+    \IF{$d' < \texttt{dist}[v]$}
+      \STATE $\texttt{dist}[v] \leftarrow d'$
+      \STATE \textsc{Push}$(Q, (d', v))$
+    \ENDIF
+  \ENDFOR
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+The algorithm performs a fixed amount of work outside the queue. Each vertex is settled once and each arc is examined once, which accounts for $\Theta(n + m)$ . Everything else is queue work. A vertex's edges are scanned only the first time it is extracted, because stale entries are skipped before the loop. Every edge is therefore relaxed at most once, so there are at most $m$ pushes plus the initial one. Every pushed entry is eventually extracted, giving at most $m + 1$ pops, of which at most $n$ settle a vertex and the rest are stale. Eventually, the running time is:
+
+\[
+  O\!\left(n + m + (m + 1)\,T_{\textsc{push}} + (m + 1)\,T_{\textsc{pop}}\right)
+\]
+
+\begin{algorithm}[H]
+\caption{Dijkstra's algorithm, eager update (\texttt{decrease\_key})}
+\begin{algorithmic}
+\STATE $\texttt{dist}[v] \leftarrow \infty$ for all $v \in V$, \quad $\texttt{dist}[s] \leftarrow 0$
+\STATE $Q \leftarrow$ \textsc{Heap-Create}$(n)$, \quad \textsc{Push}$(Q, (0, s))$
+\WHILE{$Q$ is not empty}
+  \STATE $(d, u) \leftarrow$ \textsc{Min}$(Q)$, \quad \textsc{Pop}$(Q)$
+  \FOR{each edge $(u, v)$ with weight $w(u,v)$}
+    \STATE $d' \leftarrow d + w(u,v)$
+    \IF{$d' < \texttt{dist}[v]$}
+      \IF{$\texttt{dist}[v] = \infty$}
+        \STATE \textsc{Push}$(Q, (d', v))$
+      \ELSE
+        \STATE \textsc{Decrease-Key}$(Q, (d', v))$
+      \ENDIF
+      \STATE $\texttt{dist}[v] \leftarrow d'$
+    \ENDIF
+  \ENDFOR
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+For the eager variant, the work outside the queue is the same $\Theta(n + m)$, but the queue work changes. The queue only push vertices that are not yet encountered, so there are $n$ pushes and $n$ pops. \code{decrease_key()} is called when the edge contains a seen vertices, so it is triggered at most $m - n + 1$. Hence the running time:
+
+\[
+  O\!\left(n + m + n \cdot T_{\textsc{push}} + n \cdot T_{\textsc{pop}}
+    + (m - n + 1) \cdot T_{\textsc{dec}}\right)
+\]
+
+\subsection{Algorithm choices}
+
+\subsubsection{Binary heap}
+A complete binary tree of $n$ items stored implicitly in a flat array, with the children of index $i$ at $2i+1$ and $2i+2$ and the parent at
+$\lfloor (i-1)/2 \rfloor$. The heap invariant is that no node's key is smaller than its parent's, so the minimum is always at index $0$ and is read in $O(1)$ time. Insertion appends at the end of the array and \emph{bubbles} the item towards the root while it is smaller than its parent. Extraction overwrites the root with the last item and \emph{sinks} it downwards, swapping with its smaller child while the invariant is violated. Both paths are bounded by the tree height, giving $O(\log n)$ worst-case insertion, extraction, and key
+decrease. The tree structure is based on indices arithmetic rather than poinsters, so the entire heap occupies one contiguous allocation. A separate index array $\texttt{pos}[v]$ records where vertex $v$ currently sits so that
+\textsc{Decrease-Key} can locate it in $O(1)$ time before bubbling.
+
+\subsubsection{Pairing heap}
+
+TODO
+
+\subsubsection{Fibonacci heap}
+
+TODO
+
+\subsubsection{Brodal--Okasaki heap}
+
+TODO
