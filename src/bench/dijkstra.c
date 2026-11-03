@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "graph.h"
-#include "heap.h"
+#include "../heap/heap.h"
 
 void dijkstra_decrease_key(int* dist, const Graph* g) {
   size_t n  = g->num_vertices;

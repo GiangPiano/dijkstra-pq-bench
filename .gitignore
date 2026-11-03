@@ -3,7 +3,6 @@ compile_flags.txt
 # output dirs
 build/
 bin/
-data/
 
 # Prerequisites
 *.d

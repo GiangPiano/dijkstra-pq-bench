@@ -9,9 +9,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../../dijkstra.h"
-#include "../../graph.h"
-#include "../bench0/bench0.h"
+#include "../dijkstra.h"
+#include "../graph.h"
+#include "../ubench.h"
 
 UBENCH_STATE();
 

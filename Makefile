@@ -1,170 +1,194 @@
+#
+# shell
+#
+
+SHELL:=/usr/bin/env bash -O globstar
+
+#
+# c compilation vars
+#
+
 # C compiler to use, we might want to switch to Clang
 CC = gcc
 # Compiler flags
-CFLAGS = -Wall -Wextra -g -MMD -MP -O3
+CFLAGS = -Wall -Wextra -g -MMD -MP -O3 -std=c11
 # Linker flags
 LDFLAGS = -lm
+# Alternate linker flags for memory profiling
+MEM_LDFLAGS = $(LDFLAGS) -Wl,--wrap=malloc -Wl,--wrap=free \
+							-Wl,--wrap=calloc -Wl,--wrap=realloc
 
-GREEN  = \033[32m
-WHITE  = \033[37m
-RESET  = \033[0m
+#
+# cli colour vars
+#
 
-# source directory
-SRC_DIR = ./src
+GREEN = \033[32m
+WHITE = \033[37m
+RESET = \033[0m
+
+#
+# build layout vars
+#
+
+# source directories
+SRC_DIR       = ./src
+BENCH_SRC_DIR = $(SRC_DIR)/bench
+HEAP_SRC_DIR  = $(SRC_DIR)/heap
 # build output directories
-BUILD_DIR = ./build
-BIN_DIR = ./bin
-DATA_DIR = ./data
-DATA_OUT_DIR = $(DATA_DIR)/out
-TEST_SRC_DIR = $(DATA_DIR)/src
-TEST_BUILD_DIR = $(DATA_DIR)/build
+BUILD_DIR       = ./build
+HEAP_BUILD_DIR  = $(BUILD_DIR)/heap
+BENCH_BUILD_DIR = $(BUILD_DIR)/bench
+TEST_BUILD_DIR  = $(BUILD_DIR)/test
+# binaries directories
+BIN_DIR         = ./bin
+RUNTIME_BIN_DIR = $(BIN_DIR)/runtime
+PERF_BIN_DIR    = $(BIN_DIR)/perf
+MEM_BIN_DIR     = $(BIN_DIR)/mem
 
-# all subdirs of source
-VARIANTS = $(filter-out bench, $(patsubst $(SRC_DIR)/%/,%,$(filter %/, $(wildcard $(SRC_DIR)/*/))))
-BIN_VARIANTS = $(addprefix $(BIN_DIR)/,$(VARIANTS))
-PERF_BIN_VARIANTS = $(VARIANTS:%=$(BIN_DIR)/perf_%)
-MEM_BIN_VARIANTS = $(VARIANTS:%=$(BIN_DIR)/mem_%)
-CSV_VARIANTS = $(VARIANTS:%=$(DATA_OUT_DIR)/%.csv)
+# all subdirs of src/heap
+VARIANTS = $(patsubst $(HEAP_SRC_DIR)/%/,%,$(filter %/,$(wildcard $(HEAP_SRC_DIR)/*/)))
 
-MEM_LDFLAGS = $(LDFLAGS) -Wl,--wrap=malloc -Wl,--wrap=free -Wl,--wrap=calloc -Wl,--wrap=realloc
+# all the different output executables
+RUNTIME_BIN_VARIANTS = $(addprefix $(RUNTIME_BIN_DIR)/,$(VARIANTS))
+PERF_BIN_VARIANTS    = $(addprefix $(PERF_BIN_DIR)/,$(VARIANTS))
+MEM_BIN_VARIANTS     = $(addprefix $(MEM_BIN_DIR)/,$(VARIANTS))
 
-# helper function
-OBJS_FOR_SRCS = $(patsubst $(SRC_DIR)$(1)/%.c,$(BUILD_DIR)$(1)/%.o,$(wildcard $(SRC_DIR)$(1)/*.c))
+# helper function to get expected .o files
+# for a heap variant
+OBJS_FOR_HEAP = $(patsubst $(HEAP_SRC_DIR)/%.c,$(HEAP_BUILD_DIR)/%.o,$(shell ls $(HEAP_SRC_DIR)$(1)/**/*.c))
+# common objects for all executables
+COMMON_OBJS = $(patsubst $(BENCH_SRC_DIR)/%.c,$(BENCH_BUILD_DIR)/%.o,$(wildcard $(BENCH_SRC_DIR)/*.c))
 
-COMMON_OBJS = $(call OBJS_FOR_SRCS,)
+#
+# generated test data
+#
 
-# generated test data vars:
 SEED = 67
 
-tiny_dense = -n 50     -m 1000   -w 10
-small_med  = -n 2000   -m 40000  -w 50
-mod_sparse = -n 100000 -m 400000 -w 100
-big_sparse = -n 100000 -m 400000 -w 1000
-perf_sparse = -n 50000 -m 200000  -w 100
-perf_dense  = -n 50000 -m 6400000 -w 100
+tiny_dense  = -n 50     -m 1000    -w 10
+small_med   = -n 2000   -m 40000   -w 50
+mod_sparse  = -n 100000 -m 400000  -w 100
+big_sparse  = -n 100000 -m 400000  -w 1000
+sparse      = -n 50000  -m 200000  -w 100
+dense       = -n 50000  -m 6400000 -w 100
 
-TEST_SET  = tiny_dense small_med mod_sparse big_sparse
-TEST_SRCS = $(patsubst %,$(TEST_SRC_DIR)/%.c,$(TEST_SET))
+TEST_SET  = tiny_dense small_med mod_sparse big_sparse sparse dense
+TEST_SRCS = $(patsubst %,$(TEST_BUILD_DIR)/%.c,$(TEST_SET))
 TEST_OBJS = $(patsubst %,$(TEST_BUILD_DIR)/%.o,$(TEST_SET))
 
-PERF_TEST_SET  = perf_sparse perf_dense
-PERF_TEST_SRCS = $(patsubst %,$(TEST_SRC_DIR)/%.c,$(PERF_TEST_SET))
-PERF_TEST_OBJS = $(patsubst %,$(TEST_BUILD_DIR)/%.o,$(PERF_TEST_SET))
+#
+# report and data outputs
+#
 
-ALL_TEST_SRCS = $(TEST_SRCS) $(PERF_TEST_SRCS)
-ALL_TEST_OBJS = $(TEST_OBJS) $(PERF_TEST_OBJS)
+REPORT_DIR          = ./report
+DATA_DIR            = $(REPORT_DIR)/data
+RUNTIME_DATA_DIR    = $(DATA_DIR)/runtime
+PERF_DATA_DIR       = $(DATA_DIR)/perf
+MEM_DATA_DIR        = $(DATA_DIR)/mem
+FIGURES_DIR         = $(REPORT_DIR)/figures
+RUNTIME_FIGURES_DIR = $(FIGURES_DIR)/runtime
+PERF_FIGURES_DIR    = $(FIGURES_DIR)/perf
+MEM_FIGURES_DIR     = $(FIGURES_DIR)/mem
 
-.PHONY:
-all: tests report
-
-.PHONY:
-tests: $(CSV_VARIANTS)
-
-.PHONY:
-plot:
-	./src/bench/bench0/plot0.py -i $(DATA_OUT_DIR) -o report/figures/runtime
-
-.PHONY:
-perf-build: $(PERF_BIN_VARIANTS)
-
-.PHONY:
-perf-run: perf-build
-	./src/bench/bench1/bench1.py -o data/out/perf/hardware_counters.csv
+# all the runtime csvs
+RUNTIME_CSVS = $(patsubst %,$(RUNTIME_DATA_DIR)/%.csv,$(VARIANTS))
+PERF_CSV     = $(PERF_DATA_DIR)/hardware_counters.csv
+MEM_CSV      = $(MEM_DATA_DIR)/memory_footprint.csv
 
 .PHONY:
-perf-plot:
-	./src/bench/bench1/plot1.py -i data/out/perf/hardware_counters.csv -o report/figures/perf
+all: report
 
 .PHONY:
-perf: perf-run perf-plot
+build: $(RUNTIME_BIN_VARIANTS) $(PERF_BIN_VARIANTS) $(MEM_BIN_VARIANTS)
 
 .PHONY:
-mem-build: $(MEM_BIN_VARIANTS)
+csv: $(RUNTIME_CSVS) $(PERF_CSV) $(MEM_CSV)
 
 .PHONY:
-mem-run: mem-build
-	./src/bench/bench2/bench2.py -o data/out/memory/memory_footprint.csv
+data: csv
 
 .PHONY:
-mem-plot:
-	./src/bench/bench2/plot2.py -i data/out/memory/memory_footprint.csv -o report/figures/memory
-
-.PHONY:
-mem: mem-run mem-plot
-
-.PHONY:
-build: $(BIN_VARIANTS)
-
-.PHONY:
-clean-bin:
-	-rm -r $(BIN_DIR)
-
-.PHONY:
-clean-build:
-	-rm -r $(BUILD_DIR)
-
-.PHONY:
-clean-data:
-	-rm -r $(DATA_DIR)
-
-.PHONY:
-clean-output-data:
-	-rm -r $(DATA_OUT_DIR)
-
-.PHONY:
-clean-report:
-	$(MAKE) -C ./report clean
-
-.PHONY: clean
-clean: clean-bin clean-build clean-data clean-report
-
-# For the latex report
-.PHONY: report
-report:
+report: data
 	$(MAKE) -C ./report
 
-# generated data files
-.SECONDEXPANSION:
-$(ALL_TEST_SRCS): $(TEST_SRC_DIR)/%.c:
-	@printf "$(GREEN)generating $(WHITE)$*$(GREEN) tests $(RESET)\n"
-	mkdir -p $(dir $@)
-	./src/bench/gen.py $* $($(*)) -s "$(SEED)" -o "$@"
+.PHONY:
+clean:
+	-rm -r $(BUILD_DIR)
+	-rm -r $(BIN_DIR)
+	-rm -r $(DATA_DIR)
+	$(MAKE) -C ./report clean
 
-$(ALL_TEST_OBJS): $(TEST_BUILD_DIR)/%.o: $(TEST_SRC_DIR)/%.c
-	mkdir -p $(dir $@)
+# ./src/heap .c files -> ./build/heap .o files
+$(HEAP_BUILD_DIR)/%.o: $(HEAP_SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 
-# object files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	mkdir -p $(dir $@)
+# ./src/bench .c files -> ./build/bench .o files
+$(BENCH_BUILD_DIR)/%.o: $(BENCH_SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 
-# executable variants
+# generated test source files
 .SECONDEXPANSION:
-$(BIN_VARIANTS): $(BIN_DIR)/%: $(COMMON_OBJS) $(TEST_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
-	mkdir -p $(dir $@)
+$(TEST_SRCS): $(TEST_BUILD_DIR)/%.c: $(BENCH_SRC_DIR)/gen.py
+	@printf "$(GREEN)generating $(WHITE)$*$(GREEN) test sources $(RESET)\n"
+	@mkdir -p $(dir $@)
+	$(BENCH_SRC_DIR)/gen.py $* $($(*)) -s "$(SEED)" -o "$@"
+
+# generated test object files
+$(TEST_OBJS): $(TEST_BUILD_DIR)/%.o: $(TEST_BUILD_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+
+# executable variants, each has a different entry point
+.SECONDEXPANSION:
+$(RUNTIME_BIN_VARIANTS): $(RUNTIME_BIN_DIR)/%: \
+	$(BENCH_BUILD_DIR)/runtime/main.o $(COMMON_OBJS) $(TEST_OBJS) \
+	$$(call OBJS_FOR_HEAP,/$$*)
+	@mkdir -p $(dir $@)
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 .SECONDEXPANSION:
-$(PERF_BIN_VARIANTS): $(BIN_DIR)/perf_%: $(BUILD_DIR)/dijkstra.o $(BUILD_DIR)/graph.o $(BUILD_DIR)/bench/bench1/bench1.o $(PERF_TEST_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
-	mkdir -p $(dir $@)
+$(PERF_BIN_VARIANTS): $(PERF_BIN_DIR)/%: \
+	$(BENCH_BUILD_DIR)/perf/main.o $(COMMON_OBJS) $(TEST_OBJS) \
+	$$(call OBJS_FOR_HEAP,/$$*)
+	@mkdir -p $(dir $@)
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
+# alternate linker flags
 .SECONDEXPANSION:
-$(MEM_BIN_VARIANTS): $(BIN_DIR)/mem_%: $(BUILD_DIR)/dijkstra.o $(BUILD_DIR)/graph.o $(BUILD_DIR)/bench/bench2/bench2.o $(PERF_TEST_OBJS) $$(call OBJS_FOR_SRCS,/$$*)
-	mkdir -p $(dir $@)
+$(MEM_BIN_VARIANTS): $(MEM_BIN_DIR)/%: \
+	$(BENCH_BUILD_DIR)/mem/main.o $(COMMON_OBJS) $(TEST_OBJS) \
+	$$(call OBJS_FOR_HEAP,/$$*)
+	@mkdir -p $(dir $@)
 	$(CC) $(MEM_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-$(CSV_VARIANTS): $(DATA_OUT_DIR)/%.csv: $(BIN_DIR)/% $(TEST_OBJS)
+# output csv data
+$(RUNTIME_CSVS): $(RUNTIME_DATA_DIR)/%.csv: $(RUNTIME_BIN_DIR)/%
 	@printf "$(GREEN)========================================\n"
-	@printf "Running benchmark: $(WHITE)$*$(GREEN)\n"
+	@printf "Running runtime benchmark: $(WHITE)$*$(GREEN)\n"
 	@printf "========================================$(RESET)\n"
-	mkdir -p $(dir $@)
-	-$< --output=$@
+	@mkdir -p $(dir $@)
+	$< --output=$@
 
-DEPS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(wildcard $(SRC_DIR)/**/*.c))
+$(PERF_CSV): $(PERF_BIN_VARIANTS) $(BENCH_SRC_DIR)/perf/bench.py
+	@mkdir -p $(dir $@)
+	$(BENCH_SRC_DIR)/perf/bench.py -o $@
 
--include $(DEPS)
+$(MEM_CSV): $(MEM_BIN_VARIANTS) $(BENCH_SRC_DIR)/mem/bench.py
+	@mkdir -p $(dir $@)
+	$(BENCH_SRC_DIR)/mem/bench.py -o $@
 
+$(RUNTIME_FIGURES_DIR)/%: $(RUNTIME_CSVS) $(BENCH_SRC_DIR)/runtime/plot.py
+	$(BENCH_SRC_DIR)/runtime/plot.py -i $(RUNTIME_DATA_DIR) -o $(RUNTIME_FIGURES_DIR)
+
+$(PERF_FIGURES_DIR)/%: $(PERF_CSVS) $(BENCH_SRC_DIR)/perf/plot.py
+	$(BENCH_SRC_DIR)/perf/plot.py -i $(PERF_DATA_DIR) -o $(PERF_FIGURES_DIR)
+
+$(MEM_FIGURES_DIR)/%: $(MEM_CSVS) $(BENCH_SRC_DIR)/mem/plot.py
+	$(BENCH_SRC_DIR)/mem/plot.py -i $(MEM_DATA_DIR) -o $(MEM_FIGURES_DIR)
+
+# include the .d makefiles of all ./src/**/*.c files
+-include $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(shell ls $(SRC_DIR)/**/*.c))
+# include the .d makefiles of all ./build/test/**/*.c files
 -include $(patsubst %,$(TEST_BUILD_DIR)/%.d,$(TEST_SET))
--include $(patsubst %,$(TEST_BUILD_DIR)/%.d,$(PERF_TEST_SET))

@@ -1,7 +1,7 @@
-#include "graph.h"
-
 #include <stdlib.h>
 #include <string.h>
+
+#include "graph.h"
 
 void free_graph(Graph* g) {
   if (!g) return;

@@ -1,3 +1,7 @@
+# data output dirs
+data/
+figures/
+
 # LaTeX build artifacts
 *.pdf
 *.aux
