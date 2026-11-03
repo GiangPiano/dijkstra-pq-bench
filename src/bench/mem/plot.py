@@ -326,8 +326,8 @@ def main():
     # 4. Tables
     generate_tables(
         rows=rows,
-        out_md_path=os.path.join(output_dir, "memory_summary_table.md"),
-        out_tex_path=os.path.join(output_dir, "memory_summary_table.tex")
+        out_md_path=os.path.join(output_dir, "mem.md"),
+        out_tex_path=os.path.join(output_dir, "mem.tex")
     )
 
     print(f"\n[SUCCESS] Experiment 3 plots and tables generated in {output_dir}")

@@ -293,8 +293,8 @@ def main():
     # 3. Tables
     generate_tables(
         rows=rows,
-        out_md_path=os.path.join(output_dir, "perf_summary_table.md"),
-        out_tex_path=os.path.join(output_dir, "perf_summary_table.tex")
+        out_md_path=os.path.join(output_dir, "perf.md"),
+        out_tex_path=os.path.join(output_dir, "perf.tex")
     )
 
     print(f"\n[SUCCESS] Experiment 2 plots and tables generated in {output_dir}")

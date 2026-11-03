@@ -433,16 +433,16 @@ def main():
 
     # Generate individual dataset bar charts
     for d in datasets:
-        out_svg = os.path.join(output_dir, f"runtime_{d}.svg")
+        out_svg = os.path.join(output_dir, f"{d}.svg")
         generate_bar_chart_svg(d, data[d], variants, out_svg)
 
     # Generate speedup chart
-    out_speedup = os.path.join(output_dir, "speedup_lazy_vs_decrease_key.svg")
+    out_speedup = os.path.join(output_dir, "lazy_vs_decrease_key.svg")
     generate_speedup_svg(data, datasets, variants, out_speedup)
 
     # Generate summary tables
-    out_md = os.path.join(output_dir, "benchmark_summary.md")
-    out_tex = os.path.join(output_dir, "benchmark_table.tex")
+    out_md = os.path.join(output_dir, "runtime.md")
+    out_tex = os.path.join(output_dir, "runtime.tex")
     generate_tables(data, datasets, variants, out_md, out_tex)
 
     print(f"\n[SUCCESS] All plots and tables generated successfully in {output_dir}")
