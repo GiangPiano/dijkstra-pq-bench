@@ -131,11 +131,11 @@ Item heap_min(Heap* h) {
   return h->data[0];
 }
 
-void heap_decrease_key(Heap* h, Item it) {
+void heap_decrease_key(Heap* h, Item it, int new_distance) {
   size_t i = h->pos[it.vertex];
   assert(i < h->size && h->data[i].vertex == it.vertex);  // vertex must currently be in the heap
-  assert(it.distance <= h->data[i].distance);
-  h->data[i].distance = it.distance;
+  assert(new_distance <= h->data[i].distance);
+  h->data[i].distance = new_distance;
   bubble(h, i);
 }
 

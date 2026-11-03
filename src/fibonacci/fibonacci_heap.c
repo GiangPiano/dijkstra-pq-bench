@@ -68,7 +68,7 @@ void heap_push(Heap* h, Item it) {
   n->parent = NULL;
   n->child  = NULL;
   h->pos[it.vertex] = n;
-    
+
   // 2. Add the node to the root list
   if (h->min == NULL) {
     // The heap was empty, node is the only root, looping to itself
@@ -81,13 +81,13 @@ void heap_push(Heap* h, Item it) {
     n->left             = h->min;
     h->min->right->left = n;
     h->min->right       = n;
-    
+
     // 3. Update min if the new node has a smaller distance
     if (n->item.distance < h->min->item.distance) {
       h->min = n;
     }
   }
-    
+
   // 4. Increment the total node count
   h->size++;
 }
@@ -103,9 +103,9 @@ bool heap_empty(Heap* h) {
 
 void heap_pop(Heap* h) {
   assert(h != NULL && h->min != NULL);
-  
+
   Node* z = h->min;
-    
+
   // 1. Promote all children of z to the root list
   if (z->child != NULL) {
     Node* curr = z->child;
@@ -120,7 +120,7 @@ void heap_pop(Heap* h) {
       curr = next;
     }
   }
-   
+
   // 2. Remove z from the root list
   if (z->right == z) {
     // z was the only node in the entire heap
@@ -131,7 +131,7 @@ void heap_pop(Heap* h) {
     h->min         = z->right; // temporary min, consolidate will find the true min
     consolidate(h);
   }
-   
+
   // 3. Free memory and decrement size
   if (z->item.vertex < h->pos_cap) {
     h->pos[z->item.vertex] = NULL;
@@ -188,13 +188,13 @@ static void cascading_cut(Heap* h, Node* y) {
   }
 }
 
-void heap_decrease_key(Heap* h, Item it) {
+void heap_decrease_key(Heap* h, Item it, int new_distance) {
   if (!h || it.vertex >= h->pos_cap) return;
   Node* x = h->pos[it.vertex];
   if (!x) return;
-  assert(it.distance <= x->item.distance);
+  assert(new_distance <= x->item.distance);
 
-  x->item.distance = it.distance;
+  x->item.distance = new_distance;
   Node* y = x->parent;
 
   if (y != NULL && x->item.distance < y->item.distance) {
@@ -230,20 +230,20 @@ static void link_child(Node* y, Node* x) {
 // Combine trees of equal degree until every root has a unique degree
 static void consolidate(Heap* h) {
   Node* A[MAX_DEGREE] = {NULL};
-    
+
   // 1. Break circular root list into a linear NULL-terminated list
   h->min->left->right = NULL;
   Node* curr = h->min;
-    
+
   while (curr != NULL) {
     Node* next = curr->right;
     Node* x    = curr;
     int d      = x->degree;
-   
+
     // Isolate x as a standalone tree
     x->left  = x;
     x->right = x;
-    
+
     // Merge with existing trees in A[] of the same degree
     while (d < MAX_DEGREE && A[d] != NULL) {
       Node* y = A[d];
@@ -259,7 +259,7 @@ static void consolidate(Heap* h) {
     A[d] = x;
     curr = next;
   }
-    
+
   // 2. Rebuild the circular root list from A[]
   h->min = NULL;
   for (int i = 0; i < MAX_DEGREE; i++) {
@@ -273,7 +273,7 @@ static void consolidate(Heap* h) {
         A[i]->left          = h->min;
         h->min->right->left = A[i];
         h->min->right       = A[i];
-    
+
         if (A[i]->item.distance < h->min->item.distance) {
           h->min = A[i];
         }
