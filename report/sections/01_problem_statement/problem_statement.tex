@@ -107,19 +107,36 @@ For the eager variant, the work outside the queue is the same $\Theta(n + m)$, b
 \subsection{Algorithm choices}
 
 \subsubsection{Binary heap}
+\vspace{-0.2cm}
+{\small \textbf{Author:} Truong Giang Nguyen} 
+
+\vspace{0.2cm}
+\noindent
 A complete binary tree of $n$ items stored implicitly in a flat array, with the children of index $i$ at $2i+1$ and $2i+2$ and the parent at
 $\lfloor (i-1)/2 \rfloor$. The heap invariant is that no node's key is smaller than its parent's, so the minimum is always at index $0$ and is read in $O(1)$ time. Insertion appends at the end of the array and \emph{bubbles} the item towards the root while it is smaller than its parent. Extraction overwrites the root with the last item and \emph{sinks} it downwards, swapping with its smaller child while the invariant is violated. Both paths are bounded by the tree height, giving $O(\log n)$ worst-case insertion, extraction, and key
 decrease. The tree structure is based on indices arithmetic rather than poinsters, so the entire heap occupies one contiguous allocation. A separate index array $\texttt{pos}[v]$ records where vertex $v$ currently sits so that
 \textsc{Decrease-Key} can locate it in $O(1)$ time before bubbling.
 
 \subsubsection{Pairing heap}
+\vspace{-0.2cm}
+{\small \textbf{Author:} Tung Nguyen} 
 
+\vspace{0.2cm}
+\noindent
 TODO
 
 \subsubsection{Fibonacci heap}
+\vspace{-0.2cm}
+{\small \textbf{Author:} Tung Nguyen} 
 
+\vspace{0.2cm}
+\noindent
 TODO
 
 \subsubsection{Brodal--Okasaki heap}
+\vspace{-0.2cm}
+{\small \textbf{Author:} Oscar Chevalier} 
 
+\vspace{0.2cm}
+\noindent
 TODO
