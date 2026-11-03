@@ -37,7 +37,8 @@ void heap_delete(Heap* h) {
   (void)(h);
 }
 
-void heap_decrease_key(Heap* h, Item it) {
+void heap_decrease_key(Heap* h, Item it, int new_distance) {
   (void)(h);
   (void)(it);
+  (void)(new_distance);
 }

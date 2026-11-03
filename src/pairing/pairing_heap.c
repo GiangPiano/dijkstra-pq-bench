@@ -157,12 +157,12 @@ void heap_delete(Heap* h) {
   free(h);
 }
 
-void heap_decrease_key(Heap* h, Item it) {
+void heap_decrease_key(Heap* h, Item it, int new_distance) {
   if (!h || it.vertex >= h->pos_cap) return;
   Node* n = h->pos[it.vertex];
   if (!n) return;
-  assert(it.distance <= n->item.distance);
-  n->item.distance = it.distance;
+  assert(new_distance <= n->item.distance);
+  n->item.distance = new_distance;
 
   if (n == h->root) return;
 
