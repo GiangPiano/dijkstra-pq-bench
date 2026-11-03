@@ -7,13 +7,12 @@ Captures L1 data cache misses, LLC misses, branch mispredictions, and IPC.
 
 import argparse
 import csv
+import json
 import os
 import re
 import subprocess
 import sys
 
-VARIANTS = ["binary", "pairing", "fibonacci", "brodal-okasaki"]
-CONFIGS = ["sparse", "dense"]
 MODES = ["decrease_key", "lazy"]
 
 # P-core hardware events
@@ -80,19 +79,27 @@ def main():
 
     bin_dir = args.bin_dir if os.path.isabs(args.bin_dir) else os.path.join(proj_root, args.bin_dir)
     output_path = args.output if os.path.isabs(args.output) else os.path.join(proj_root, args.output)
+    metadata_path = os.path.join(proj_root, "build", "test", "graphs.json")
+    with open(metadata_path, encoding="utf-8") as metadata_file:
+        configs = json.load(metadata_file)["graphs"]
+    variants = sorted(
+        name for name in os.listdir(bin_dir)
+        if os.path.isfile(os.path.join(bin_dir, name))
+        and os.access(os.path.join(bin_dir, name), os.X_OK)
+    )
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     print("=" * 80)
     print(" Experiment 2: Microarchitectural Profiling (perf stat)")
     print(f" CPU Core Pinned: {args.core}")
-    print(f" Configs: Sparse (N=50,000, d=4), Dense (N=50,000, d=128)")
+    print(f"     Configurations are read from the generated graph metadata.")
     print("=" * 80)
 
     results = []
 
-    for config in CONFIGS:
+    for config in configs:
         for mode in MODES:
-            for variant in VARIANTS:
+            for variant in variants:
                 bin_name = variant
                 binary_path = os.path.join(bin_dir, bin_name)
 
@@ -100,30 +107,7 @@ def main():
                     print(f"[SKIP] Binary not found: {binary_path}")
                     continue
 
-                # Skip dense decrease_key for brodal-okasaki (O(M*N) search would take ~30 mins)
-                if variant == "brodal-okasaki" and config == "dense" and mode == "decrease_key":
-                    print(f"[*] Running {variant:<15} [{config:<6} | {mode:<12}] ... SKIPPED (O(M*N) Functional Bound)")
-                    results.append({
-                        "variant": variant,
-                        "config": config,
-                        "mode": mode,
-                        "L1_loads": "",
-                        "L1_misses": "",
-                        "L1_miss_rate_pct": "",
-                        "LLC_loads": "",
-                        "LLC_misses": "",
-                        "LLC_miss_rate_pct": "",
-                        "branches": "",
-                        "branch_misses": "",
-                        "branch_miss_rate_pct": "",
-                        "cycles": "",
-                        "instructions": "",
-                        "IPC": "",
-                        "note": "Skipped: O(M*N) functional tree search exceeds timeout",
-                    })
-                    continue
-
-                iters = 2 if config == "sparse" else 1
+                iters = 1
                 sys.stdout.write(f"[*] Running {variant:<15} [{config:<6} | {mode:<12}] (iters={iters}) ... ")
                 sys.stdout.flush()
 

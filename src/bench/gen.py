@@ -7,9 +7,28 @@
 """
 import argparse
 import contextlib
+import json
 import heapq
 import random
 import sys
+
+
+def write_graph_registry(path, names, metadata_path=None):
+    with open(path, "w", encoding="utf-8") as out:
+        out.write('#include <string.h>\n')
+        out.write('#include "../../src/bench/graph_registry.h"\n\n')
+        for name in names:
+            out.write(f"extern const Graph* g_{name};\n")
+        out.write("\n")
+        out.write("const Graph* graph_for_name(const char* name) {\n")
+        for name in names:
+            out.write(f'  if (strcmp(name, "{name}") == 0) return g_{name};\n')
+        out.write("  return NULL;\n")
+        out.write("}\n")
+    if metadata_path:
+        with open(metadata_path, "w", encoding="utf-8") as out:
+            json.dump({"graphs": names}, out)
+            out.write("\n")
 
 
 def compute_reference_checksum(n, edges, src=0):
@@ -38,8 +57,11 @@ def compute_reference_checksum(n, edges, src=0):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("name", help="graph name (written in a comment line)")
-    ap.add_argument("-n", type=int, required=True, help="number of vertices (>= 2)")
+    ap.add_argument("name", nargs="?", help="graph name (written in a comment line)")
+    ap.add_argument("--registry", metavar="PATH", help="write a graph registry source file")
+    ap.add_argument("--metadata", metavar="PATH", help="write graph metadata JSON with the registry")
+    ap.add_argument("--graphs", nargs="+", help="graph names for the generated registry")
+    ap.add_argument("-n", type=int, help="number of vertices (>= 2)")
     g = ap.add_mutually_exclusive_group()
     g.add_argument("-m", type=int, help="number of edges")
     g.add_argument("-d", type=float, help="density: percent of possible edges, (0, 100]")
@@ -47,6 +69,16 @@ def main():
     ap.add_argument("-s", type=int, default=1, help="RNG seed (default 1)")
     ap.add_argument("-o", metavar="PATH", help="output file (default: stdout)")
     a = ap.parse_args()
+
+    if a.registry:
+        if not a.graphs:
+            ap.error("--registry requires --graphs")
+        write_graph_registry(a.registry, a.graphs, a.metadata)
+        return
+    if not a.name:
+        ap.error("the graph name is required unless --registry is used")
+    if a.n is None:
+        ap.error("-n is required when generating a graph")
 
     n = a.n
     if n < 2:
