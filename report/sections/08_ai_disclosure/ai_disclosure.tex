@@ -1,1 +1,10 @@
 \section{AI Disclosure}
+
+\subsubsection{What AI did wrong}
+When generating the benchmark visualisations, AI overlooked the fact that the benchmarking library already supported exporting results directly to \code{.csv} files. Instead, it created a separate Python parser to read the output and convert it into a pandas DataFrame. This added unnecessary complexity to the workflow. We eventually discarded that implementation and provided AI with more context about the library's existing CSV export functionality so it could use it instead.
+
+TODO
+
+How AI wrote a terrible Makefile (Oscar)
+
+
