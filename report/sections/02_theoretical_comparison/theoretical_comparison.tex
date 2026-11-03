@@ -1,5 +1,6 @@
 \section{Theoretical Comparison and Predictions}
-\subsection{Complexity analysis of each heap's operation}
+\subsection{Complexity analysis}
+\subsubsection{Heap operations}
 The theoretical merit of priority queues in shortest-path algorithms can be evaluated by how efficiently they execute three core operations: 
 \begin{itemize}
     \item \textsc{Push}: inserting an unvisited frontier node.
@@ -26,6 +27,7 @@ The theoretical merit of priority queues in shortest-path algorithms can be eval
   {\footnotesize $^*$Aggregate per-operation cost bound. $^\dagger$Simulated via positive/negative tree cancellation.}
 \end{table}
 
+\subsubsection{Node memory}
 \begin{table}[H]
   \centering
   \small
@@ -88,6 +90,48 @@ The theoretical merit of priority queues in shortest-path algorithms can be eval
   \]
 \end{enumerate}
 
-\subsection{Hardware considerations}
+\subsubsection{Lazy vs. Decrease-Key}
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Tradeoffs between Decrease-Key vs. Lazy Dijkstra}
+  \label{tab:eager_vs_lazy}
+  \begin{tabular}{lcc}
+    \toprule
+    \textbf{Metric / Operation} & \textbf{Decrease-key} & \textbf{Lazy} \\
+    \midrule
+    \textbf{Max Priority Queue Size} & Exactly $n$ vertices & Up to $m$ entries\\
+    \textbf{Total \textsc{Push} Invocations} & Exactly $n$ & At most $m + 1$ \\
+    \textbf{Total \textsc{Pop} Invocations} & Exactly $n$ & At most $m + 1$ \\
+    \textbf{Total \textsc{Decrease-Key} Calls} & At most $m - n + 1$ & 0 \\
+    \textbf{Handle Tracking (\texttt{pos} array)} & Required & None \\
+    \textbf{Binary Heap Complexity} & $O(m \log n)$ & $O(m \log m) = O(m \log n)$ \\
+    \textbf{Fibonacci Heap Complexity} & $O(m + n \log n)$ & $O(m \log m) = O(m \log n)$ \\
+    \textbf{Memory Footprint Scaling} & $O(n)$ & $O(m)$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Analytical Comparison: Eager vs. Lazy Tradeoffs}
+The choice between eager update via \textsc{Decrease-Key} and lazy duplicate insertion fundamentally alters how priority queue overhead is distributed:
+
+\begin{enumerate}
+  \item \textbf{The Cost of Position Tracking in Eager Mode:} 
+  While eager mode restricts the queue size to at most $n$ items, it imposes a continuous maintenance tax. For array-based binary heaps, every swap during a \code{bubble()} or \code{sink()} must perform a secondary write to update $\texttt{pos}[\code{vertex}]$. In pointer heaps, \textsc{Decrease-Key} requires unlinking and re-melding subtrees. 
+  
+  \item \textbf{The Elimination of \textsc{Decrease-Key} in Lazy Mode:} 
+  Lazy Dijkstra completely bypasses the need for node handles and position synchronization. When an edge $(u, v)$ is relaxed, a fresh \code{(distance, v)} tuple is appended with a simple \textsc{Push}. This transforms edge relaxation from a complex tree-restructuring operation into a trivial insertion.
+
+  \item \textbf{The Penalty of Queue Bloat on Dense Graphs:} 
+  The vulnerability of the lazy formulation lies in queue inflation on dense topologies ($m \gg n$). Because stale entries linger in the heap until they float to the root, the queue swells from size $n$ to $O(m)$. Consequently:
+  \begin{itemize}
+    \item Every extraction incurs tree depth penalties proportional to $\log m$ instead of $\log n$.
+    \item The algorithm performs $m$ total extractions rather than $n$. While skipping a stale entry requires only an $O(1)$ scalar distance comparison (\code{d > dist[u]}), getting that stale entry to the top of the heap requires a full, expensive $O(\log m)$ \textsc{Pop} restructuring.
+    \item For Fibonacci and pairing heaps, lazy insertion nullifies their asymptotic advantage: their $O(1)$-like decrease-key is never exercised, reducing their theoretical bound from $O(m + n \log n)$ back to $O(m \log m)$.
+  \end{itemize}
+\end{enumerate}
+
+\noindent
+\textbf{Analytical Takeaway:} On sparse graphs ($m \approx 2n \dots 4n$), the number of stale entries is small, so avoiding \code{pos[]} synchronization and pointer cuts allows Lazy Dijkstra to match or exceed Eager Dijkstra in speed. However, as density $m/n$ increases, the cost of $m$ full extractions rapidly overwhelms the cost of $m$ in-place key reductions.
 
 \subsection{Experiment hypotheses}
