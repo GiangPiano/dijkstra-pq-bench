@@ -1,1 +1,6 @@
 \section{Future Improvement}
+
+The present interface identifies a queue entry by its vertex number. Every
+structure that supports \code{heap_decrease_key} therefore maintains a indexing table to map a vertex to the location of its entry, and the operation costs one random access into that table before any structural work begins. 
+
+The current implementation also does not support multi entries for a single keys. As a result, when updating a new value, the old value still remains in the heap but it is treated as a stale entry instead of removing from the list. \code{heap_decrease_key} updates one of the entry to the new value. This still works for both variants of the Dijkstra's algorithm, as we only care about the lowest value so far, so any other values greater than it are discarded. However, the stale values still occupy memory space, which might not be suboptimal. A possible patch for this is to assign an unique identifier to each entry, but it requires extra lookup time for bookkeeping outside of the heap. Since the project focuses on benchmarking the heap implementation, we decided to skip this feature.

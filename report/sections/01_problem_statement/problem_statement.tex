@@ -23,8 +23,7 @@ reachable $v$, and the sentinel $-1$ where no $s \rightarrow v$ path
 exists. The path trace are not reconstructed, since that process is identical across every implementation and would add a constant to all
 measurements without discriminating between them.
 
-The input graph must have the following two properties for Dijkstra's algorithm to be functional. Firstly, weights are
-strictly positive integers, since Dijkstra's algorithm depends on the greedy approach that the distance to a processed node is fixed once it is relaxed. 
+The input graph must have the following two properties for Dijkstra's algorithm to be functional. Firstly, weights are strictly positive integers, since Dijkstra's algorithm depends on the greedy approach that the distance to a processed node is fixed once it is relaxed. 
 
 
 The input graph must satisfy one condition for Dijkstra's algorithm to work correctly. All edge weights must be strictly positive integers. This is because the algorithm relies on a greedy approach, where it chooses the next vertex to process by their current shortest distance. This choice is guaranteed to be correct as long as there are no negative edge weights. The input graphs are generated with a fixed pseudo-random seed so that every implementation is measured on identical input.
