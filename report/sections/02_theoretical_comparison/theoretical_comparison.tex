@@ -1,5 +1,92 @@
 \section{Theoretical Comparison and Predictions}
 \subsection{Complexity analysis of each heap's operation}
+The theoretical merit of priority queues in shortest-path algorithms can be evaluated by how efficiently they execute three core operations: 
+\begin{itemize}
+    \item \textsc{Push}: inserting an unvisited frontier node.
+    \item \textsc{Pop}: extracting the unvisited node with minimum tentative distance.
+    \item \textsc{Decrease-Key}: relaxing an edge to an already-discovered node.
+\end{itemize}
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Asymptotic Complexity and Pointer Overhead per Node}
+  \label{tab:asymptotic_complexity}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Heap Variant} & \textbf{Push} & \textbf{Pop (Extract)} & \textbf{Decrease-Key} & \textbf{Pointers / Node} \\
+    \midrule
+    \textbf{Binary}          & $O(\log n)$ & $O(\log n)$   & $O(\log n)$         & 0 (implicit array) \\
+    \textbf{Pairing}         & $O(1)$      & $O(\log n)^*$ & $o(\log n)^*$       & 3 (\code{child, next, prev}) \\
+    \textbf{Fibonacci}       & $O(1)$      & $O(\log n)^*$ & $O(1)^*$            & 4 (\code{parent, child, left, right}) \\
+    \textbf{Brodal--Okasaki} & $O(1)$      & $O(\log n)$   & $O(\log n)^\dagger$ & 0 (buffer indices) \\
+    \bottomrule
+  \end{tabular}
+  \vspace{0.1cm}
+  \flushleft
+  {\footnotesize $^*$Aggregate per-operation cost bound. $^\dagger$Simulated via positive/negative tree cancellation.}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Memory Layout and Struct Size per Node (64-bit Architecture)}
+  \label{tab:node_sizes}
+  \begin{tabular}{llcccc}
+    \toprule
+    \textbf{Heap Variant} 
+      & \textbf{Pointers / Indices} & \textbf{Padding} & \textbf{Total Node Size} \\
+    \midrule
+    \textbf{Binary}          
+          & 0 B                  & 0 B & \textbf{16 B} \\
+    \textbf{Pairing}         
+          & 24 B (3 pointers)    & 0 B & \textbf{40 B} \\
+    \textbf{Fibonacci}       
+    & 32 B (4 pointers)    & 3 B & \textbf{56 B} \\
+    \textbf{Brodal--Okasaki} 
+            & 24 B (3 \code{size_t})& 0 B & \textbf{40 B} \\
+    \bottomrule
+  \end{tabular}
+  \vspace{0.1cm}
+  \flushleft
+  {\footnotesize \textit{Note:} In eager Dijkstra, all variants additionally maintain an external vertex lookup array ($\texttt{pos}$), adding 8~bytes per vertex (a \code{size_t} index for Binary, or a \code{Node*} handle for pointer heaps).}
+\end{table}
+
+\noindent On standard 64-bit systems (\texttt{x86\_64}), pointers and \code{size_t} primitives are 8~bytes in size and require 8-byte alignment boundaries. The physical memory footprint of each node is determined as follows:
+
+\begin{enumerate}
+  \item \textbf{Payload (\texttt{Item}):} 
+  The fundamental payload stored by all heaps is the \code{Item} struct (\code{int distance}, \code{size_t vertex}). While \code{distance} requires only 4~bytes, the subsequent 8-byte \code{vertex} field forces the compiler to insert 4~bytes of tail padding to maintain 8-byte alignment, bringing $\texttt{sizeof}(\code{Item}) = 16\text{ bytes}$.
+
+  \item \textbf{Binary Heap (16~B node + 8~B handle):} 
+  The binary heap allocates no per-node wrapper structs or metadata. Items reside contiguously in a flat array (\code{Item data[]}), consuming exactly 16~bytes per element. When paired with the external index mapping array (\code{size_t pos[]}, 8~bytes per vertex), the total memory allocated per active vertex is exactly:
+  \[
+    16\text{ B} + 8\text{ B} = 24\text{ B/vertex}
+  \]
+
+  \item \textbf{Pairing Heap (40~B node + 8~B handle):} 
+  Each \code{Node} contains the 16-byte \code{item} payload followed by three 8-byte pointers: \code{child}, \code{next}, and \code{prev}. Because all members are multiples of 8~bytes, no internal structure padding is required:
+  \[
+    16\text{ B (item)} + 3 \times 8\text{ B (pointers)} = 40\text{ bytes per node}
+  \]
+  Accounting for the external \code{Node* pos[]} pointer array yields a combined active footprint of $48\text{ bytes per vertex}$.
+
+  \item \textbf{Fibonacci Heap (56~B node + 8~B handle):} 
+  A Fibonacci \code{Node} introduces significant structural metadata:
+  \begin{itemize}
+    \item \code{Item item}: 16~bytes (offsets $0 \dots 15$)
+    \item \code{int degree}: 4~bytes (offsets $16 \dots 19$)
+    \item \code{bool marked}: 1~byte (offset $20$)
+    \item \emph{Compiler alignment padding}: 3~bytes (offsets $21 \dots 23$) to align the subsequent pointer fields to an 8-byte boundary.
+    \item Four pointers (\code{parent}, \code{child}, \code{left}, \code{right}): $4 \times 8 = 32\text{ bytes}$ (offsets $24 \dots 55$)
+  \end{itemize}
+  This sums to $\texttt{sizeof}(\code{Node}) = 56\text{ bytes}$. With the 8-byte external \code{pos} handle, each settled vertex incurs a memory commitment of $64\text{ bytes}$.
+
+  \item \textbf{Brodal--Okasaki Heap (40~B cell):} 
+  The cell buffer stores \code{struct Tree}, consisting of the 16-byte payload, an 8-byte integer \code{rank}, and two 8-byte relative buffer indices (\code{child} and \code{sibling}):
+  \[
+    16\text{ B (item)} + 8\text{ B (rank)} + 2 \times 8\text{ B (indices)} = 40\text{ bytes per cell}
+  \]
+\end{enumerate}
 
 \subsection{Hardware considerations}
 
