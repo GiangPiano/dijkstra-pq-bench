@@ -59,20 +59,20 @@ The theoretical merit of priority queues in shortest-path algorithms can be eval
   \item \textbf{Payload (\texttt{Item}):} 
   The fundamental payload stored by all heaps is the \code{Item} struct (\code{int distance}, \code{size_t vertex}). While \code{distance} requires only 4~bytes, the subsequent 8-byte \code{vertex} field forces the compiler to insert 4~bytes of tail padding to maintain 8-byte alignment, bringing $\texttt{sizeof}(\code{Item}) = 16\text{ bytes}$.
 
-  \item \textbf{Binary Heap (16~B node + 8~B handle):} 
+  \item \textbf{Binary Heap:} 
   The binary heap allocates no per-node wrapper structs or metadata. Items reside contiguously in a flat array (\code{Item data[]}), consuming exactly 16~bytes per element. When paired with the external index mapping array (\code{size_t pos[]}, 8~bytes per vertex), the total memory allocated per active vertex is exactly:
   \[
     16\text{ B} + 8\text{ B} = 24\text{ B/vertex}
   \]
 
-  \item \textbf{Pairing Heap (40~B node + 8~B handle):} 
+  \item \textbf{Pairing Heap:} 
   Each \code{Node} contains the 16-byte \code{item} payload followed by three 8-byte pointers: \code{child}, \code{next}, and \code{prev}. Because all members are multiples of 8~bytes, no internal structure padding is required:
   \[
     16\text{ B (item)} + 3 \times 8\text{ B (pointers)} = 40\text{ bytes per node}
   \]
   Accounting for the external \code{Node* pos[]} pointer array yields a combined active footprint of $48\text{ bytes per vertex}$.
 
-  \item \textbf{Fibonacci Heap (56~B node + 8~B handle):} 
+  \item \textbf{Fibonacci Heap:} 
   A Fibonacci \code{Node} introduces significant structural metadata:
   \begin{itemize}
     \item \code{Item item}: 16~bytes (offsets $0 \dots 15$)
@@ -83,7 +83,7 @@ The theoretical merit of priority queues in shortest-path algorithms can be eval
   \end{itemize}
   This sums to $\texttt{sizeof}(\code{Node}) = 56\text{ bytes}$. With the 8-byte external \code{pos} handle, each settled vertex incurs a memory commitment of $64\text{ bytes}$.
 
-  \item \textbf{Brodal--Okasaki Heap (40~B cell):} 
+  \item \textbf{Brodal--Okasaki Heap:} 
   The cell buffer stores \code{struct Tree}, consisting of the 16-byte payload, an 8-byte integer \code{rank}, and two 8-byte relative buffer indices (\code{child} and \code{sibling}):
   \[
     16\text{ B (item)} + 8\text{ B (rank)} + 2 \times 8\text{ B (indices)} = 40\text{ bytes per cell}
@@ -112,15 +112,14 @@ The theoretical merit of priority queues in shortest-path algorithms can be eval
   \end{tabular}
 \end{table}
 
-\paragraph{Analytical Comparison: Eager vs. Lazy Tradeoffs}
-The choice between eager update via \textsc{Decrease-Key} and lazy duplicate insertion fundamentally alters how priority queue overhead is distributed:
+The choice \textsc{Decrease-Key} and lazy insertion fundamentally alters how priority queue overhead is distributed:
 
 \begin{enumerate}
-  \item \textbf{The Cost of Position Tracking in Eager Mode:} 
+  \item \textbf{The Position Tracking with \textsc{Decrease-key}:} 
   While eager mode restricts the queue size to at most $n$ items, it imposes a continuous maintenance tax. For array-based binary heaps, every swap during a \code{bubble()} or \code{sink()} must perform a secondary write to update $\texttt{pos}[\code{vertex}]$. In pointer heaps, \textsc{Decrease-Key} requires unlinking and re-melding subtrees. 
   
   \item \textbf{The Elimination of \textsc{Decrease-Key} in Lazy Mode:} 
-  Lazy Dijkstra completely bypasses the need for node handles and position synchronization. When an edge $(u, v)$ is relaxed, a fresh \code{(distance, v)} tuple is appended with a simple \textsc{Push}. This transforms edge relaxation from a complex tree-restructuring operation into a trivial insertion.
+  Lazy Dijkstra completely bypasses the need for node handles and position synchronisation. When an edge $(u, v)$ is relaxed, a fresh \code{(distance, v)} tuple is appended with a simple \textsc{Push}. This transforms edge relaxation from a complex tree-restructuring operation into a trivial insertion.
 
   \item \textbf{The Penalty of Queue Bloat on Dense Graphs:} 
   The vulnerability of the lazy formulation lies in queue inflation on dense topologies ($m \gg n$). Because stale entries linger in the heap until they float to the root, the queue swells from size $n$ to $O(m)$. Consequently:
@@ -132,6 +131,5 @@ The choice between eager update via \textsc{Decrease-Key} and lazy duplicate ins
 \end{enumerate}
 
 \noindent
-\textbf{Analytical Takeaway:} On sparse graphs ($m \approx 2n \dots 4n$), the number of stale entries is small, so avoiding \code{pos[]} synchronization and pointer cuts allows Lazy Dijkstra to match or exceed Eager Dijkstra in speed. However, as density $m/n$ increases, the cost of $m$ full extractions rapidly overwhelms the cost of $m$ in-place key reductions.
 
 \subsection{Experiment hypotheses}
