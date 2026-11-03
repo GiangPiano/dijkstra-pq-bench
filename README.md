@@ -41,6 +41,13 @@ implementation.
 `make clean`:
 removes the build and bin directories.
 
+The optional perf benchmark (`src/bench/perf/bench.py`) requires Linux
+`perf`. It uses generic events where available and detects optional cache
+counters from `perf list`; unsupported counters are left at zero in the CSV
+with a diagnostic note. If `taskset` is unavailable, the benchmark runs
+without CPU pinning. Other operating systems can still build and run the
+runtime and memory benchmarks, but this perf runner is Linux-only.
+
 ## Layout
 
 | File                          | Purpose                                              |
