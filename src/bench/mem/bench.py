@@ -7,12 +7,11 @@ Captures peak heap allocation, total allocator calls, memory leaks, and OS Peak 
 
 import argparse
 import csv
+import json
 import os
 import subprocess
 import sys
 
-VARIANTS = ["binary", "pairing", "fibonacci", "brodal-okasaki"]
-CONFIGS = ["sparse", "dense"]
 MODES = ["decrease_key", "lazy"]
 
 N_VERTICES = 50000
@@ -63,45 +62,31 @@ def main():
 
     bin_dir = args.bin_dir if os.path.isabs(args.bin_dir) else os.path.join(proj_root, args.bin_dir)
     output_path = args.output if os.path.isabs(args.output) else os.path.join(proj_root, args.output)
+    metadata_path = os.path.join(proj_root, "build", "test", "graphs.json")
+    with open(metadata_path, encoding="utf-8") as metadata_file:
+        configs = json.load(metadata_file)["graphs"]
+    variants = sorted(
+        name for name in os.listdir(bin_dir)
+        if os.path.isfile(os.path.join(bin_dir, name))
+        and os.access(os.path.join(bin_dir, name), os.X_OK)
+    )
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     print("=" * 88)
     print(" Experiment 3: Memory Footprint & Allocator Pressure")
-    print(" Configurations: Sparse (N=50,000, d=4), Dense (N=50,000, d=128)")
+    print("     Configurations are read from the generated graph metadata.")
     print("=" * 88)
 
     results = []
 
-    for config in CONFIGS:
+    for config in configs:
         for mode in MODES:
-            for variant in VARIANTS:
+            for variant in variants:
                 bin_name = variant
                 binary_path = os.path.join(bin_dir, bin_name)
 
                 if not os.path.exists(binary_path):
                     print(f"[SKIP] Binary not found: {binary_path}")
-                    continue
-
-                # Theoretical bound skip: Brodal-Okasaki dense decrease_key has O(M*N) runtime
-                if variant == "brodal-okasaki" and config == "dense" and mode == "decrease_key":
-                    print(f"[-] {variant:<15} | {config:<7} | {mode:<12} -> SKIPPED (O(M*N) Functional Bound)")
-                    results.append({
-                        "variant": variant,
-                        "config": config,
-                        "mode": mode,
-                        "peak_heap_bytes": "",
-                        "peak_heap_kib": "",
-                        "peak_heap_mib": "",
-                        "total_allocated_bytes": "",
-                        "malloc_count": "",
-                        "free_count": "",
-                        "realloc_count": "",
-                        "leaked_bytes": "",
-                        "peak_rss_kib": "",
-                        "peak_rss_mib": "",
-                        "elapsed_ms": "",
-                        "bytes_per_vertex": "",
-                    })
                     continue
 
                 print(f"[*] Profiling: {variant:<15} | {config:<7} | {mode:<12} ...", end="", flush=True)

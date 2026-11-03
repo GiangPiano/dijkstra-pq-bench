@@ -12,13 +12,6 @@ import math
 import os
 import sys
 
-VARIANT_COLORS = {
-    "binary": "#2563EB",         # Royal Blue
-    "pairing": "#16A34A",        # Emerald Green
-    "fibonacci": "#9333EA",      # Vibrant Purple
-    "brodal-okasaki": "#EA580C", # Deep Orange
-    "stub": "#6B7280",           # Gray
-}
 DEFAULT_COLORS = ["#2563EB", "#16A34A", "#9333EA", "#EA580C"]
 
 
@@ -28,7 +21,7 @@ def esc(val):
 
 
 def get_color(variant, idx=0):
-    return VARIANT_COLORS.get(variant, DEFAULT_COLORS[idx % len(DEFAULT_COLORS)])
+    return DEFAULT_COLORS[idx % len(DEFAULT_COLORS)]
 
 
 def read_memory_csv(csv_path):
@@ -46,7 +39,7 @@ def read_memory_csv(csv_path):
 
 def generate_bar_svg(title, subtitle, y_axis_label, rows, metric_key, val_formatter, output_path, max_limit=None, log_scale=False):
     """
-    Renders grouped bar chart for metric_key across (sparse, dense) and modes.
+    Renders grouped bar chart for metric_key across generated configurations and modes.
     """
     width = 760
     height = 460
@@ -58,14 +51,16 @@ def generate_bar_svg(title, subtitle, y_axis_label, rows, metric_key, val_format
     plot_w = width - pad_left - pad_right
     plot_h = height - pad_top - pad_bottom
 
+    configs = sorted({r["config"] for r in rows})
+    modes = ["decrease_key", "lazy"]
     group_keys = [
-        ("sparse", "decrease_key", "Sparse (d=4)\nDecrease-Key"),
-        ("sparse", "lazy", "Sparse (d=4)\nLazy"),
-        ("dense", "decrease_key", "Dense (d=128)\nDecrease-Key"),
-        ("dense", "lazy", "Dense (d=128)\nLazy"),
+        (config, mode, f"{config}\n{mode.replace('_', ' ').title()}")
+        for config in configs
+        for mode in modes
+        if any(r["config"] == config and r["mode"] == mode for r in rows)
     ]
 
-    variants = ["binary", "pairing", "fibonacci", "brodal-okasaki"]
+    variants = sorted({r["variant"] for r in rows})
 
     all_vals = []
     lookup = {}

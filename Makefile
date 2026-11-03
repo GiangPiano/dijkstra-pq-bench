@@ -75,6 +75,9 @@ dense       = -n 50000  -m 6400000 -w 100
 TEST_SET  = tiny_dense small_med mod_sparse big_sparse sparse dense
 TEST_SRCS = $(patsubst %,$(TEST_BUILD_DIR)/%.c,$(TEST_SET))
 TEST_OBJS = $(patsubst %,$(TEST_BUILD_DIR)/%.o,$(TEST_SET))
+GRAPH_REGISTRY_SRC = $(TEST_BUILD_DIR)/graph_registry.c
+GRAPH_REGISTRY_OBJ = $(TEST_BUILD_DIR)/graph_registry.o
+GRAPH_METADATA = $(TEST_BUILD_DIR)/graphs.json
 
 #
 # report and data outputs
@@ -140,17 +143,25 @@ $(TEST_OBJS): $(TEST_BUILD_DIR)/%.o: $(TEST_BUILD_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 
+$(GRAPH_REGISTRY_SRC) $(GRAPH_METADATA): $(TEST_SRCS) $(BENCH_SRC_DIR)/gen.py
+	@mkdir -p $(dir $@)
+	$(BENCH_SRC_DIR)/gen.py --registry "$(GRAPH_REGISTRY_SRC)" --metadata "$(GRAPH_METADATA)" --graphs $(TEST_SET)
+
+$(GRAPH_REGISTRY_OBJ): $(GRAPH_REGISTRY_SRC)
+	@mkdir -p $(dir $@)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+
 # executable variants, each has a different entry point
 .SECONDEXPANSION:
 $(RUNTIME_BIN_VARIANTS): $(RUNTIME_BIN_DIR)/%: \
-	$(BENCH_BUILD_DIR)/runtime/main.o $(COMMON_OBJS) $(TEST_OBJS) \
+	$(BENCH_BUILD_DIR)/runtime/main.o $(COMMON_OBJS) $(TEST_OBJS) $(GRAPH_REGISTRY_OBJ) \
 	$$(call OBJS_FOR_HEAP,/$$*)
 	@mkdir -p $(dir $@)
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 .SECONDEXPANSION:
 $(PERF_BIN_VARIANTS): $(PERF_BIN_DIR)/%: \
-	$(BENCH_BUILD_DIR)/perf/main.o $(COMMON_OBJS) $(TEST_OBJS) \
+	$(BENCH_BUILD_DIR)/perf/main.o $(COMMON_OBJS) $(TEST_OBJS) $(GRAPH_REGISTRY_OBJ) \
 	$$(call OBJS_FOR_HEAP,/$$*)
 	@mkdir -p $(dir $@)
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
@@ -158,7 +169,7 @@ $(PERF_BIN_VARIANTS): $(PERF_BIN_DIR)/%: \
 # alternate linker flags
 .SECONDEXPANSION:
 $(MEM_BIN_VARIANTS): $(MEM_BIN_DIR)/%: \
-	$(BENCH_BUILD_DIR)/mem/main.o $(COMMON_OBJS) $(TEST_OBJS) \
+	$(BENCH_BUILD_DIR)/mem/main.o $(COMMON_OBJS) $(TEST_OBJS) $(GRAPH_REGISTRY_OBJ) \
 	$$(call OBJS_FOR_HEAP,/$$*)
 	@mkdir -p $(dir $@)
 	$(CC) $(MEM_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@

@@ -19,12 +19,10 @@
 
 #include "../dijkstra.h"
 #include "../graph.h"
+#include "../graph_registry.h"
 #include "../ubench.h"
 
 UBENCH_STATE();
-
-extern const Graph* g_sparse;
-extern const Graph* g_dense;
 
 // ============================================================================
 // Allocator Interposition (__wrap_malloc, __wrap_free, etc.)
@@ -143,7 +141,7 @@ static long get_proc_vmhwm_kib(void) {
 
 int main(int argc, char* argv[]) {
   if (argc < 3) {
-    fprintf(stderr, "Usage: %s <sparse|dense> <decrease_key|lazy>\n", argv[0]);
+    fprintf(stderr, "Usage: %s <graph> <decrease_key|lazy>\n", argv[0]);
     return 1;
   }
 
@@ -160,7 +158,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  const Graph* g = (strcmp(config_name, "sparse") == 0) ? g_sparse : g_dense;
+  const Graph* g = graph_for_name(config_name);
   if (!g) {
     fprintf(stderr, "[ERROR] Graph '%s' is NULL\n", config_name);
     return 1;
