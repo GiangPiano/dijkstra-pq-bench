@@ -105,7 +105,7 @@ build: $(RUNTIME_BIN_VARIANTS) $(PERF_BIN_VARIANTS) $(MEM_BIN_VARIANTS)
 csvs: $(RUNTIME_CSVS) $(PERF_CSV) $(MEM_CSV)
 
 .PHONY:
-figures: csvs $(RUNTIME_FIGURES_DIR)/runtime_table.tex $(PERF_FIGURES_DIR)/perf_table.tex $(MEM_FIGURES_DIR)/mem_table.tex
+figures: csvs $(RUNTIME_FIGURES_DIR)/runtime.tex $(PERF_FIGURES_DIR)/perf.tex $(MEM_FIGURES_DIR)/mem.tex
 
 .PHONY:
 report: figures
@@ -173,20 +173,20 @@ $(RUNTIME_CSVS): $(RUNTIME_DATA_DIR)/%.csv: $(RUNTIME_BIN_DIR)/%
 
 $(PERF_CSV): $(PERF_BIN_VARIANTS) $(BENCH_SRC_DIR)/perf/bench.py
 	@mkdir -p $(dir $@)
-	$(BENCH_SRC_DIR)/perf/bench.py -o $@
+	$(BENCH_SRC_DIR)/perf/bench.py -b $(PERF_BIN_DIR) -o $@
 
 $(MEM_CSV): $(MEM_BIN_VARIANTS) $(BENCH_SRC_DIR)/mem/bench.py
 	@mkdir -p $(dir $@)
-	$(BENCH_SRC_DIR)/mem/bench.py -o $@
+	$(BENCH_SRC_DIR)/mem/bench.py -b $(MEM_BIN_DIR) -o $@
 
 $(RUNTIME_FIGURES_DIR)/runtime.tex: $(RUNTIME_CSVS) $(BENCH_SRC_DIR)/runtime/plot.py
 	$(BENCH_SRC_DIR)/runtime/plot.py -i $(RUNTIME_DATA_DIR) -o $(RUNTIME_FIGURES_DIR)
 
-$(PERF_FIGURES_DIR)/perf.tex: $(PERF_CSVS) $(BENCH_SRC_DIR)/perf/plot.py
-	$(BENCH_SRC_DIR)/perf/plot.py -i $(PERF_DATA_DIR) -o $(PERF_FIGURES_DIR)
+$(PERF_FIGURES_DIR)/perf.tex: $(PERF_CSV) $(BENCH_SRC_DIR)/perf/plot.py
+	$(BENCH_SRC_DIR)/perf/plot.py -i $(PERF_CSV) -o $(PERF_FIGURES_DIR)
 
-$(MEM_FIGURES_DIR)/mem.tex: $(MEM_CSVS) $(BENCH_SRC_DIR)/mem/plot.py
-	$(BENCH_SRC_DIR)/mem/plot.py -i $(MEM_DATA_DIR) -o $(MEM_FIGURES_DIR)
+$(MEM_FIGURES_DIR)/mem.tex: $(MEM_CSV) $(BENCH_SRC_DIR)/mem/plot.py
+	$(BENCH_SRC_DIR)/mem/plot.py -i $(MEM_CSV) -o $(MEM_FIGURES_DIR)
 
 # include the .d makefiles of all ./src/**/*.c files
 -include $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(shell ls $(SRC_DIR)/**/*.c))

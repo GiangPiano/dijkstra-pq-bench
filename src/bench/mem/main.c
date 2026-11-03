@@ -23,8 +23,8 @@
 
 UBENCH_STATE();
 
-extern const Graph* g_perf_sparse;
-extern const Graph* g_perf_dense;
+extern const Graph* g_sparse;
+extern const Graph* g_dense;
 
 // ============================================================================
 // Allocator Interposition (__wrap_malloc, __wrap_free, etc.)
@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  const Graph* g = (strcmp(config_name, "sparse") == 0) ? g_perf_sparse : g_perf_dense;
+  const Graph* g = (strcmp(config_name, "sparse") == 0) ? g_sparse : g_dense;
   if (!g) {
     fprintf(stderr, "[ERROR] Graph '%s' is NULL\n", config_name);
     return 1;

@@ -93,7 +93,7 @@ def main():
     for config in CONFIGS:
         for mode in MODES:
             for variant in VARIANTS:
-                bin_name = f"perf_{variant}"
+                bin_name = variant
                 binary_path = os.path.join(bin_dir, bin_name)
 
                 if not os.path.exists(binary_path):
