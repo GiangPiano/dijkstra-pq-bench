@@ -7,4 +7,5 @@
 		"texlive-upquote"
 		"texlive-latexmk"
 		"texlive-svg"
-		"texlive-transparent"))
+		"texlive-transparent"
+		"make"))
