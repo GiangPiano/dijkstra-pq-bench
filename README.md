@@ -2,7 +2,14 @@
 
 This project compares priority-queue implementations in a real Dijkstra
 workload. The benchmark runs the same CSR graph and algorithm with each heap,
-then collects runtime, memory, and (on Linux) hardware-counter data.
+then collects runtime, cpu perf, and memory data.
+
+This project requires a linux computer for complete functionality.
+
+macos can be used to compile and run the runtime benchmarks, but does not
+support the perf or mem benchmarks.
+
+windows is not supported.
 
 ## Dependencies
 
@@ -10,21 +17,23 @@ then collects runtime, memory, and (on Linux) hardware-counter data.
 
 ```sh
 sudo apt update
-sudo apt install build-essential bash coreutils python3 \
-  linux-tools-generic texlive-latex-recommended texlive-fonts-recommended \
-  texlive-science texlive-latex-extra latexmk
+# for building and running the benchmarks
+sudo apt install build-essential bash coreutils python3 linux-tools-generic
+# for compiling the report
+sudo apt install texlive-latex-recommended texlive-fonts-recommended texlive-science texlive-latex-extra latexmk
 ```
 
-`perf` must be available for the Linux performance-counter benchmark. The
-runtime benchmark and graph generation only require the compiler, Make, and
-Python.
+`perf` must be available for the perf benchmark.
 
 ### Guix
 
 The repository includes `manifest.scm` for a development environment:
 
 ```sh
+# dev shell
 guix shell -m manifest.scm
+# isolated build and run container
+guix shell -FC -m manifest.scm
 ```
 
 It provides GCC, Bash, Coreutils, Make, Python, `perf`, and the TeX Live
@@ -36,22 +45,39 @@ packages used to build the report.
 brew install gcc coreutils bash make python texlive
 ```
 
-Homebrew does not provide the Linux `perf` workflow on macOS, and macOS does
-not support the GNU linker wrapping used by the memory benchmark. Build and
-run the runtime binaries there, but skip `perf` and `mem`.
+You need a version of bash that supports globstar, and the default macos version
+is too old.
+
+You also need gnu make, as we use features not available in darwin make.
 
 ## Building
 
-On Linux, build the benchmark binaries with:
+Build the complete benchmark data, figures, and report with:
+
+```sh
+make report
+# or
+make all
+# or
+make
+```
+
+Build the benchmark binaries with:
 
 ```sh
 make build
 ```
 
-Build the complete benchmark data, figures, and report with:
+Record data csvs with:
 
 ```sh
-make
+make csvs
+```
+
+Generate figures with:
+
+```sh
+make figures
 ```
 
 Remove generated build, binary, data, and report outputs with:
@@ -59,16 +85,6 @@ Remove generated build, binary, data, and report outputs with:
 ```sh
 make clean
 ```
-
-On macOS, build only the runtime variants:
-
-```sh
-make bin/runtime/binary bin/runtime/brodal-okasaki \
-  bin/runtime/fibonacci bin/runtime/pairing
-```
-
-The `perf` and `mem` benchmark variants are Linux-only and are intentionally
-skipped on macOS.
 
 ## Project structure
 
