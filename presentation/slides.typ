@@ -491,8 +491,8 @@ So decrease-key $(v: 9 → 4)$ becomes:
     and variations of the existing implementations with different optimisations
     applied, to explore which optimisations had the greatest impact on which
     heaps.
-  + Have `push` return a handle so decrease-key skips the vertex lookup, and no
-    heap implementation needs to handle it specially.
+  + Have `push` return a handle so decrease-key is correct and works similarly
+    on all heaps.
   + Rerun on graphs far bigger than the cache to see if the binary heap's lead
     holds as cache performance degrades.
 ]
