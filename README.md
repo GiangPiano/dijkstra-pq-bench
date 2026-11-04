@@ -36,13 +36,14 @@ guix shell -m manifest.scm
 guix shell -FC -m manifest.scm
 ```
 
-It provides GCC, Bash, Coreutils, Make, Python, `perf`, and the TeX Live
-packages used to build the report.
+It provides GCC, Bash, Coreutils, Make, Python, `perf`.
+A similar manifest is in `report/` which contains the texlive packages for
+compiling the report.
 
 ### Homebrew
 
 ```sh
-brew install gcc coreutils bash make python texlive
+brew install gcc coreutils bash make python
 ```
 
 You need a version of bash that supports globstar, and the default macos version
@@ -52,10 +53,10 @@ You also need gnu make, as we use features not available in darwin make.
 
 ## Building
 
-Build the complete benchmark data, figures, and report with:
+Build the complete benchmark data and figures with:
 
 ```sh
-make report
+make figures
 # or
 make all
 # or
@@ -74,13 +75,7 @@ Record data csvs with:
 make csvs
 ```
 
-Generate figures with:
-
-```sh
-make figures
-```
-
-Remove generated build, binary, data, and report outputs with:
+Remove generated build, binary, data, and figures with:
 
 ```sh
 make clean
@@ -97,6 +92,8 @@ make clean
   report targets.
 - `report/` contains the LaTeX report and receives generated benchmark data and
   figures.
+- `report/frozen_results` contains the outputs from the selected run used for
+  making the submitted report.
 
 ## Input graphs
 

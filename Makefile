@@ -120,7 +120,7 @@ FIGURES = $(RUNTIME_FIGURES_DIR)/runtime.tex
 endif
 
 .PHONY:
-all: report
+all: figures
 
 .PHONY:
 build: $(RUNTIME_BIN_VARIANTS) $(PERF_BIN_VARIANTS) $(MEM_BIN_VARIANTS)
@@ -132,15 +132,10 @@ csvs: $(RUNTIME_CSVS) $(PERF_CSV) $(MEM_CSV)
 figures: $(FIGURES)
 
 .PHONY:
-report: figures
-	$(MAKE) -C ./report
-
-.PHONY:
 clean:
 	-rm -r $(BUILD_DIR)
 	-rm -r $(BIN_DIR)
 	-rm -r $(DATA_DIR)
-	$(MAKE) -C ./report clean
 
 # ./src/heap .c files -> ./build/heap .o files
 $(HEAP_BUILD_DIR)/%.o: $(HEAP_SRC_DIR)/%.c

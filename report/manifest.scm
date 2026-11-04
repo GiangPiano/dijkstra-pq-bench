@@ -1,0 +1,10 @@
+(specifications->manifest
+  '("texlive-scheme-basic"
+		"texlive-collection-latexrecommended"
+		"texlive-collection-fontsrecommended"
+		"texlive-collection-mathscience"
+		"texlive-inconsolata"
+		"texlive-upquote"
+		"texlive-latexmk"
+		"texlive-svg"
+		"texlive-transparent"))
