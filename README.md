@@ -1,115 +1,125 @@
 # dijkstra-pq-bench
 
-Binary heap vs pairing heap vs Fibonacci heap, measured inside a real
-shortest-path workload — not an isolated microbenchmark, but the full cost of
-each priority queue as Dijkstra's algorithm actually uses it (interleaved
-push/pop, decrease-key traffic, cache behavior on a real graph).
+This project compares priority-queue implementations in a real Dijkstra
+workload. The benchmark runs the same CSR graph and algorithm with each heap,
+then collects runtime, memory, and (on Linux) hardware-counter data.
 
-## Status
+## Dependencies
 
-Early work in progress; nothing here is benchmarkable yet.
+### Debian/Ubuntu
 
-- [x] Graph representation — CSR adjacency (`graph.h`, `graph.c`)
-- [x] Dijkstra's algorithm, written against a generic heap interface
-      (`djikstra.c`)
-- [x] Binary heap — array-backed, implements the `Heap` interface
-      (`src/binary/binary_heap.c`)
-- [ ] Pairing heap / Fibonacci heap — not yet implemented
-- [ ] Benchmark harness / graph generation (`main.c` is a placeholder)
-- [x] Build system — `Makefile` is not yet wired up to the current sources
+```sh
+sudo apt update
+sudo apt install build-essential bash coreutils python3 \
+  linux-tools-generic texlive-latex-recommended texlive-fonts-recommended \
+  texlive-science texlive-latex-extra latexmk
+```
 
-## Project Layout
+`perf` must be available for the Linux performance-counter benchmark. The
+runtime benchmark and graph generation only require the compiler, Make, and
+Python.
 
-`src/*.{c, h}`:
-common source and header files, used by all builds.
+### Guix
 
-`src/*/`:
-sub directories of src are considered variants, and will be automatically
-supported by the Makefile. Variants are mutually exclusive and are used to
-enable linking with alternate priority queue / heap implementations.
+The repository includes `manifest.scm` for a development environment:
+
+```sh
+guix shell -m manifest.scm
+```
+
+It provides GCC, Bash, Coreutils, Make, Python, `perf`, and the TeX Live
+packages used to build the report.
+
+### Homebrew
+
+```sh
+brew install gcc coreutils bash make python texlive
+```
+
+Homebrew does not provide the Linux `perf` workflow on macOS, and macOS does
+not support the GNU linker wrapping used by the memory benchmark. Build and
+run the runtime binaries there, but skip `perf` and `mem`.
 
 ## Building
 
-`make all`:
-the default target
-builds all executable variants under `bin/`
+On Linux, build the benchmark binaries with:
 
-`make bin/*`:
-builds an individual executable for any particular variant / heap
-implementation.
+```sh
+make build
+```
 
-`make clean`:
-removes the build and bin directories.
+Build the complete benchmark data, figures, and report with:
 
-The optional perf benchmark (`src/bench/perf/bench.py`) requires Linux
-`perf`. It uses generic events where available and detects optional cache
-counters from `perf list`; unsupported counters are left at zero in the CSV
-with a diagnostic note. If `taskset` is unavailable, the benchmark runs
-without CPU pinning. Other operating systems can still build and run the
-runtime and memory benchmarks, but this perf runner is Linux-only.
+```sh
+make
+```
 
-## Benchmark graph suite
+Remove generated build, binary, data, and report outputs with:
 
-`make build` generates the complete deterministic graph suite through
-`src/bench/gen.py` and records graph names plus descriptive parameters in
-`build/test/graphs.json`. The same registry drives runtime, performance-counter,
-memory, figure, and report targets.
+```sh
+make clean
+```
 
-| Graph | Structure |
+On macOS, build only the runtime variants:
+
+```sh
+make bin/runtime/binary bin/runtime/brodal-okasaki \
+  bin/runtime/fibonacci bin/runtime/pairing
+```
+
+The `perf` and `mem` benchmark variants are Linux-only and are intentionally
+skipped on macOS.
+
+## Project structure
+
+- `src/bench/` contains the CSR graph representation, Dijkstra
+  implementation, graph generator, graph registry, and runtime/perf/memory
+  benchmark runners and plotting scripts.
+- `src/heap/` contains the common heap interface and one implementation per
+  heap variant.
+- `Makefile` defines compilation, graph-generation, benchmark, plotting, and
+  report targets.
+- `report/` contains the LaTeX report and receives generated benchmark data and
+  figures.
+
+## Input graphs
+
+The Makefile builds these deterministic graphs with seed `SEED` (default
+`67`):
+
+| Graph | Description |
 | --- | --- |
-| `smoke_1k` | 1,000-vertex uniform smoke graph |
-| `uniform_sparse` | Uniform random sparse digraph |
-| `uniform_medium` | Uniform random medium-density digraph |
-| `uniform_dense` | Uniform random dense digraph |
-| `grid_224` | 224 x 224 four-neighbour directed grid |
-| `hub_skewed` | Uniform background with concentrated hub traffic |
-| `layered_frontier` | Layered forward graph with broad deterministic frontiers |
+| `smoke_1k` | Uniform random graph with 1,000 vertices, 4,000 edges, and weights up to 50. |
+| `uniform_sparse` | Uniform random digraph with 10,000 vertices and 40,000 edges (average out-degree 4). |
+| `uniform_medium` | Uniform random digraph with 20,000 vertices and 200,000 edges (average out-degree 10). |
+| `uniform_dense` | Uniform random digraph with 10,000 vertices and 500,000 edges (average out-degree 50). |
+| `grid_224` | 224 × 224 directed four-neighbour grid, with weights up to 100. |
+| `hub_skewed` | 20,000-vertex, 120,000-edge graph with a concentrated set of 32 hubs and weights up to 100. |
+| `layered_frontier` | 100 layers of 200 vertices, with deterministic forward fan-out 8 and weights up to 100. |
 
-All graph parameters and metadata are authoritative Makefile arguments and use
-the Makefile seed (`SEED`, default `67`). Each generated graph emits a
-reference shortest-path checksum, and benchmark runners discover the graph set
-from generated metadata rather than graph-specific code.
+## Heap implementations
 
-## Layout
+All variants implement the interface in `src/heap/heap.h`, including
+push, minimum, pop, decrease-key, empty, and delete operations.
 
-| File                          | Purpose                                              |
-| ----------------------------- | ---------------------------------------------------- |
-| `src/graph.h` / `src/graph.c` | Graph in CSR form: `adj_start[]` holds per-vertex offsets into `adj[]`, which stores outgoing edges contiguously. Built from a flat `EdgeInput` list via `build_graph`. |
-| `src/heap.h`                  | Priority queue interface (`heap_create`, `heap_push`, `heap_min`, `heap_pop`, `heap_empty`, `heap_delete`) operating on `Item{distance, vertex}`. Each heap variant (binary, pairing, Fibonacci) will implement this interface so `dijkstra()` can run unmodified against all three. |
-| `src/djikstra.c`              | Dijkstra's algorithm against the `Heap` interface — allocates a `dist[]` array, relaxes edges out of the CSR graph, pushes updated distances back onto the heap. |
-| `src/binary/binary_heap.c`    | Binary heap variant of the `Heap` interface — a min-heap stored as an implicit binary tree in a flat, resizable `Item[]` array (`2*i+1` / `2*i+2` for a node's children). `heap_push` appends and bubbles the new element up; `heap_pop` moves the last element to the root and sinks it down. |
-| `src/main.c`                  | Entry point; currently just wires together a toy graph as a smoke test. |
-| `Makefile`                    | Build rules. Not yet in sync with the current source filenames — needs revisiting once a heap implementation exists to link against. |
-| `compile_flags.txt`           | Flags for clangd / clang tooling (`-xc -std=c11 -Iinclude`). |
+- **`binary`** — array-backed binary min-heap with position tracking for
+  decrease-key.
+- **`pairing`** — pointer-based pairing heap with sibling/child links and
+  position tracking.
+- **`fibonacci`** — Fibonacci heap with circular root and child lists,
+  consolidation, and cascading cuts.
+- **`brodal-okasaki`** — an imperative buffer-based adaptation of the
+  Brodal–Okasaki priority queue using relative tree references and a free list.
 
-## Design notes
+## Code generation and outputs
 
-- The graph uses CSR (compressed sparse row) instead of an adjacency list so
-  that neighbor iteration is a single contiguous scan (`g->adj_start[u] ..
-  g->adj_start[u+1]`), which matters for the benchmark since it's the inner loop
-  of every heap variant being compared.
-- `dijkstra()` is written once against the abstract `Heap` interface in `heap.h`
-  so swapping in binary/pairing/Fibonacci implementations doesn't require
-  touching the algorithm itself — only the heap's internals change between
-  benchmark runs.
-- The binary heap keeps the tree implicit in a flat array rather than linking
-  nodes with pointers, so a node's parent/children are computed from its
-  index (`(i-1)/2`, `2*i+1`, `2*i+2`) instead of being dereferenced — this is
-  the baseline we expect pairing/Fibonacci heaps to beat (or not) once they
-  land.
+`src/bench/gen.py` generates deterministic C graph sources and graph metadata.
+The Makefile invokes it automatically while building the benchmark binaries:
 
-# Implementations
-
-## `binary`
-
-Array-backed binary min-heap (`src/binary/binary_heap.c`). O(log n)
-push/pop via bubble-up/sink-down, O(1) `heap_min`. The baseline priority
-queue the other variants will be benchmarked against.
-
-## `pure`
-
-// TODO
-
-## `pure_rc`
-
-// TODO
+- Generated graph sources and objects go under `build/test/`.
+- The generated registry is `build/test/graph_registry.c`, and graph metadata
+  is `build/test/graphs.json`.
+- Runtime, perf, and memory executables go under `bin/runtime/`, `bin/perf/`,
+  and `bin/mem/`.
+- Benchmark CSVs go under `report/data/runtime/`, `report/data/perf/`, and
+  `report/data/mem/`; generated figures go under `report/figures/`.
