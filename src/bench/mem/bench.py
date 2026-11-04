@@ -14,9 +14,6 @@ import sys
 
 MODES = ["decrease_key", "lazy"]
 
-N_VERTICES = 50000
-
-
 def run_mem_prof(binary_path, config, mode, timeout_s=120):
     """
     Executes binary and parses CSV output line.
@@ -64,7 +61,8 @@ def main():
     output_path = args.output if os.path.isabs(args.output) else os.path.join(proj_root, args.output)
     metadata_path = os.path.join(proj_root, "build", "test", "graphs.json")
     with open(metadata_path, encoding="utf-8") as metadata_file:
-        configs = json.load(metadata_file)["graphs"]
+        metadata = json.load(metadata_file)
+    configs = metadata["graphs"]
     variants = sorted(
         name for name in os.listdir(bin_dir)
         if os.path.isfile(os.path.join(bin_dir, name))
@@ -100,7 +98,13 @@ def main():
                 peak_mib = stats["peak_heap_bytes"] / (1024.0 * 1024.0)
                 rss_mib = stats["peak_rss_kib"] / 1024.0
                 elapsed_ms = stats["elapsed_ns"] / 1000000.0
-                bpv = stats["peak_heap_bytes"] / float(N_VERTICES)
+                spec = metadata.get("metadata", {}).get(config, {})
+                vertices = spec.get("n")
+                if vertices is None:
+                    vertices = spec.get("rows", 0) * spec.get("cols", 0)
+                if not vertices:
+                    vertices = spec.get("layers", 0) * spec.get("width", 0)
+                bpv = stats["peak_heap_bytes"] / float(vertices) if vertices else 0.0
 
                 print(f" Peak Heap: {peak_kib:>9.1f} KiB | RSS: {rss_mib:>6.1f} MiB | "
                       f"Mallocs: {stats['malloc_count']:>9,d} | Time: {elapsed_ms:>7.1f} ms")

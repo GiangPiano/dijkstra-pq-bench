@@ -48,6 +48,28 @@ with a diagnostic note. If `taskset` is unavailable, the benchmark runs
 without CPU pinning. Other operating systems can still build and run the
 runtime and memory benchmarks, but this perf runner is Linux-only.
 
+## Benchmark graph suite
+
+`make build` generates the complete deterministic graph suite through
+`src/bench/gen.py` and records graph names plus descriptive parameters in
+`build/test/graphs.json`. The same registry drives runtime, performance-counter,
+memory, figure, and report targets.
+
+| Graph | Structure |
+| --- | --- |
+| `smoke_1k` | 1,000-vertex uniform smoke graph |
+| `uniform_sparse` | Uniform random sparse digraph |
+| `uniform_medium` | Uniform random medium-density digraph |
+| `uniform_dense` | Uniform random dense digraph |
+| `grid_224` | 224 x 224 four-neighbour directed grid |
+| `hub_skewed` | Uniform background with concentrated hub traffic |
+| `layered_frontier` | Layered forward graph with broad deterministic frontiers |
+
+All graph parameters and metadata are authoritative Makefile arguments and use
+the Makefile seed (`SEED`, default `67`). Each generated graph emits a
+reference shortest-path checksum, and benchmark runners discover the graph set
+from generated metadata rather than graph-specific code.
+
 ## Layout
 
 | File                          | Purpose                                              |
