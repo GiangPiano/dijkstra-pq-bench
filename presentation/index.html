@@ -380,16 +380,6 @@
       font-weight: 800;
     }
 
-    .key-pill {
-      background: var(--surface-subtle);
-      color: var(--text-main);
-      border: 1px solid var(--surface-border);
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-    }
-
     code {
       font-family: var(--font-mono);
       background: #1f2335;
@@ -459,12 +449,9 @@
           </div>
         </div>
 
-        <div class="highlight-card" style="margin-top: 1.25rem; background: var(--surface-subtle); display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.6rem;">
-          <div style="font-size: 1.05rem;">
-            <strong>Core Research Question:</strong> Does Fibonacci's textbook $O(m + n \log n)$ bound surpass Binary Heap's $O(m \log n)$ on modern hardware?
-          </div>
-          <div style="font-size: 0.9rem; color: var(--text-dim);">
-            Navigate: <span class="key-pill">←</span> <span class="key-pill">→</span> or <span class="key-pill">Space</span>
+        <div class="highlight-card" style="margin-top: 1.25rem; background: var(--surface-subtle); padding: 1.25rem 1.6rem; text-align: center;">
+          <div style="font-size: 1.15rem;">
+            <strong>Research Objective:</strong> Benchmark Dijkstra with different heaps to evaluate actual performance vs. theoretical merits.
           </div>
         </div>
       </div>
@@ -483,8 +470,7 @@
         <div class="col col-50">
           <ul class="bullet-list">
             <li><strong>Input:</strong> Directed graph $G=(V,E)$ with $n=|V|$ vertices, $m=|E|$ edges, positive weights $w: E \to \mathbb{Z}^+$, and source $s$.</li>
-            <li><strong>Non-Queue Work is Fixed:</strong> Exactly $\Theta(n + m)$. Every reachable vertex is settled once, and every outgoing arc is relaxed once.</li>
-            <li><strong>The Priority Queue is the Sole Variable:</strong> All performance variance between benchmark runs stems entirely from the priority queue implementation!</li>
+            <li><strong>Non-Queue Work is Invariant:</strong> Exactly $\Theta(n + m)$. Every reachable vertex is settled once, and each arc relaxed once. All empirical runtime differences isolate queue operations directly.</li>
             <li><strong>Two Distinct Update Paradigms:</strong>
               <br><span class="text-blue">Lazy Insertion:</span> Push $(d', v)$ on every relaxation; skip stale nodes at pop.
               <br><span class="text-purple">Eager Decrease-Key:</span> Maintain 1 entry per vertex in queue; update key in-place.
@@ -535,8 +521,550 @@
       </div>
     </section>
 
-    <!-- SLIDE 3: The Contenders & Central Hypothesis -->
+    <!-- SLIDE 3: Binary Heap - Architecture -->
     <section class="slide" id="slide-3">
+      <div class="slide-top">
+        <div class="slide-heading">
+          <h1>Binary Heap: Architecture & Position Indexing</h1>
+          <p class="subtitle">Complete binary tree in a flat array paired with an external vertex lookup index</p>
+        </div>
+        <div class="author-badge">Author: Truong Giang Nguyen</div>
+      </div>
+      <div class="slide-content">
+        <div class="col col-40">
+          <div class="highlight-card primary">
+            <h4>Implicit Array-Backed Complete Tree</h4>
+            <ul class="bullet-list" style="margin-top: 0.5rem; font-size: 1.05rem;">
+              <li><strong>Left Child:</strong> $2i + 1$ &nbsp;|&nbsp; <strong>Right Child:</strong> $2i + 2$</li>
+              <li><strong>Parent:</strong> $\lfloor (i - 1) / 2 \rfloor$</li>
+              <li><strong>Contiguous Memory:</strong> Packed sequentially in <code>Item data[]</code> (16 B / item: 4 B dist, 8 B v, 4 B pad) with 0 pointer overhead.</li>
+            </ul>
+          </div>
+          <div class="highlight-card green" style="margin-top: 0.85rem;">
+            <h4>Handle Requirement & Footprint</h4>
+            <ul class="bullet-list" style="margin-top: 0.5rem; font-size: 1.05rem;">
+              <li><strong>Position Handle:</strong> External <code>size_t pos[]</code> array (8 B / vertex) maps $\text{vertex} \to \text{array index}$.</li>
+              <li><strong>$O(1)$ Entry Lookup:</strong> Eliminates $O(n)$ array scans during edge relaxations.</li>
+              <li><strong>Total Memory Footprint:</strong> Exactly $16\text{ B} + 8\text{ B} = 24\text{ B per vertex}$.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col col-60">
+          <div class="media-card diagram">
+            <!-- Inline SVG Diagram for Binary Heap Array Mapping in Tokyo Night Storm (Enlarged Streamlined Layout) -->
+            <svg viewBox="0 0 720 310" width="100%" height="295" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#7aa2f7" />
+                </marker>
+                <marker id="pos-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#73daca" />
+                </marker>
+              </defs>
+              <style>
+                .t-node { fill: #24283b; stroke: #7aa2f7; stroke-width: 2; }
+                .t-node-hi { fill: #1d253f; stroke: #7aa2f7; stroke-width: 2.5; }
+                .t-edge { stroke: #565f89; stroke-width: 1.8; }
+                .t-txt { fill: #c0caf5; font-family: monospace; font-size: 13.5px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }
+                .t-sub { fill: #737aa2; font-family: monospace; font-size: 10px; text-anchor: middle; }
+                .arr-box { fill: #24283b; stroke: #3b4261; stroke-width: 1.5; rx: 5; }
+                .arr-box-hi { fill: #1d253f; stroke: #7aa2f7; stroke-width: 2.2; rx: 5; }
+                .pos-box-hi { fill: #1b2927; stroke: #73daca; stroke-width: 2.2; rx: 5; }
+                .h-lbl { fill: #7aa2f7; font-family: monospace; font-size: 12px; font-weight: bold; }
+                .v-lbl { fill: #73daca; font-family: monospace; font-size: 12px; font-weight: bold; }
+                .idx-lbl { fill: #7aa2f7; font-family: monospace; font-size: 10.5px; text-anchor: middle; }
+                .val-txt { fill: #c0caf5; font-family: monospace; font-size: 11.5px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+              </style>
+
+              <!-- LEFT: COMPLETE BINARY TREE -->
+              <text x="125" y="22" class="h-lbl" style="text-anchor:middle;">Complete Binary Tree</text>
+
+              <!-- Edges -->
+              <line x1="112" y1="66" x2="78" y2="112" class="t-edge" />
+              <line x1="138" y1="66" x2="172" y2="112" class="t-edge" />
+              <line x1="56" y1="150" x2="44" y2="193" class="t-edge" />
+              <line x1="74" y1="150" x2="86" y2="193" class="t-edge" />
+              <line x1="178" y1="150" x2="164" y2="193" class="t-edge" />
+
+              <!-- Root: dist 3, v7 -->
+              <circle cx="125" cy="52" r="21" class="t-node" />
+              <text x="125" y="46" class="t-txt">3</text>
+              <text x="125" y="60" class="t-sub" style="fill:#7aa2f7;">v7</text>
+
+              <!-- Node 1: dist 5, v2 (TARGET) -->
+              <circle cx="65" cy="130" r="21" class="t-node-hi" />
+              <text x="65" y="124" class="t-txt" style="fill:#7aa2f7;">5</text>
+              <text x="65" y="138" class="t-sub" style="fill:#73daca; font-weight:bold;">v2</text>
+
+              <!-- Node 2: dist 8, v6 -->
+              <circle cx="185" cy="130" r="21" class="t-node" />
+              <text x="185" y="124" class="t-txt">8</text>
+              <text x="185" y="138" class="t-sub" style="fill:#7aa2f7;">v6</text>
+
+              <!-- Node 3: dist 9, v4 -->
+              <circle cx="38" cy="210" r="18" class="t-node" />
+              <text x="38" y="206" class="t-txt" style="font-size:11.5px;">9</text>
+              <text x="38" y="218" class="t-sub">v4</text>
+
+              <!-- Node 4: dist 6, v1 -->
+              <circle cx="92" cy="210" r="18" class="t-node" />
+              <text x="92" y="206" class="t-txt" style="font-size:11.5px;">6</text>
+              <text x="92" y="218" class="t-sub">v1</text>
+
+              <!-- Node 5: dist 11, v5 -->
+              <circle cx="158" cy="210" r="18" class="t-node" />
+              <text x="158" y="206" class="t-txt" style="font-size:11.5px;">11</text>
+              <text x="158" y="218" class="t-sub">v5</text>
+
+              <text x="125" y="260" class="t-sub" style="font-size:10.5px;">Level-Order Array Packing</text>
+
+              <!-- VERTICAL DIVIDER -->
+              <line x1="245" y1="15" x2="245" y2="295" stroke="#3b4261" stroke-dasharray="4,4" />
+
+              <!-- RIGHT TOP: Item data[] -->
+              <text x="275" y="22" class="h-lbl">Item data[] (Heap Buffer)</text>
+
+              <!-- data[] slots: 6 slots -->
+              <g transform="translate(275, 42)">
+                <rect x="0" y="0" width="62" height="36" class="arr-box" />
+                <text x="31" y="-6" class="idx-lbl">0</text>
+                <text x="31" y="18" class="val-txt">{3, v7}</text>
+
+                <rect x="68" y="0" width="62" height="36" class="arr-box-hi" />
+                <text x="99" y="-6" class="idx-lbl" style="fill:#7aa2f7; font-weight:bold;">1</text>
+                <text x="99" y="18" class="val-txt" style="fill:#7aa2f7;">{5, v2}</text>
+
+                <rect x="136" y="0" width="62" height="36" class="arr-box" />
+                <text x="167" y="-6" class="idx-lbl">2</text>
+                <text x="167" y="18" class="val-txt">{8, v6}</text>
+
+                <rect x="204" y="0" width="62" height="36" class="arr-box" />
+                <text x="235" y="-6" class="idx-lbl">3</text>
+                <text x="235" y="18" class="val-txt">{9, v4}</text>
+
+                <rect x="272" y="0" width="62" height="36" class="arr-box" />
+                <text x="303" y="-6" class="idx-lbl">4</text>
+                <text x="303" y="18" class="val-txt">{6, v1}</text>
+
+                <rect x="340" y="0" width="62" height="36" class="arr-box" />
+                <text x="371" y="-6" class="idx-lbl">5</text>
+                <text x="371" y="18" class="val-txt">{11, v5}</text>
+              </g>
+
+              <!-- Curving Arrow: from pos[v2] up to data[1] (Unobstructed in open channel) -->
+              <path d="M 400 134 C 400 102, 374 102, 374 85" stroke="#73daca" stroke-width="2.2" fill="none" marker-end="url(#pos-arrow)" />
+
+              <!-- pos[] slots: 8 slots -->
+              <g transform="translate(275, 134)">
+                <rect x="0" y="0" width="46" height="32" class="arr-box" /><text x="23" y="-6" class="idx-lbl">v0</text><text x="23" y="16" class="val-txt">-</text>
+                <rect x="51" y="0" width="46" height="32" class="arr-box" /><text x="74" y="-6" class="idx-lbl">v1</text><text x="74" y="16" class="val-txt">4</text>
+                <rect x="102" y="0" width="46" height="32" class="pos-box-hi" /><text x="125" y="-6" class="idx-lbl" style="fill:#73daca; font-weight:bold;">v2</text><text x="125" y="16" class="val-txt" style="fill:#73daca;">1</text>
+                <rect x="153" y="0" width="46" height="32" class="arr-box" /><text x="176" y="-6" class="idx-lbl">v3</text><text x="176" y="16" class="val-txt">-</text>
+                <rect x="204" y="0" width="46" height="32" class="arr-box" /><text x="227" y="-6" class="idx-lbl">v4</text><text x="227" y="16" class="val-txt">3</text>
+                <rect x="255" y="0" width="46" height="32" class="arr-box" /><text x="278" y="-6" class="idx-lbl">v5</text><text x="278" y="16" class="val-txt">5</text>
+                <rect x="306" y="0" width="46" height="32" class="arr-box" /><text x="329" y="-6" class="idx-lbl">v6</text><text x="329" y="16" class="val-txt">2</text>
+                <rect x="357" y="0" width="46" height="32" class="arr-box" /><text x="380" y="-6" class="idx-lbl">v7</text><text x="380" y="16" class="val-txt">0</text>
+              </g>
+
+              <!-- BELOW THE HEAP: size_t pos[] Labelling & O(1) Lookup Callout -->
+              <text x="275" y="192" class="v-lbl">size_t pos[] (Vertex &#8594; Index Handle)</text>
+
+              <rect x="275" y="210" width="403" height="38" rx="6" fill="#1f2335" stroke="#414868" />
+              <text x="476" y="234" fill="#73daca" font-family="monospace" font-size="12px" text-anchor="middle" font-weight="bold">pos[v2] = 1 &#8594; data[1] (O(1) handle lookup)</text>
+            </svg>
+            <div class="media-caption">Contiguous array storage with explicit reverse position mapping</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Binary Heap - Deep Dive -->
+    <section class="slide" id="slide-4">
+      <div class="slide-top">
+        <div class="slide-heading">
+          <h1>Binary Heap: Deep Dive & The Indexing Tax</h1>
+          <p class="subtitle">Why continuous position synchronization matters in Dijkstra's relaxation loop</p>
+        </div>
+        <div class="author-badge">Author: Truong Giang Nguyen</div>
+      </div>
+      <div class="slide-content">
+        <div class="col col-50">
+          <div class="highlight-card primary">
+            <h4>The Critical Invariants</h4>
+            <p><strong>1. Heap Order:</strong> <code>data[(i-1)/2].distance &le; data[i].distance</code>.</p>
+            <p><strong>2. Position Synchrony:</strong> <code>pos[data[i].vertex] == i</code> for every index $i < \text{size}$.</p>
+          </div>
+          <ul class="bullet-list" style="margin-top: 0.6rem;">
+            <li><strong>The Core Mechanism (<code>bubble</code> & <code>sink</code>):</strong>
+              During sift-up and sift-down, whenever an item moves from index $p$ to $i$, we must execute:
+              <br><code style="color:var(--primary); font-family:monospace;">pos[data[i].vertex] = i;</code>
+            </li>
+            <li><strong>Handle Invariant:</strong>
+              Without <code>pos[]</code>, finding a vertex for <code>decrease_key</code> requires scanning the array in $O(n)$ time, degrading Dijkstra to $O(m \cdot n)$.
+            </li>
+          </ul>
+        </div>
+        <div class="col col-50">
+          <div class="highlight-card amber">
+            <h4>Memory Traffic & Hardware Prefetching</h4>
+            <p style="margin-bottom: 0.5rem;">Each element swap in <code>bubble()</code> and <code>sink()</code> pays a secondary write to sync <code>pos[]</code>.</p>
+            <p><strong>Hardware Locality Wins:</strong> Sequential memory buffers allow L1 prefetchers to stream elements smoothly, completely offsetting the secondary write cost with zero pointer stalls.</p>
+          </div>
+          <div class="highlight-card green" style="margin-top: 0.85rem;">
+            <h4>Allocator Profile</h4>
+            <p>Requires exactly <strong>3 malloc calls for an entire Dijkstra run</strong> (Heap struct, <code>data[]</code>, and <code>pos[]</code>), eliminating runtime allocator overhead.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: Pairing Heap - Architecture -->
+    <section class="slide" id="slide-5">
+      <div class="slide-top">
+        <div class="slide-heading">
+          <h1>Pairing Heap: Architecture & Left-Child Right-Sibling</h1>
+          <p class="subtitle">Self-adjusting multi-way tree with O(1) cuts and trivial pointer detachment</p>
+        </div>
+        <div class="author-badge">Author: Tung Nguyen</div>
+      </div>
+      <div class="slide-content">
+        <div class="col col-40">
+          <ul class="bullet-list">
+            <li><strong>Left-Child Right-Sibling (LCRS) Layout:</strong> Each node represents an arbitrary multi-way tree using exactly 3 pointers:
+              <br><code>child</code>: points to leftmost child
+              <br><code>next</code>: points to right sibling
+              <br><code>prev</code>: points to left sibling (or parent if first child)
+            </li>
+            <li><strong>Struct Overhead:</strong> 16 B Item + 24 B pointers = <strong>40 B per node</strong> (+ 8 B handle in <code>pos[]</code> = 48 B/vertex).</li>
+            <li><strong>Trivial Melds:</strong> Merging two heaps takes $O(1)$ worst-case time by making the root with larger key the leftmost child of the smaller root.</li>
+          </ul>
+        </div>
+        <div class="col col-60">
+          <div class="media-card diagram">
+            <!-- Inline SVG Diagram for Pairing Heap LCRS in Tokyo Night Storm (Expanded Widescreen Layout) -->
+            <svg viewBox="0 0 680 340" width="100%" height="320" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <!-- Solid blue arrow for child and next -->
+                <marker id="ptr-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#7aa2f7" />
+                </marker>
+                <!-- Dashed purple arrow for prev -->
+                <marker id="prev-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#bb9af7" />
+                </marker>
+              </defs>
+              <style>
+                .lcrs-box { fill: #24283b; stroke: #73daca; stroke-width: 2.2; rx: 6; }
+                .lcrs-txt { fill: #c0caf5; font-family: monospace; font-size: 16px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }
+                .ptr-lbl { fill: #7aa2f7; font-family: monospace; font-size: 11.5px; font-weight: bold; paint-order: stroke fill; stroke: #1f2335; stroke-width: 4px; stroke-linejoin: round; }
+                .prev-lbl { fill: #bb9af7; font-family: monospace; font-size: 11px; font-weight: bold; paint-order: stroke fill; stroke: #1f2335; stroke-width: 4px; stroke-linejoin: round; }
+                .ptr-line { stroke: #7aa2f7; stroke-width: 2.2; }
+                .prev-line { stroke: #bb9af7; stroke-width: 1.8; stroke-dasharray: 5,4; }
+              </style>
+
+              <!-- Root Node 3 -->
+              <rect x="80" y="25" width="75" height="46" class="lcrs-box" style="stroke:#7aa2f7;" />
+              <text x="117" y="48" class="lcrs-txt">3</text>
+              <text x="42" y="48" class="ptr-lbl" style="text-anchor:middle;">root</text>
+
+              <!-- Child 5 -->
+              <rect x="80" y="150" width="75" height="46" class="lcrs-box" />
+              <text x="117" y="173" class="lcrs-txt">5</text>
+
+              <!-- Sibling 8 -->
+              <rect x="270" y="150" width="75" height="46" class="lcrs-box" />
+              <text x="307" y="173" class="lcrs-txt">8</text>
+
+              <!-- Sibling 9 -->
+              <rect x="460" y="150" width="75" height="46" class="lcrs-box" />
+              <text x="497" y="173" class="lcrs-txt">9</text>
+
+              <!-- Child of 8: 11 -->
+              <rect x="270" y="265" width="75" height="46" class="lcrs-box" />
+              <text x="307" y="288" class="lcrs-txt">11</text>
+
+              <!-- ==================== POINTERS ==================== -->
+
+              <!-- 1. Root 3 <-> Child 5 -->
+              <!-- 3 child -> 5 -->
+              <line x1="98" y1="71" x2="98" y2="142" class="ptr-line" marker-end="url(#ptr-arrow)" />
+              <text x="88" y="110" class="ptr-lbl" style="text-anchor:end;">child</text>
+
+              <!-- 5 prev -> parent 3 -->
+              <line x1="136" y1="150" x2="136" y2="79" class="prev-line" marker-end="url(#prev-arrow)" />
+              <text x="146" y="110" class="prev-lbl" style="text-anchor:start;">prev &#8594; parent</text>
+
+              <!-- 2. Child 5 <-> Sibling 8 -->
+              <!-- 5 next -> 8 -->
+              <line x1="155" y1="165" x2="262" y2="165" class="ptr-line" marker-end="url(#ptr-arrow)" />
+              <text x="210" y="155" class="ptr-lbl" style="text-anchor:middle;">next</text>
+
+              <!-- 8 prev -> left sibling 5 (wide curving arc below) -->
+              <path d="M 270 182 C 235 212, 190 212, 158 182" class="prev-line" fill="none" marker-end="url(#prev-arrow)" />
+              <text x="212" y="222" class="prev-lbl" style="text-anchor:middle;">prev &#8594; left</text>
+
+              <!-- 3. Sibling 8 <-> Sibling 9 -->
+              <!-- 8 next -> 9 -->
+              <line x1="345" y1="165" x2="452" y2="165" class="ptr-line" marker-end="url(#ptr-arrow)" />
+              <text x="400" y="155" class="ptr-lbl" style="text-anchor:middle;">next</text>
+
+              <!-- 9 prev -> left sibling 8 (wide curving arc below) -->
+              <path d="M 460 182 C 425 212, 380 212, 348 182" class="prev-line" fill="none" marker-end="url(#prev-arrow)" />
+              <text x="402" y="222" class="prev-lbl" style="text-anchor:middle;">prev &#8594; left</text>
+
+              <!-- 4. Node 8 <-> Child 11 -->
+              <!-- 8 child -> 11 -->
+              <line x1="288" y1="196" x2="288" y2="257" class="ptr-line" marker-end="url(#ptr-arrow)" />
+              <text x="278" y="233" class="ptr-lbl" style="text-anchor:end;">child</text>
+
+              <!-- 11 prev -> parent 8 -->
+              <line x1="326" y1="265" x2="326" y2="204" class="prev-line" marker-end="url(#prev-arrow)" />
+              <text x="336" y="233" class="prev-lbl" style="text-anchor:start;">prev &#8594; parent</text>
+            </svg>
+            <div class="media-caption">The <code>prev</code> pointer points to parent when first child, or left sibling otherwise</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: Pairing Heap - Deep Dive -->
+    <section class="slide" id="slide-6">
+      <div class="slide-top">
+        <div class="slide-heading">
+          <h1>Pairing Heap: Deep Dive into Two-Pass Melds</h1>
+          <p class="subtitle">Deferred structural rebalancing during extract-min prevents tree degeneration</p>
+        </div>
+        <div class="author-badge">Author: Tung Nguyen</div>
+      </div>
+      <div class="slide-content">
+        <div class="col col-50">
+          <div class="highlight-card green">
+            <h4>$O(1)$ Insert & Decrease-Key</h4>
+            <p><strong>Insert:</strong> Allocate node, <code>meld(root, new_node)</code> in $O(1)$.</p>
+            <p><strong>Decrease-Key:</strong> Splice node out using <code>prev</code> and <code>next</code>, lower key, and <code>meld(root, node)</code> in $O(1)$.</p>
+          </div>
+          <div class="highlight-card amber" style="margin-top: 0.85rem;">
+            <h4>Deferred Rebalancing at Pop</h4>
+            <p>Removing the root leaves an orphaned sibling chain $T_1, T_2, \ldots, T_k$. Naive sequential melding collapses the tree into an $O(n)$ linear list, causing subsequent extractions to degrade to $O(n)$.</p>
+          </div>
+        </div>
+        <div class="col col-50">
+          <div class="highlight-card primary">
+            <h4>The Critical Two-Pass Scheme</h4>
+            <ul class="bullet-list" style="margin-top: 0.6rem;">
+              <li><strong>Pass 1 (Left-to-Right Pairing):</strong>
+                Iterate through the children list in pairs:
+                <br>$\text{pair}_1 = \text{meld}(T_1, T_2)$, $\text{pair}_2 = \text{meld}(T_3, T_4), \ldots$
+              </li>
+              <li><strong>Pass 2 (Right-to-Left Accumulation):</strong>
+                Accumulate the pairs backward from the tail:
+                <br>$\text{result} = \text{meld}(P_{last-1}, P_{last})$, cascading back to the front.
+              </li>
+              <li><strong>The Invariant:</strong>
+                This two-pass reduction bounds tree height and guarantees $O(\log n)$ amortized extraction time.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: Fibonacci Heap - Architecture -->
+    <section class="slide" id="slide-7">
+      <div class="slide-top">
+        <div class="slide-heading">
+          <h1>Fibonacci Heap: Architecture & Marked Nodes</h1>
+          <p class="subtitle">Circular doubly-linked root list with cascading cuts to enforce logarithmic degree</p>
+        </div>
+        <div class="author-badge">Author: Tung Nguyen</div>
+      </div>
+      <div class="slide-content">
+        <div class="col col-40">
+          <div class="highlight-card purple">
+            <h4>Circular Root List & Lazy Work</h4>
+            <ul class="bullet-list" style="margin-top: 0.5rem; font-size: 1.05rem;">
+              <li><strong>Min-Tree Forest:</strong> Maintained in a circular doubly-linked root list with <code>h->min</code> pointer.</li>
+              <li><strong>$O(1)$ Insertion:</strong> Nodes inserted in $O(1)$ without rebalancing; restructuring deferred to <code>pop()</code>.</li>
+            </ul>
+          </div>
+          <div class="highlight-card primary" style="margin-top: 0.85rem;">
+            <h4>Heavy Struct Footprint (64 B / vertex)</h4>
+            <ul class="bullet-list" style="margin-top: 0.5rem; font-size: 1.05rem;">
+              <li><strong>Payload & Degree:</strong> 16 B <code>Item</code> + 4 B <code>degree</code> + 1 B <code>marked</code> + 3 B padding.</li>
+              <li><strong>4 Pointers (32 B):</strong> <code>parent</code>, <code>child</code>, <code>left</code>, <code>right</code>.</li>
+              <li><strong>Cache Line Satiation:</strong> 56 B node + 8 B handle = <strong>64 B per vertex</strong> (saturates a full L1 cache line).</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col col-60">
+          <div class="media-card diagram">
+            <!-- Inline SVG Diagram for Fibonacci Heap in Tokyo Night Storm (Streamlined Widescreen Layout) -->
+            <svg viewBox="0 0 740 330" width="100%" height="310" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="fib-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#7aa2f7" />
+                </marker>
+                <marker id="fib-purple-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#bb9af7" />
+                </marker>
+              </defs>
+              <style>
+                .fib-box { fill: #24283b; stroke: #bb9af7; stroke-width: 2.2; rx: 6; }
+                .fib-box-min { fill: #1d253f; stroke: #7aa2f7; stroke-width: 2.5; rx: 6; }
+                .fib-txt { fill: #c0caf5; font-family: monospace; font-size: 16px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }
+                .fib-sub { fill: #7aa2f7; font-family: monospace; font-size: 11px; text-anchor: middle; }
+                .lbl-halo { fill: #7aa2f7; font-family: monospace; font-size: 11px; font-weight: bold; paint-order: stroke fill; stroke: #1f2335; stroke-width: 4px; stroke-linejoin: round; }
+                .lbl-halo-purple { fill: #bb9af7; font-family: monospace; font-size: 11px; font-weight: bold; paint-order: stroke fill; stroke: #1f2335; stroke-width: 4px; stroke-linejoin: round; }
+                .dlink { stroke: #7aa2f7; stroke-width: 2; }
+                .dlink-purple { stroke: #bb9af7; stroke-width: 1.8; stroke-dasharray: 5,4; }
+                .dlink-curve { stroke: #7aa2f7; stroke-width: 1.8; stroke-dasharray: 5,4; fill: none; }
+              </style>
+
+              <!-- Circular wrap-around link at top -->
+              <path d="M 590 52 C 690 12, 60 12, 142 47" class="dlink-curve" marker-end="url(#fib-arrow)" />
+
+              <!-- Node 3 (min) -->
+              <rect x="110" y="52" width="85" height="52" class="fib-box-min" />
+              <text x="152" y="72" class="fib-txt">3</text>
+              <text x="152" y="90" class="fib-sub">deg: 0</text>
+
+              <!-- h->min badge -->
+              <text x="46" y="78" class="lbl-halo" style="text-anchor:middle; font-size:12px;">h&#8594;min</text>
+              <line x1="72" y1="78" x2="102" y2="78" stroke="#7aa2f7" stroke-width="2.2" marker-end="url(#fib-arrow)" />
+
+              <!-- Node 7 -->
+              <rect x="325" y="52" width="90" height="52" class="fib-box" />
+              <text x="370" y="72" class="fib-txt">7</text>
+              <text x="370" y="90" class="fib-sub">deg: 2</text>
+
+              <!-- Node 7 Marked badge -->
+              <circle cx="405" cy="58" r="8.5" fill="#f7768e" />
+              <text x="405" y="58" fill="#ffffff" font-family="monospace" font-size="10px" font-weight="bold" text-anchor="middle" dominant-baseline="central">M</text>
+              <text x="370" y="42" fill="#f7768e" font-family="monospace" font-size="10.5px" font-weight="bold" text-anchor="middle">marked</text>
+
+              <!-- Node 5 -->
+              <rect x="545" y="52" width="85" height="52" class="fib-box" />
+              <text x="587" y="72" class="fib-txt">5</text>
+              <text x="587" y="90" class="fib-sub">deg: 0</text>
+
+              <!-- Circular root links (clean bidirectional arrows) -->
+              <line x1="195" y1="68" x2="317" y2="68" class="dlink" marker-end="url(#fib-arrow)" />
+              <line x1="325" y1="88" x2="203" y2="88" class="dlink" marker-end="url(#fib-arrow)" />
+
+              <line x1="415" y1="68" x2="537" y2="68" class="dlink" marker-end="url(#fib-arrow)" />
+              <line x1="545" y1="88" x2="423" y2="88" class="dlink" marker-end="url(#fib-arrow)" />
+
+              <!-- Tree Hierarchy Pointers -->
+              <!-- 7 child -> 9 -->
+              <line x1="345" y1="104" x2="287" y2="174" stroke="#7aa2f7" stroke-width="2.2" marker-end="url(#fib-arrow)" />
+              <text x="285" y="136" class="lbl-halo" style="text-anchor:end;">child</text>
+
+              <!-- 6 parent -> 7 -->
+              <line x1="452" y1="182" x2="395" y2="112" class="dlink-purple" marker-end="url(#fib-purple-arrow)" />
+              <text x="455" y="136" class="lbl-halo-purple" style="text-anchor:start;">parent</text>
+
+              <!-- Child 9 -->
+              <rect x="245" y="182" width="85" height="48" class="fib-box" style="stroke:#3b4261;" />
+              <text x="287" y="206" class="fib-txt">9</text>
+
+              <!-- Child 6 -->
+              <rect x="410" y="182" width="85" height="48" class="fib-box" style="stroke:#3b4261;" />
+              <text x="452" y="206" class="fib-txt">6</text>
+
+              <!-- Child list bidirectional links (clean arrows) -->
+              <line x1="330" y1="196" x2="402" y2="196" class="dlink" marker-end="url(#fib-arrow)" />
+              <line x1="410" y1="216" x2="338" y2="216" class="dlink" marker-end="url(#fib-arrow)" />
+
+              <!-- Cascading Cut Rule Callout Box -->
+              <rect x="50" y="265" width="640" height="40" rx="6" fill="#1f2335" stroke="#414868" />
+              <text x="370" y="290" fill="#f7768e" font-family="monospace" font-size="11.5px" text-anchor="middle" font-weight="bold">Cascading Cut: 2nd child loss severs marked node to root list (bounds d &#8804; log&#981; n)</text>
+            </svg>
+            <div class="media-caption">A marked node severs on losing its second child to enforce $d = O(\log n)$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: Fibonacci Heap - Deep Dive -->
+    <section class="slide" id="slide-8">
+      <div class="slide-top">
+        <div class="slide-heading">
+          <h1>Fibonacci Heap: Cascading Cuts & Consolidation</h1>
+          <p class="subtitle">The mechanics behind O(1) decrease-key and the auxiliary degree array</p>
+        </div>
+        <div class="author-badge">Author: Tung Nguyen</div>
+      </div>
+      <div class="slide-content">
+        <div class="col col-50">
+          <div class="highlight-card purple">
+            <h4>Cascading Cut Invariant</h4>
+            <p><strong>The Problem:</strong> Arbitrary cuts during decrease-key could thin trees into high-degree, single-node chains, breaking the logarithmic height bound.</p>
+            <p><strong>The Marking Rule:</strong>
+              <br>&bull; Node $x$ has its key decreased below parent $y$.
+              <br>&bull; Cut $x$ and promote to root list; $x.\text{marked} = \text{false}$.
+              <br>&bull; If parent $y$ is unmarked $\to$ set $y.\text{marked} = \text{true}$.
+              <br>&bull; If parent $y$ was already marked $\to$ cut $y$ to root list and <strong>cascade up the ancestor chain</strong>!
+            </p>
+            <p style="font-size:0.9rem; color:var(--accent-purple); margin-top:0.4rem; font-weight:600;">
+              Enforces that a node of degree $d$ roots at least $F_{d+2}$ nodes $\implies d \le \log_\phi n$.
+            </p>
+          </div>
+        </div>
+        <div class="col col-50">
+          <div class="highlight-card primary">
+            <h4>Consolidation during Extract-Min</h4>
+            <p>When <code>h->min</code> is removed, all its children are promoted to the root list. Then <code>consolidate()</code> executes:</p>
+            <ul class="bullet-list" style="margin-top:0.6rem; font-size:1.02rem;">
+              <li>Maintains degree lookup table: <code>Node* A[MAX_DEGREE]</code> with 64 slots.</li>
+              <li>Iterates through root list, pairwise linking trees of identical degree until all roots have unique degrees.</li>
+              <li><strong>Practical Penalty:</strong> Requires extensive pointer rewriting, clearing/populating auxiliary degree tables, and widespread cache evictions.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: Brodal-Okasaki Heap -->
+    <section class="slide" id="slide-9">
+      <div class="slide-top">
+        <div class="slide-heading">
+          <h1>Brodal–Okasaki Heap: Imperative Buffer Adaptation</h1>
+          <p class="subtitle">Adapting purely functional skew-binomial queues to an in-place buffer with relative addressing</p>
+        </div>
+        <div class="author-badge">Author: Oscar Chevalier</div>
+      </div>
+      <div class="slide-content">
+        <div class="col col-50">
+          <ul class="bullet-list">
+            <li><strong>From Pure Functional to Imperative:</strong> The original Brodal–Okasaki queue achieves optimal worst-case bounds ($O(1)$ push, $O(\log n)$ pop). We adapted it into an in-place imperative structure.</li>
+            <li><strong>Contiguous Cell Buffer (Custom Allocator):</strong>
+              <br>&bull; Cells reside in a flat <code>Tree* buf</code> array.
+              <br>&bull; Links use <code>RelativeTree</code> (index offsets) instead of absolute pointers $\implies$ entire heap can be <code>realloc</code>'d without pointer corruption!
+              <br>&bull; Custom internal free-list manages cell recycling.
+            </li>
+            <li><strong>Decrease-Key via Negative Tree Cancellation:</strong>
+              <br>Because skew-binomial trees lack back-pointers, decrease-key pushes the old item into a <strong>negative queue</strong> and the new key into the positive queue. During pop, roots cancel out.
+            </li>
+          </ul>
+        </div>
+        <div class="col col-50">
+          <div class="highlight-card amber">
+            <h4>Node & Struct Layout</h4>
+            <pre style="font-family:monospace; font-size:0.9rem; color:#7dcfff; background:#1f2335; border:1px solid var(--surface-border); padding:12px; border-radius:8px; margin:0.6rem 0;">
+struct Tree {
+  Item it;              // 16 B (distance, vertex)
+  size_t rank;          //  8 B
+  RelativeTree child;   //  8 B (buffer index)
+  RelativeTree sibling; //  8 B (buffer index)
+};                      // 40 B total per cell</pre>
+            <p style="font-size:0.92rem; color:var(--text-main);">Zero pointer overhead and only 2 to 5 mallocs per run. However, negative tree cancellation introduces heavy cancellation and restructuring during pop.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: The Contenders & Central Hypothesis -->
+    <section class="slide" id="slide-10">
       <div class="slide-top">
         <div class="slide-heading">
           <h1>The Four Contenders & The Core Hypothesis</h1>
@@ -599,447 +1127,6 @@
           <h4>Pre-Registered Experimental Predictions:</h4>
           <p><strong>Prediction 1 (Sparse Dominance):</strong> Binary heap will win on sparse graphs ($\bar{d} \le 4$) because contiguous memory and zero pointer indirection maximize cache efficiency.</p>
           <p><strong>Prediction 2 (The Dense Crossover):</strong> As density grows ($\bar{d} \gg 32$, $m \gg n$), decrease-key calls will overwhelm extractions, allowing Pairing and Fibonacci heaps to cross over and beat the Binary heap.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 4: Binary Heap - Architecture -->
-    <section class="slide" id="slide-4">
-      <div class="slide-top">
-        <div class="slide-heading">
-          <h1>Binary Heap: Architecture & Position Indexing</h1>
-          <p class="subtitle">Complete binary tree in a flat array paired with an external vertex lookup index</p>
-        </div>
-        <div class="author-badge">Author: Truong Giang Nguyen</div>
-      </div>
-      <div class="slide-content">
-        <div class="col col-40">
-          <ul class="bullet-list">
-            <li><strong>Implicit Complete Tree:</strong>
-              <br>Children of index $i$: $2i + 1$ and $2i + 2$.
-              <br>Parent of index $i$: $\lfloor (i - 1) / 2 \rfloor$.
-              <br>The tree structure itself is never stored in memory!
-            </li>
-            <li><strong>Zero Pointer Indirection:</strong> Elements stored contiguously in <code>Item data[]</code> (16 B per element: 4B distance, 8B vertex, 4B padding).</li>
-            <li><strong>The Handle Requirement:</strong> External index array <code>size_t pos[]</code> (8 B per vertex) maps $\text{vertex} \to \text{array index}$ to support $O(1)$ entry lookup before bubbling.</li>
-            <li><strong>Total Footprint:</strong> Exactly $16\text{ B} + 8\text{ B} = 24\text{ B per vertex}$.</li>
-          </ul>
-        </div>
-        <div class="col col-60">
-          <div class="media-card diagram">
-            <!-- Inline SVG Diagram for Binary Heap Array Mapping in Tokyo Night Storm -->
-            <svg viewBox="0 0 540 260" width="100%" height="250" xmlns="http://www.w3.org/2000/svg">
-              <style>
-                .tree-node { fill: #24283b; stroke: #7aa2f7; stroke-width: 2.5; }
-                .tree-text { fill: #c0caf5; font-family: monospace; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
-                .tree-edge { stroke: #565f89; stroke-width: 2; }
-                .arr-box { fill: #24283b; stroke: #383e5a; stroke-width: 1.5; }
-                .arr-box-hi { fill: rgba(122, 162, 247, 0.22); stroke: #7aa2f7; stroke-width: 2; }
-                .arr-lbl { fill: #7aa2f7; font-family: monospace; font-size: 11px; text-anchor: middle; }
-                .arr-val { fill: #c0caf5; font-family: monospace; font-size: 12px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
-              </style>
-              <!-- Tree Graphic -->
-              <line x1="80" y1="35" x2="45" y2="90" class="tree-edge" />
-              <line x1="80" y1="35" x2="115" y2="90" class="tree-edge" />
-              <line x1="45" y1="90" x2="25" y2="150" class="tree-edge" />
-              <line x1="45" y1="90" x2="65" y2="150" class="tree-edge" />
-              <line x1="115" y1="90" x2="135" y2="150" class="tree-edge" />
-
-              <circle cx="80" cy="35" r="18" class="tree-node" />
-              <text x="80" y="35" class="tree-text">3</text>
-              <text x="105" y="30" class="arr-lbl">i=0</text>
-
-              <circle cx="45" cy="90" r="16" class="tree-node" style="stroke:#7aa2f7;" />
-              <text x="45" y="90" class="tree-text">5</text>
-              <text x="22" y="85" class="arr-lbl">i=1</text>
-
-              <circle cx="115" cy="90" r="16" class="tree-node" />
-              <text x="115" y="90" class="tree-text">8</text>
-              <text x="138" y="85" class="arr-lbl">i=2</text>
-
-              <circle cx="25" cy="150" r="14" class="tree-node" />
-              <text x="25" y="150" class="tree-text" style="font-size:12px;">9</text>
-              <circle cx="65" cy="150" r="14" class="tree-node" />
-              <text x="65" y="150" class="tree-text" style="font-size:12px;">6</text>
-              <circle cx="135" cy="150" r="14" class="tree-node" />
-              <text x="135" y="150" class="tree-text" style="font-size:12px;">11</text>
-
-              <!-- Array data[] -->
-              <text x="190" y="25" class="arr-lbl" style="text-anchor:start; fill:#7aa2f7; font-weight:bold;">Item data[] (contiguous array)</text>
-              <g transform="translate(190, 35)">
-                <rect x="0" y="0" width="50" height="32" class="arr-box" />
-                <text x="25" y="-6" class="arr-lbl">0</text>
-                <text x="25" y="16" class="arr-val">{3, 7}</text>
-
-                <rect x="55" y="0" width="50" height="32" class="arr-box-hi" />
-                <text x="80" y="-6" class="arr-lbl" style="fill:#7aa2f7; font-weight:bold;">1</text>
-                <text x="80" y="16" class="arr-val">{5, 2}</text>
-
-                <rect x="110" y="0" width="50" height="32" class="arr-box" />
-                <text x="135" y="-6" class="arr-lbl">2</text>
-                <text x="135" y="16" class="arr-val">{8, 6}</text>
-
-                <rect x="165" y="0" width="50" height="32" class="arr-box" />
-                <text x="190" y="-6" class="arr-lbl">3</text>
-                <text x="190" y="16" class="arr-val">{9, 4}</text>
-
-                <rect x="220" y="0" width="50" height="32" class="arr-box" />
-                <text x="245" y="-6" class="arr-lbl">4</text>
-                <text x="245" y="16" class="arr-val">{6, 1}</text>
-
-                <rect x="275" y="0" width="50" height="32" class="arr-box" />
-                <text x="300" y="-6" class="arr-lbl">5</text>
-                <text x="300" y="16" class="arr-val">{11, 5}</text>
-              </g>
-
-              <!-- Array pos[] -->
-              <text x="190" y="105" class="arr-lbl" style="text-anchor:start; fill:#73daca; font-weight:bold;">size_t pos[] (vertex lookup table)</text>
-              <g transform="translate(190, 115)">
-                <rect x="0" y="0" width="38" height="28" class="arr-box" /><text x="19" y="-5" class="arr-lbl">v0</text><text x="19" y="14" class="arr-val">-</text>
-                <rect x="42" y="0" width="38" height="28" class="arr-box" /><text x="61" y="-5" class="arr-lbl">v1</text><text x="61" y="14" class="arr-val">4</text>
-                <rect x="84" y="0" width="38" height="28" class="arr-box-hi" style="border-color:#73daca;" /><text x="103" y="-5" class="arr-lbl" style="fill:#73daca; font-weight:bold;">v2</text><text x="103" y="14" class="arr-val">1</text>
-                <rect x="126" y="0" width="38" height="28" class="arr-box" /><text x="145" y="-5" class="arr-lbl">v3</text><text x="145" y="14" class="arr-val">-</text>
-                <rect x="168" y="0" width="38" height="28" class="arr-box" /><text x="187" y="-5" class="arr-lbl">v4</text><text x="187" y="14" class="arr-val">3</text>
-                <rect x="210" y="0" width="38" height="28" class="arr-box" /><text x="229" y="-5" class="arr-lbl">v5</text><text x="229" y="14" class="arr-val">5</text>
-                <rect x="252" y="0" width="38" height="28" class="arr-box" /><text x="271" y="-5" class="arr-lbl">v6</text><text x="271" y="14" class="arr-val">2</text>
-                <rect x="294" y="0" width="38" height="28" class="arr-box" /><text x="313" y="-5" class="arr-lbl">v7</text><text x="313" y="14" class="arr-val">0</text>
-              </g>
-
-              <!-- Connection arrow -->
-              <path d="M 293 115 C 293 85, 270 70, 270 70" stroke="#7aa2f7" stroke-width="2" fill="none" />
-              <text x="330" y="80" class="arr-lbl" style="fill:#7aa2f7; text-anchor:start; font-weight:bold;">pos[2] = 1 &rarr; data[1] carries v2</text>
-            </svg>
-            <div class="media-caption">Contiguous array storage with explicit reverse position mapping</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 5: Binary Heap - Deep Dive -->
-    <section class="slide" id="slide-5">
-      <div class="slide-top">
-        <div class="slide-heading">
-          <h1>Binary Heap: Deep Dive & The Indexing Tax</h1>
-          <p class="subtitle">Why continuous position synchronization matters in Dijkstra's relaxation loop</p>
-        </div>
-        <div class="author-badge">Author: Truong Giang Nguyen</div>
-      </div>
-      <div class="slide-content">
-        <div class="col col-50">
-          <div class="highlight-card primary">
-            <h4>The Critical Invariants</h4>
-            <p><strong>1. Heap Order:</strong> <code>data[(i-1)/2].distance &le; data[i].distance</code>.</p>
-            <p><strong>2. Position Synchrony:</strong> <code>pos[data[i].vertex] == i</code> for every index $i < \text{size}$.</p>
-          </div>
-          <ul class="bullet-list" style="margin-top: 0.6rem;">
-            <li><strong>The Core Mechanism (<code>bubble</code> & <code>sink</code>):</strong>
-              During sift-up and sift-down, whenever an item moves from index $p$ to $i$, we must execute:
-              <br><code style="color:var(--primary); font-family:monospace;">pos[data[i].vertex] = i;</code>
-            </li>
-            <li><strong>What Breaks Without It?</strong>
-              Without <code>pos[]</code>, locating a vertex during <code>decrease_key</code> would require scanning the entire array in $O(n)$ time, degrading Dijkstra to $O(m \cdot n)$!
-            </li>
-          </ul>
-        </div>
-        <div class="col col-50">
-          <div class="highlight-card amber">
-            <h4>The Trade-Off & Hidden Tax</h4>
-            <p style="margin-bottom: 0.5rem;">Every single swap in <code>bubble()</code> and <code>sink()</code> pays a secondary memory write to maintain the external <code>pos[]</code> lookup table.</p>
-            <p><strong>Hardware Locality Wins:</strong> Despite the index tracking tax, all operations occur over a single sequential memory buffer. The CPU prefetcher effortlessly streams array elements into L1 cache lines with virtually zero pointer stalls!</p>
-          </div>
-          <div class="highlight-card green" style="margin-top: 0.85rem;">
-            <h4>Allocation Profile</h4>
-            <p>Requires exactly <strong>3 malloc calls for an entire Dijkstra run</strong> (one for Heap, one for <code>data[]</code>, one for <code>pos[]</code>), completely eliminating allocator overhead.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 6: Pairing Heap - Architecture -->
-    <section class="slide" id="slide-6">
-      <div class="slide-top">
-        <div class="slide-heading">
-          <h1>Pairing Heap: Architecture & Left-Child Right-Sibling</h1>
-          <p class="subtitle">Self-adjusting multi-way tree with O(1) cuts and trivial pointer detachment</p>
-        </div>
-        <div class="author-badge">Author: Tung Nguyen</div>
-      </div>
-      <div class="slide-content">
-        <div class="col col-40">
-          <ul class="bullet-list">
-            <li><strong>Left-Child Right-Sibling (LCRS) Layout:</strong> Each node represents an arbitrary multi-way tree using exactly 3 pointers:
-              <br><code>child</code>: points to leftmost child
-              <br><code>next</code>: points to right sibling
-              <br><code>prev</code>: points to left sibling (or parent if first child)
-            </li>
-            <li><strong>Struct Overhead:</strong> 16 B Item + 24 B pointers = <strong>40 B per node</strong> (+ 8 B handle in <code>pos[]</code> = 48 B/vertex).</li>
-            <li><strong>Trivial Melds:</strong> Merging two heaps takes $O(1)$ worst-case time by making the root with larger key the leftmost child of the smaller root.</li>
-          </ul>
-        </div>
-        <div class="col col-60">
-          <div class="media-card diagram">
-            <!-- Inline SVG Diagram for Pairing Heap LCRS in Tokyo Night Storm -->
-            <svg viewBox="0 0 520 250" width="100%" height="240" xmlns="http://www.w3.org/2000/svg">
-              <style>
-                .lcrs-box { fill: #24283b; stroke: #73daca; stroke-width: 2; rx: 6; }
-                .lcrs-txt { fill: #c0caf5; font-family: monospace; font-size: 15px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }
-                .ptr-lbl { fill: #7aa2f7; font-family: monospace; font-size: 11px; text-anchor: middle; }
-                .ptr-line { stroke: #7aa2f7; stroke-width: 2; }
-                .prev-line { stroke: #bb9af7; stroke-width: 1.5; stroke-dasharray: 4,3; }
-              </style>
-
-              <!-- Root Node 3 -->
-              <rect x="60" y="25" width="60" height="40" class="lcrs-box" style="stroke:#7aa2f7;" />
-              <text x="90" y="45" class="lcrs-txt">3</text>
-              <text x="30" y="45" class="ptr-lbl" style="fill:#7aa2f7; font-weight:bold;">root</text>
-
-              <!-- Child 5 -->
-              <rect x="60" y="115" width="60" height="40" class="lcrs-box" />
-              <text x="90" y="135" class="lcrs-txt">5</text>
-
-              <!-- Sibling 8 -->
-              <rect x="200" y="115" width="60" height="40" class="lcrs-box" />
-              <text x="230" y="135" class="lcrs-txt">8</text>
-
-              <!-- Sibling 9 -->
-              <rect x="340" y="115" width="60" height="40" class="lcrs-box" />
-              <text x="370" y="135" class="lcrs-txt">9</text>
-
-              <!-- Child of 8: 11 -->
-              <rect x="200" y="195" width="60" height="40" class="lcrs-box" />
-              <text x="230" y="215" class="lcrs-txt">11</text>
-
-              <!-- Pointers: root -> child 5 -->
-              <line x1="75" y1="65" x2="75" y2="110" class="ptr-line" />
-              <text x="55" y="90" class="ptr-lbl">child</text>
-
-              <!-- prev pointer: 5 -> parent 3 -->
-              <line x1="105" y1="115" x2="105" y2="70" class="prev-line" />
-              <text x="145" y="90" class="ptr-lbl" style="fill:#bb9af7; font-weight:bold;">prev &rarr; parent</text>
-
-              <!-- 5 next -> 8 -->
-              <line x1="120" y1="130" x2="195" y2="130" class="ptr-line" />
-              <text x="160" y="122" class="ptr-lbl">next</text>
-
-              <!-- 8 prev -> left sibling 5 -->
-              <path d="M 200 145 C 170 160, 150 160, 122 145" class="prev-line" fill="none" />
-              <text x="160" y="170" class="ptr-lbl" style="fill:#bb9af7;">prev &rarr; left</text>
-
-              <!-- 8 next -> 9 -->
-              <line x1="260" y1="135" x2="335" y2="135" class="ptr-line" />
-              <text x="300" y="125" class="ptr-lbl">next</text>
-
-              <!-- 8 child -> 11 -->
-              <line x1="230" y1="155" x2="230" y2="190" class="ptr-line" />
-              <text x="250" y="175" class="ptr-lbl">child</text>
-            </svg>
-            <div class="media-caption">The <code>prev</code> pointer points to parent when first child, or left sibling otherwise</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 7: Pairing Heap - Deep Dive -->
-    <section class="slide" id="slide-7">
-      <div class="slide-top">
-        <div class="slide-heading">
-          <h1>Pairing Heap: Deep Dive into Two-Pass Melds</h1>
-          <p class="subtitle">Deferred structural rebalancing during extract-min prevents tree degeneration</p>
-        </div>
-        <div class="author-badge">Author: Tung Nguyen</div>
-      </div>
-      <div class="slide-content">
-        <div class="col col-50">
-          <div class="highlight-card green">
-            <h4>Trivial Insert & Decrease-Key</h4>
-            <p><strong>Insert:</strong> Allocate node, <code>meld(root, new_node)</code> in $O(1)$.</p>
-            <p><strong>Decrease-Key:</strong> Splice node out using <code>prev</code> and <code>next</code>, lower key, and <code>meld(root, node)</code> in $O(1)$!</p>
-          </div>
-          <div class="highlight-card amber" style="margin-top: 0.85rem;">
-            <h4>All Heavy Work Deferred to Pop</h4>
-            <p>Removing the root leaves an orphaned sibling chain $T_1, T_2, \ldots, T_k$. If melded naively, the tree collapses into a linear list of depth $O(n)$, causing subsequent extractions to degrade to $O(n)$!</p>
-          </div>
-        </div>
-        <div class="col col-50">
-          <div class="highlight-card primary">
-            <h4>The Critical Two-Pass Scheme</h4>
-            <ul class="bullet-list" style="margin-top: 0.6rem;">
-              <li><strong>Pass 1 (Left-to-Right Pairing):</strong>
-                Iterate through the children list in pairs:
-                <br>$\text{pair}_1 = \text{meld}(T_1, T_2)$, $\text{pair}_2 = \text{meld}(T_3, T_4), \ldots$
-              </li>
-              <li><strong>Pass 2 (Right-to-Left Accumulation):</strong>
-                Accumulate the pairs backward from the tail:
-                <br>$\text{result} = \text{meld}(P_{last-1}, P_{last})$, cascading back to the front.
-              </li>
-              <li><strong>The Invariant:</strong>
-                This two-pass reduction bounds tree height and guarantees $O(\log n)$ amortized extraction time.
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 8: Fibonacci Heap - Architecture -->
-    <section class="slide" id="slide-8">
-      <div class="slide-top">
-        <div class="slide-heading">
-          <h1>Fibonacci Heap: Architecture & Marked Nodes</h1>
-          <p class="subtitle">Circular doubly-linked root list with cascading cuts to enforce logarithmic degree</p>
-        </div>
-        <div class="author-badge">Author: Tung Nguyen</div>
-      </div>
-      <div class="slide-content">
-        <div class="col col-40">
-          <ul class="bullet-list">
-            <li><strong>Collection of Min-Trees:</strong> Maintained in a circular doubly-linked root list with a direct pointer <code>h->min</code> to the minimum root.</li>
-            <li><strong>Heavy Struct Layout (56 B / node):</strong>
-              <br>&bull; 16 B <code>Item</code>
-              <br>&bull; 4 B <code>degree</code> + 1 B <code>marked</code> + 3 B padding
-              <br>&bull; 32 B (4 pointers: <code>parent, child, left, right</code>)
-              <br>&bull; Total with handle: <strong>64 B / vertex</strong> (an entire cache line!).
-            </li>
-            <li><strong>Lazy Work Strategy:</strong> Elements inserted in $O(1)$ without rebalancing; root list consolidation occurs strictly inside <code>pop()</code>.</li>
-          </ul>
-        </div>
-        <div class="col col-60">
-          <div class="media-card diagram">
-            <!-- Inline SVG Diagram for Fibonacci Heap in Tokyo Night Storm -->
-            <svg viewBox="0 0 520 250" width="100%" height="240" xmlns="http://www.w3.org/2000/svg">
-              <style>
-                .fib-box { fill: #24283b; stroke: #bb9af7; stroke-width: 2; rx: 6; }
-                .fib-txt { fill: #c0caf5; font-family: monospace; font-size: 14px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }
-                .fib-lbl { fill: #7aa2f7; font-family: monospace; font-size: 10px; text-anchor: middle; }
-                .dlink { stroke: #7aa2f7; stroke-width: 1.5; }
-              </style>
-
-              <!-- Root list header -->
-              <text x="30" y="20" class="fib-lbl" style="fill:#7aa2f7; font-size:12px; font-weight:bold;">Circular Doubly-Linked Root List</text>
-
-              <!-- Node 3 (min) -->
-              <rect x="50" y="40" width="70" height="45" class="fib-box" style="stroke:#7aa2f7; stroke-width:2.5;" />
-              <text x="85" y="62" class="fib-txt">3</text>
-              <text x="85" y="75" class="fib-lbl">deg: 0</text>
-              <text x="15" y="62" class="fib-lbl" style="fill:#7aa2f7; font-weight:bold;">h->min</text>
-
-              <!-- Node 7 -->
-              <rect x="200" y="40" width="70" height="45" class="fib-box" />
-              <text x="235" y="62" class="fib-txt">7</text>
-              <text x="235" y="75" class="fib-lbl">deg: 2</text>
-
-              <!-- Node 5 -->
-              <rect x="350" y="40" width="70" height="45" class="fib-box" />
-              <text x="385" y="62" class="fib-txt">5</text>
-              <text x="385" y="75" class="fib-lbl">deg: 0</text>
-
-              <!-- Circular links between roots -->
-              <line x1="120" y1="55" x2="200" y2="55" class="dlink" />
-              <line x1="200" y1="68" x2="120" y2="68" class="dlink" />
-
-              <line x1="270" y1="55" x2="350" y2="55" class="dlink" />
-              <line x1="350" y1="68" x2="270" y2="68" class="dlink" />
-
-              <!-- Wrap-around curve -->
-              <path d="M 420 50 C 470 50, 470 10, 240 10 C 20 10, 20 50, 50 50" class="dlink" fill="none" stroke-dasharray="4,3" />
-
-              <!-- Children under Node 7 -->
-              <rect x="160" y="140" width="60" height="40" class="fib-box" style="stroke:#383e5a;" />
-              <text x="190" y="160" class="fib-txt">9</text>
-              <rect x="260" y="140" width="60" height="40" class="fib-box" style="stroke:#383e5a;" />
-              <text x="290" y="160" class="fib-txt">6</text>
-
-              <line x1="225" y1="85" x2="190" y2="140" class="dlink" />
-              <line x1="245" y1="85" x2="290" y2="140" class="dlink" />
-
-              <line x1="220" y1="160" x2="260" y2="160" class="dlink" />
-              <text x="240" y="180" class="fib-lbl" style="fill:#7aa2f7;">child list</text>
-
-              <!-- Node marked badge -->
-              <circle cx="265" cy="45" r="7" fill="#f7768e" />
-              <text x="265" y="45" class="fib-txt" style="font-size:8px; fill:#ffffff;">M</text>
-              <text x="320" y="35" class="fib-lbl" style="fill:#f7768e; font-weight:bold;">marked = true</text>
-            </svg>
-            <div class="media-caption">A marked node severs on losing its second child to enforce $d = O(\log n)$</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 9: Fibonacci Heap - Deep Dive -->
-    <section class="slide" id="slide-9">
-      <div class="slide-top">
-        <div class="slide-heading">
-          <h1>Fibonacci Heap: Cascading Cuts & Consolidation</h1>
-          <p class="subtitle">The mechanics behind O(1) decrease-key and the auxiliary degree array</p>
-        </div>
-        <div class="author-badge">Author: Tung Nguyen</div>
-      </div>
-      <div class="slide-content">
-        <div class="col col-50">
-          <div class="highlight-card purple">
-            <h4>Cascading Cut Invariant</h4>
-            <p><strong>The Problem:</strong> Arbitrary cuts during decrease-key could thin trees into high-degree, single-node chains, breaking the logarithmic height bound.</p>
-            <p><strong>The Marking Rule:</strong>
-              <br>&bull; Node $x$ has its key decreased below parent $y$.
-              <br>&bull; Cut $x$ and promote to root list; $x.\text{marked} = \text{false}$.
-              <br>&bull; If parent $y$ is unmarked $\to$ set $y.\text{marked} = \text{true}$.
-              <br>&bull; If parent $y$ was already marked $\to$ cut $y$ to root list and <strong>cascade up the ancestor chain</strong>!
-            </p>
-            <p style="font-size:0.9rem; color:var(--accent-purple); margin-top:0.4rem; font-weight:600;">
-              Enforces that a node of degree $d$ roots at least $F_{d+2}$ nodes $\implies d \le \log_\phi n$.
-            </p>
-          </div>
-        </div>
-        <div class="col col-50">
-          <div class="highlight-card primary">
-            <h4>Consolidation during Extract-Min</h4>
-            <p>When <code>h->min</code> is removed, all its children are promoted to the root list. Then <code>consolidate()</code> executes:</p>
-            <ul class="bullet-list" style="margin-top:0.6rem; font-size:1.02rem;">
-              <li>Maintains degree lookup table: <code>Node* A[MAX_DEGREE]</code> with 64 slots.</li>
-              <li>Iterates through root list, pairwise linking trees of identical degree until all roots have unique degrees.</li>
-              <li><strong>Practical Penalty:</strong> Requires extensive pointer rewriting, clearing/populating auxiliary degree tables, and widespread cache evictions.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 10: Brodal-Okasaki Heap -->
-    <section class="slide" id="slide-10">
-      <div class="slide-top">
-        <div class="slide-heading">
-          <h1>Brodal–Okasaki Heap: Imperative Buffer Adaptation</h1>
-          <p class="subtitle">Adapting purely functional skew-binomial queues to an in-place buffer with relative addressing</p>
-        </div>
-        <div class="author-badge">Author: Oscar Chevalier</div>
-      </div>
-      <div class="slide-content">
-        <div class="col col-50">
-          <ul class="bullet-list">
-            <li><strong>From Pure Functional to Imperative:</strong> The original Brodal–Okasaki queue achieves optimal worst-case bounds ($O(1)$ push, $O(\log n)$ pop). We adapted it into an in-place imperative structure.</li>
-            <li><strong>Contiguous Cell Buffer (Custom Allocator):</strong>
-              <br>&bull; Cells reside in a flat <code>Tree* buf</code> array.
-              <br>&bull; Links use <code>RelativeTree</code> (index offsets) instead of absolute pointers $\implies$ entire heap can be <code>realloc</code>'d without pointer corruption!
-              <br>&bull; Custom internal free-list manages cell recycling.
-            </li>
-            <li><strong>Decrease-Key via Negative Tree Cancellation:</strong>
-              <br>Because skew-binomial trees lack back-pointers, decrease-key pushes the old item into a <strong>negative queue</strong> and the new key into the positive queue. During pop, roots cancel out.
-            </li>
-          </ul>
-        </div>
-        <div class="col col-50">
-          <div class="highlight-card amber">
-            <h4>Node & Struct Layout</h4>
-            <pre style="font-family:monospace; font-size:0.9rem; color:#7dcfff; background:#1f2335; border:1px solid var(--surface-border); padding:12px; border-radius:8px; margin:0.6rem 0;">
-struct Tree {
-  Item it;              // 16 B (distance, vertex)
-  size_t rank;          //  8 B
-  RelativeTree child;   //  8 B (buffer index)
-  RelativeTree sibling; //  8 B (buffer index)
-};                      // 40 B total per cell</pre>
-            <p style="font-size:0.92rem; color:var(--text-main);">Zero pointer overhead and only 2 to 5 mallocs per run. However, negative tree cancellation introduces heavy cancellation and restructuring during pop.</p>
-          </div>
         </div>
       </div>
     </section>
@@ -1136,8 +1223,8 @@ struct Tree {
       <div class="slide-content">
         <div class="col col-40">
           <div class="highlight-card primary">
-            <h4 style="color:var(--primary);">The Headline Result:</h4>
-            <p><strong>Binary Heap is the fastest implementation on EVERY SINGLE graph workload.</strong></p>
+            <h4 style="color:var(--primary);">Key Finding</h4>
+            <p><strong>Binary Heap is the fastest implementation across all 7 benchmark topologies.</strong></p>
           </div>
           <table class="data-table" style="margin-top:0.6rem;">
             <thead>
@@ -1171,7 +1258,7 @@ struct Tree {
             </tbody>
           </table>
           <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.6rem;">
-            Even at $\bar{d}=50$ on <code>uniform_dense</code>, Fibonacci Heap remains <strong>74% slower</strong> than Binary Heap!
+            Even at $\bar{d}=50$ on <code>uniform_dense</code>, Fibonacci Heap remains <strong>74% slower</strong> than Binary Heap.
           </p>
         </div>
         <div class="col col-60">
@@ -1185,7 +1272,7 @@ struct Tree {
               <button class="chart-tab-btn" onclick="switchRuntimeChart('uniform_sparse', 'Sparse Digraph (d=4)', this)">uniform_sparse</button>
             </div>
             <img id="runtime-chart-img" src="../report/frozen_results/figures/runtime/uniform_dense.svg" alt="Runtime Chart" onerror="this.src='../report/frozen_results/figures/report_charts/runtime/uniform_dense.png'">
-            <div class="media-caption" id="runtime-chart-caption">Runtime comparison on <code>uniform_dense</code> ($n=10\text{k}, m=500\text{k}$, $\bar{d}=50$) from frozen results</div>
+            <div class="media-caption" id="runtime-chart-caption">Runtime comparison on <code>uniform_dense</code> ($n=10\text{k}, m=500\text{k}$, $\bar{d}=50$)</div>
           </div>
         </div>
       </div>
@@ -1206,19 +1293,19 @@ struct Tree {
             <li><strong>For Binary, Pairing, & Fibonacci:</strong>
               Decrease-key is strictly faster on every graph ($T_{\text{lazy}} / T_{\text{dec}} > 1.0$).
               <br>&bull; On <code>uniform_sparse</code>: Binary lazy is <strong>1.27&times; slower</strong> (0.89 ms vs 0.70 ms).
-              <br>&bull; On <code>uniform_dense</code>: Binary lazy is <strong>1.93&times; slower</strong> (3.17 ms vs 1.64 ms); Pairing is <strong>1.80&times; slower</strong> (3.72 ms vs 2.06 ms); Fib is <strong>2.42&times; slower</strong> (6.92 ms vs 2.86 ms)!
+              <br>&bull; On <code>uniform_dense</code>: Binary lazy is <strong>1.93&times; slower</strong> (3.17 ms vs 1.64 ms); Pairing is <strong>1.80&times; slower</strong> (3.72 ms vs 2.06 ms); Fib is <strong>2.42&times; slower</strong> (6.92 ms vs 2.86 ms).
             </li>
             <li><strong>The Cause: Queue Inflation:</strong> Stale entries swell lazy queue to $O(m)$ nodes, turning $n$ extractions into $m$ full $O(\log m)$ pops.</li>
             <li><strong class="text-amber">The Brodal–Okasaki Inversion:</strong>
-              Lazy is faster on EVERY graph!
-              <br>On <code>uniform_dense</code>: Lazy takes <strong>9.10 ms</strong> vs. Decrease-Key's <strong>15.72 ms</strong> (0.58&times;). Negative tree cancellation was so costly that discarding stale entries was 42% faster!
+              Lazy is faster across all graph families.
+              <br>On <code>uniform_dense</code>: Lazy takes <strong>9.10 ms</strong> vs. Decrease-Key's <strong>15.72 ms</strong> (0.58&times;). Negative tree cancellation overhead exceeds stale node extraction penalty by 42%.
             </li>
           </ul>
         </div>
         <div class="col col-60">
           <div class="media-card chart">
             <img src="../report/frozen_results/figures/runtime/lazy_vs_decrease_key.svg" alt="Lazy vs Decrease-Key Speedup" onerror="this.src='../report/frozen_results/figures/report_charts/runtime/lazy_vs_decrease_key.png'">
-            <div class="media-caption">Speedup Ratio $T(\text{lazy}) / T(\text{decrease\_key})$. Values above 1.0 indicate Decrease-Key is faster.</div>
+            <div class="media-caption">Speedup Ratio $T(\text{lazy}) / T(\text{decrease\_key})$; values $> 1.0$ indicate Decrease-Key is faster.</div>
           </div>
         </div>
       </div>
@@ -1267,7 +1354,7 @@ struct Tree {
               <button class="chart-tab-btn" onclick="switchMetricChart('ipc_comparison', 'perf', 'Instructions Per Cycle (IPC) throughput', this)">IPC Throughput</button>
             </div>
             <img id="metric-chart-img" src="../report/frozen_results/figures/mem/allocator_pressure.svg" alt="Metric Chart" onerror="this.src='../report/frozen_results/figures/report_charts/mem/allocator_pressure.png'">
-            <div class="media-caption" id="metric-chart-caption">Dynamic heap allocation activity across benchmarks from frozen results</div>
+            <div class="media-caption" id="metric-chart-caption">Dynamic heap allocation activity across benchmarks</div>
           </div>
         </div>
       </div>
@@ -1300,10 +1387,6 @@ struct Tree {
               <li><strong>Cache-Aligned $d$-ary Heaps:</strong> Compare 4-ary and 8-ary heaps using SIMD vector instructions for parallel child scans.</li>
             </ul>
           </div>
-        </div>
-
-        <div class="highlight-card" style="text-align:center; padding:1rem; background:var(--surface-subtle); border:1px solid var(--surface-border);">
-          <strong style="color:var(--text-heading); font-size: 1.05rem;">Thank you for watching!</strong> Questions & peer feedback welcome.
         </div>
       </div>
     </section>
@@ -1374,7 +1457,7 @@ struct Tree {
         const cap = document.getElementById('runtime-chart-caption');
         img.src = '../report/frozen_results/figures/runtime/' + dataset + '.svg';
         img.onerror = function() { img.src = '../report/frozen_results/figures/report_charts/runtime/' + dataset + '.png'; };
-        cap.innerHTML = 'Runtime comparison on <code>' + dataset + '</code> (' + desc + ') from frozen results';
+        cap.innerHTML = 'Runtime comparison on <code>' + dataset + '</code> (' + desc + ')';
         btn.parentElement.querySelectorAll('.chart-tab-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
       };
@@ -1385,7 +1468,7 @@ struct Tree {
         const cap = document.getElementById('metric-chart-caption');
         img.src = '../report/frozen_results/figures/' + folder + '/' + metric + '.svg';
         img.onerror = function() { img.src = '../report/frozen_results/figures/report_charts/' + folder + '/' + metric + '.png'; };
-        cap.innerHTML = desc + ' from frozen results';
+        cap.innerHTML = desc;
         btn.parentElement.querySelectorAll('.chart-tab-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
       };
