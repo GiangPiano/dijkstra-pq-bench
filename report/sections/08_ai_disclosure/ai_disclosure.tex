@@ -22,7 +22,7 @@ the early implementations of perf recorded intel specific events, and were not
 portable at all. The early perf and mem tests also hardcoded the graph and heap
 names, and would not have held up well to changes in the inputs.
 
-However, despite these downfalls, it was easy to later correct the LLM, modifing
+However, despite these downfalls, it was easy to later correct the LLM, modifying
 the scripts to not hard code the systems by pointing them to good examples and
 motivations for why tasks should be completed in the way I wanted them to be
 done.
@@ -57,6 +57,12 @@ development going forward.
 \subsection{Truong Giang's Experience}
 
 I used Claude Code to scaffold the project structure, since my task is the very first step in the project. Initially, Claude implemented a vector to use as adjacency list for the graph representation. Since our project focuses on benchmarking the heap implementation, I wanted to minimise the impact of other operations outside of the heap. So I ask Claude to change that to a more effective format, so it suggested using CSR table. I then announce my group about this change before approving it.
+
+One thing I found AI to be particularly helpful is when debugging pointers usage and memory allocation. Since C offers raw control over the allocated memory space, it is very easy to miss calculate the required size for the allocation, eventually leading to a silent crash. I encountered a bug in the binary heap's \code{heap_pop} function, but the assert failed in the \code{decrease_key} function instead. Claude Code instantly caught this, saving me a lot of time trying to debug it manually.
+
+I noticed that AI tends to overly engineer the solution when the given input is not specific enough. An example is when we decided to implement another variant of the Dijkstra's algorithm. Since we have a single interface to call the Dijkstra's algorithm, it initially duplicated to another file, then rely on Makefile to dynamically link different objects to the selected algorithm. We then simplified it to have just a single file containing both variants.
+
+It also hallucinates and overcomplicate the approach on more complex tasks. We used Claude to generate the presentation slides based on our report, the codebase, and the video requirement. This task requires the AI to review everything we have in our repository. Initially, it included some random benchmark figures that does not even exist in our codebase, and it tries to fit too much detail in a 15 minutes video. I then learnt that using AI effectively is not just about giving it as much information as possible, but also to limit on the scope of the problem.
 
 When generating the benchmark visualisations, AI overlooked the fact that the benchmarking library already supported exporting results directly to \code{.csv} files. Instead, it created a separate Python parser to read the output and convert it into a pandas DataFrame. This added unnecessary complexity to the workflow. We eventually discarded that implementation and provided AI with more context about the library's existing CSV export functionality so it could use it instead.
 
