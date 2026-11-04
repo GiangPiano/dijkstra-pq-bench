@@ -65,14 +65,23 @@ COMMON_OBJS = $(patsubst $(BENCH_SRC_DIR)/%.c,$(BENCH_BUILD_DIR)/%.o,$(wildcard 
 
 SEED = 67
 
-tiny_dense  = -n 50     -m 1000    -w 10
-small_med   = -n 2000   -m 40000   -w 50
-mod_sparse  = -n 100000 -m 400000  -w 100
-big_sparse  = -n 100000 -m 400000  -w 1000
-sparse      = -n 50000  -m 200000  -w 100
-dense       = -n 50000  -m 6400000 -w 100
+smoke_1k        = --family uniform -n 1000 -m 4000 -w 50
+uniform_sparse  = --family uniform -n 10000 -m 40000 -w 100
+uniform_medium  = --family uniform -n 20000 -m 200000 -w 100
+uniform_dense   = --family uniform -n 10000 -m 500000 -w 100
+grid_224        = --family grid --rows 224 --cols 224 -w 100
+hub_skewed      = --family hub_skewed -n 20000 -m 120000 --hubs 32 -w 100
+layered_frontier = --family layered --layers 100 --width 200 --fanout 8 -w 100
 
-TEST_SET  = tiny_dense small_med mod_sparse big_sparse sparse dense
+smoke_1k_meta        = 'smoke_1k|uniform|1,000 vertices with a small uniform random frontier.|n=1000|m=4000|w=50'
+uniform_sparse_meta  = 'uniform_sparse|uniform|Uniform sparse digraph (average out-degree 4).|n=10000|m=40000|w=100'
+uniform_medium_meta  = 'uniform_medium|uniform|Uniform medium-density digraph (average out-degree 10).|n=20000|m=200000|w=100'
+uniform_dense_meta   = 'uniform_dense|uniform|Uniform dense digraph (average out-degree 50).|n=10000|m=500000|w=100'
+grid_224_meta        = 'grid_224|grid|224 x 224 four-neighbour directed grid.|rows=224|cols=224|w=100'
+hub_skewed_meta      = 'hub_skewed|hub_skewed|Uniform background edges plus a concentrated 32-hub skew.|n=20000|m=120000|hubs=32|w=100'
+layered_frontier_meta = 'layered_frontier|layered|100 layers of 200 vertices with deterministic forward fan-out.|layers=100|width=200|fanout=8|w=100'
+
+TEST_SET  = smoke_1k uniform_sparse uniform_medium uniform_dense grid_224 hub_skewed layered_frontier
 TEST_SRCS = $(patsubst %,$(TEST_BUILD_DIR)/%.c,$(TEST_SET))
 TEST_OBJS = $(patsubst %,$(TEST_BUILD_DIR)/%.o,$(TEST_SET))
 GRAPH_REGISTRY_SRC = $(TEST_BUILD_DIR)/graph_registry.c
@@ -145,7 +154,8 @@ $(TEST_OBJS): $(TEST_BUILD_DIR)/%.o: $(TEST_BUILD_DIR)/%.c
 
 $(GRAPH_REGISTRY_SRC) $(GRAPH_METADATA): $(TEST_SRCS) $(BENCH_SRC_DIR)/gen.py
 	@mkdir -p $(dir $@)
-	$(BENCH_SRC_DIR)/gen.py --registry "$(GRAPH_REGISTRY_SRC)" --metadata "$(GRAPH_METADATA)" --graphs $(TEST_SET)
+	$(BENCH_SRC_DIR)/gen.py --registry "$(GRAPH_REGISTRY_SRC)" --metadata "$(GRAPH_METADATA)" --graphs $(TEST_SET) \
+		$(foreach graph,$(TEST_SET),--metadata-entry $($(graph)_meta))
 
 $(GRAPH_REGISTRY_OBJ): $(GRAPH_REGISTRY_SRC)
 	@mkdir -p $(dir $@)
