@@ -121,3 +121,18 @@ Standalone Individual Deliverables
             What is one thing you would have done differently, or one question their work raised that they didn't answer?
 
         Grading weight: 5%.
+
+## Frozen figure conversion
+
+After frozen SVG figures have been placed in
+`report/frozen_results/{runtime,perf,mem}`, convert them to LaTeX-importable
+PDF+LaTeX assets with:
+
+```sh
+./report/frozen_results/convert_to_latex.sh
+```
+
+The script writes matching files under
+`report/frozen_results/report_charts/{runtime,perf,mem}`. Use `--dry-run` to
+validate the input groups and list the planned conversions without requiring
+Inkscape.
