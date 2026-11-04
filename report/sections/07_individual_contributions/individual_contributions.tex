@@ -1,6 +1,71 @@
 \section{Individual Reflection}
 \subsection{Oscar Chevalier}
 
+I worked primarily on the Brodal-Okasaki heap, both initially implementing it
+and optimising it. My next major role was to maintain the project more
+generally. I did all the work on the build system (Makefiles), ensuring the the
+build process is flexible, correctly captures dependencies to trigger re-builds,
+and easy to maintain. In order to do this I spent time orchestrating the group
+towards end goals and providing starting points for others to work on, and then
+adjusting their work so that everyone could build and run the project, and that
+the layout was easy to understand. This lent me a strong understanding of the
+project as a whole, and the overall experimental design. Given this, I wrote the
+experimental methodology section of the report, and produced the video
+presentation slides.
+
+The Brodal-Okasaki heap is a very complex design. While I understand the major
+design aspects of Brodal-Okasaki, I am not sure I fully understand the way in
+which those aspects interact and flow together. Specifically, I understand that
+the skew-binomial tree allows for $O(1)$ \code{heap_push} operations, and much
+of the complexity comes from maintaining the invariants of skew-binomial tree
+links. However, looking at the functions and code that maintain those invariants
+makes this understanding go out the window, especially when it comes to removing
+the minimum element.
+
+Further optimising it for cache locality made this even harder to understand.
+It was particularly difficult to get all the little helper methods correct
+during the rewrite, as it was hard to understand the role each one played in the
+larger picture, and easy to mix up the sibling and child addresses, causing a
+hard to find bug. In contrast, while cache locality was initially a concern,
+once I realised I could allocate all the cells in a continuous buffer and use
+buffer-relative addressing, the problem seems to have been addressed rather
+well, and it was a fun solution to the problem.
+
+The worst cases for Brodal-Okasaki are made very apparent in this experiment,
+decrease_key is a nightmare! Supporting it was a lot of extra work, and not a
+part of the original paper due to how unfriendly the operation is to persistant
+data structures. I believe there are other approachs to support decrease_key in
+persistant min heaps, but the negative queue idea seemed appealing to try. The
+additional invariants that needed to be maintained around negative queue
+elements added significant complexity to the design.
+
+If starting the project again, I think I'd pick the regular Brodal queue, which
+is also a skew-binomial tree, but more similar to the fibonacci heap, using
+parent links and double links to improve performance. It would also be
+interesting to apply similar memory management approaches to the fibonacci and
+pairing heaps, and see if better memory management techniques could allow one of
+the high allocation heaps to beat the binary heap.
+
+Maintaining the project build was a secondary but also interesting task. I
+already knew how to use make, but this was a lesson in maintaining a larger and
+more complex build with it. Make is probably the only build system that can do
+semi-incremental builds and can do such a complex arrangement of inputs and
+outputs, using and invoking a large range of system tools, however at this level
+of complexity it was clear that make was barely holding up. I needed to rewrite
+large parts of the Makefile ~4 times as the structure of the project changed,
+and we added more components. Make would do well to be replaced with a more
+capable programming language while still supporting the ability to interact well
+with a wide range of other programs. When issues occured due to variable
+expansion or similar it was hard to debug the Makefile. Extending this project
+would make me seriously consider writing something to replace make. We also
+temporarily considered \code{nob.h} or \code{nobuild.h} which only uses c to
+build c code, however it did not seem mature enough. Still, it beats gradle any
+day of the week.
+
+Overall this was a lot of fun, and the broad scope of the project brought a lot
+of interesting challenges to solve with a set of tools I do not usually use,
+which is always a good way to expand your skillset.
+
 \subsection{Truong Giang Nguyen}
 
 I implemented the base Dijkstra's algorithm for benchmarking. Since C has no dynamically sized array, I could not simply represent the graph using a normal adjacency matrix. Implementing one from scratch could introduce allocation overhead unrelated to the benchmark, so I implemented the shared graph representation using Compressed Sparse Row (CSR) format.
