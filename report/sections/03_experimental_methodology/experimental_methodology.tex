@@ -68,4 +68,110 @@ them to be easily embedded into the report.
 
 \subsection{Input Graphs}
 
+To compare the priority queues under different workload shapes, we use seven
+deterministically generated directed graphs. The graph definitions are kept in
+the Makefile, while \code{src/bench/gen.py} generates the corresponding C
+source files. Every graph uses the fixed seed \code{67}, positive integer edge
+weights, and the same generated input for every heap implementation and
+Dijkstra variant.
 
+The suite combines uniform random graphs with structured graphs. The uniform
+graphs vary the number of vertices and average out-degree, allowing us to
+observe how the priority queues behave as the number of edge relaxations
+increases. The structured graphs represent workload patterns that are not
+captured well by uniform random sampling, such as bounded-degree spatial
+networks, concentrated hubs, and broad layered frontiers.
+
+\begin{table}[H]
+\centering
+\caption{Generated input graphs used in the benchmarks.}
+\label{tab:input-graph-properties}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Name & Family & Size \\
+\midrule
+\code{smoke_1k}
+  & Uniform
+  & $n=1{,}000,\ m=4{,}000$ \\
+
+\code{uniform_sparse}
+  & Uniform
+  & $n=10{,}000,\ m=40{,}000$ \\
+
+\code{uniform_medium}
+  & Uniform
+  & $n=20{,}000,\ m=200{,}000$ \\
+
+\code{uniform_dense}
+  & Uniform
+  & $n=10{,}000,\ m=500{,}000$ \\
+
+\code{grid_224}
+  & Grid
+  & $224 \times 224,\ n=50{,}176$ \\
+
+\code{hub_skewed}
+  & Hub-skewed
+  & $n=20{,}000,\ m=120{,}000$ \\
+
+\code{layered_frontier}
+  & Layered
+  & $100 \times 200,\ n=20{,}000$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Purpose of each generated input graph.}
+\label{tab:input-graph-purposes}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Name & Purpose \\
+\midrule
+\code{smoke_1k}
+  & Small build and correctness check \\
+
+\code{uniform_sparse}
+  & Sparse workload; average out-degree 4 \\
+
+\code{uniform_medium}
+  & Intermediate relaxation workload; average out-degree 10 \\
+
+\code{uniform_dense}
+  & Dense random workload; average out-degree 50 \\
+
+\code{grid_224}
+  & Bounded-degree spatial graph \\
+
+\code{hub_skewed}
+  & Concentrated traffic around 32 hub vertices \\
+
+\code{layered_frontier}
+  & Broad frontier with forward fan-out 8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+The \code{smoke_1k} graph is included as a small and inexpensive validation
+case. It allows graph construction, executable linking, checksum validation,
+and benchmark execution to be checked without the cost of the larger inputs.
+The three uniform graphs provide a controlled progression from sparse to dense
+connectivity. Their increasing average out-degree produces more edge
+relaxations and changes the amount of work performed by the priority queue.
+
+The \code{grid_224} graph is a directed four-neighbour grid. Each interior
+vertex has up to four outgoing edges, producing a bounded-degree graph with
+spatial structure and longer paths than the uniform random graphs. The
+\code{hub_skewed} graph contains a concentrated set of 32 hubs together with
+background edges. This creates highly uneven vertex degrees and bursts of
+relaxation activity. Finally, \code{layered_frontier} contains 100 layers of
+200 vertices, with deterministic forward edges between consecutive layers.
+Its broad active frontier is useful for observing heap growth and the
+difference between eager decrease-key and lazy duplicate-entry Dijkstra.
+
+All seven graphs are used in every benchmark category. The generated graph
+sources are written below \code{build/test/}, and the generated registry and
+metadata are written to \code{build/test/graph_registry.c} and
+\code{build/test/graphs.json}. The graph objects are linked directly into the
+runtime, perf, and memory benchmark executables, so the benchmark runs do not
+include graph-file parsing or input-loading overhead.
