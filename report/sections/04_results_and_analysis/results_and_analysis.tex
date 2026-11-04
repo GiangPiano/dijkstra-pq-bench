@@ -1,1 +1,292 @@
 \section{Results and Analysis}
+\subsection{Overview}
+
+This section presents the experimental results for the four priority queue
+implementations used by Dijkstra's algorithm: binary, pairing, Fibonacci, and
+Brodal--Okasaki heaps. Each implementation was evaluated using the seven input
+graphs described in Section~3.2 and both Dijkstra variants: eager
+\code{decrease_key} and \code{lazy} duplicate-entry processing.
+
+We first compare execution time, both between heap implementations and between
+the two Dijkstra variants. We then examine hardware performance counters and
+memory measurements to identify factors that may explain the observed runtime
+differences. The results are discussed with respect to graph size, density,
+and structure, including uniform random, grid, hub-skewed, and layered graphs.
+
+\subsection{Runtime Results}
+\subsubsection{Runtime Comparison Between Heap Implementations}
+
+Table~\ref{tab:dijkstra_runtime} reports the mean execution time of each heap
+implementation across the seven input graphs. The corresponding graph-specific
+runtime plots are shown in Figure~\ref{fig:runtime-heap-comparison}.
+
+\input{frozen_results/figures/runtime/runtime}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.48\textwidth]
+    {frozen_results/figures/report_charts/runtime/smoke_1k.png}
+  \includegraphics[width=0.48\textwidth]
+    {frozen_results/figures/report_charts/runtime/uniform_sparse.png}
+
+  \includegraphics[width=0.48\textwidth]
+    {frozen_results/figures/report_charts/runtime/uniform_medium.png}
+  \includegraphics[width=0.48\textwidth]
+    {frozen_results/figures/report_charts/runtime/uniform_dense.png}
+
+  \includegraphics[width=0.48\textwidth]
+    {frozen_results/figures/report_charts/runtime/grid_224.png}
+  \includegraphics[width=0.48\textwidth]
+    {frozen_results/figures/report_charts/runtime/hub_skewed.png}
+
+  \includegraphics[width=0.48\textwidth]
+    {frozen_results/figures/report_charts/runtime/layered_frontier.png}
+
+  \caption{Runtime comparison between the four heap implementations across
+  the seven input graphs. Each plot shows both \code{decrease_key} and
+  \code{lazy} Dijkstra.}
+  \label{fig:runtime-heap-comparison}
+\end{figure}
+
+The binary heap is the fastest implementation in every graph configuration.
+The pairing heap is consistently second, while the Fibonacci and
+Brodal--Okasaki heaps are slower. This ordering is stable across both the
+uniform random graphs and the structured grid, hub-skewed, and layered graphs.
+
+For example, on \code{uniform_dense} with \code{decrease_key}, the binary
+heap takes approximately $1.64$~ms, compared with $2.06$~ms for the pairing
+heap, $2.86$~ms for the Fibonacci heap, and $15.72$~ms for the
+Brodal--Okasaki heap. On \code{grid_224}, the corresponding times are
+approximately $2.47$~ms, $3.10$~ms, $7.24$~ms, and $12.28$~ms.
+
+The binary heap's advantage is consistent with its contiguous array layout,
+direct index-based navigation, and low constant factors. Although the
+Fibonacci and Brodal--Okasaki heaps offer stronger theoretical bounds for some
+priority-queue operations, their additional pointer manipulation and
+bookkeeping do not translate into lower end-to-end Dijkstra runtime in these
+experiments. The pairing heap is more competitive, but still remains slower
+than the binary heap on every input.
+
+\subsubsection{Runtime Comparison Between Lazy and Decrease-Key Dijkstra}
+
+The runtime difference between the two Dijkstra variants is shown in
+Figure~\ref{fig:lazy-decrease-runtime}. The figure reports the ratio
+$T_{\mathrm{lazy}}/T_{\mathrm{decrease\_key}}$; values above one indicate that
+\code{decrease\_key} is faster, while values below one indicate that the lazy
+variant is faster.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]
+    {frozen_results/figures/report_charts/runtime/lazy_vs_decrease_key.png}
+  \caption{Runtime ratio between lazy and decrease-key Dijkstra. Values above
+  one indicate that decrease-key is faster.}
+  \label{fig:lazy-decrease-runtime}
+\end{figure}
+
+For the binary, pairing, and Fibonacci heaps, the \code{decrease\_key} variant
+is faster on every graph. The difference is small on the sparse and
+hub-skewed graphs, but becomes larger as the number of relaxations increases.
+For example, with the binary heap, lazy processing is approximately $1.27$
+times slower on \code{uniform_sparse}, $1.51$ times slower on
+\code{uniform_medium}, and $1.93$ times slower on
+\code{uniform_dense}. The same pattern appears for the pairing and Fibonacci
+heaps.
+
+This behaviour is consistent with the lazy algorithm inserting duplicate
+entries whenever a shorter path is found. These stale entries remain in the
+priority queue until they are extracted and discarded, increasing the number
+of queue operations. The effect is particularly visible on
+\code{uniform_dense} and \code{layered_frontier}, where the larger number of
+relaxations produces a larger queue workload.
+
+The Brodal--Okasaki implementation shows the opposite result. Its lazy
+variant is faster on all seven graphs, with the largest relative improvements
+on \code{uniform_dense}, \code{uniform_medium}, and
+\code{layered_frontier}. For example, on \code{uniform_dense}, lazy
+processing takes approximately $9.10$~ms compared with $15.72$~ms for
+\code{decrease_key}. This result is specific to the current implementation:
+the decrease-key operation requires additional tree-search and bookkeeping
+work, whereas the lazy variant avoids those updates at the cost of processing
+stale entries.
+
+Overall, the results show that lazy processing is not uniformly inferior.
+For the binary, pairing, and Fibonacci heaps, explicitly maintaining
+decrease-key handles is beneficial, especially on denser graphs. For the
+Brodal--Okasaki implementation, avoiding decrease-key operations is
+consistently advantageous. Thus, the effect of the Dijkstra variant depends
+not only on graph density and structure, but also on how efficiently each heap
+implements decrease-key.
+
+\subsection{Hardware Performance Results}
+\subsubsection{Instruction and Cycle Behaviour}
+
+Figure~\ref{fig:ipc-comparison} summarises the measured instruction
+throughput across the heap implementations. The hardware-counter results were
+collected using Linux \code{perf} on the frozen experiment run.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]
+    {frozen_results/figures/report_charts/perf/ipc_comparison.png}
+  \caption{Instructions per cycle across heaps, input graphs, and Dijkstra
+  variants.}
+  \label{fig:ipc-comparison}
+\end{figure}
+
+The cycle and instruction counts broadly follow the runtime results. The binary
+and pairing heaps generally require fewer cycles and instructions than the
+Fibonacci and Brodal--Okasaki heaps. The Brodal--Okasaki implementation shows
+the largest instruction and cycle counts, particularly for
+\code{decrease_key}, which is consistent with the additional bookkeeping
+required by its implementation.
+
+The IPC values are relatively similar across the implementations, usually
+remaining close to one instruction per cycle. This suggests that the main
+runtime differences are primarily caused by the amount of work performed,
+rather than by one implementation making substantially better use of the
+processor pipeline. The higher runtime of the pointer-based heaps is therefore
+more closely associated with additional instructions and queue operations than
+with a large difference in average IPC.
+
+These measurements support the runtime results: the binary heap benefits from
+its compact representation and simple operations, while the more complex heaps
+perform more work for the same shortest-path computation. The counters should
+be interpreted as supporting evidence rather than exact hardware-independent
+costs, since performance-counter values depend on the processor and operating
+system.
+
+\subsubsection{Branch and Cache Behaviour}
+
+Figure~\ref{fig:l1-cache-miss-rate} shows the measured L1 data-cache miss
+rates across the heap implementations, input graphs, and Dijkstra variants.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]
+    {frozen_results/figures/report_charts/perf/l1_cache_miss_rate.png}
+  \caption{L1 data-cache miss rates across heaps, input graphs, and Dijkstra
+  variants.}
+  \label{fig:l1-cache-miss-rate}
+\end{figure}
+
+The cache results help explain the runtime differences observed in
+Section~4.2. The binary heap generally benefits from its contiguous array
+representation, which improves spatial locality and avoids repeated pointer
+dereferences. The pairing and Fibonacci heaps use pointer-linked nodes, while
+the Brodal--Okasaki implementation performs additional structural bookkeeping;
+these designs can increase memory-access overhead during queue operations.
+
+The cache behaviour also varies with graph structure. Larger and denser graphs
+perform more relaxations and access more heap entries, making locality effects
+more visible than in the small \code{smoke_1k} case. Structured graphs such as
+\code{grid_224}, \code{hub_skewed}, and \code{layered_frontier} further
+change the pattern of heap accesses, so cache-miss rates do not increase
+uniformly with graph size.
+
+Overall, the cache measurements are consistent with the binary heap's runtime
+advantage, although cache miss rate alone does not determine execution time.
+The total number of instructions, allocation behaviour, branch behaviour, and
+heap operations also contribute to the observed performance. These results
+should therefore be interpreted as supporting evidence for the runtime
+measurements rather than as an independent ranking of the implementations.
+
+\subsection{Memory Results}
+\subsubsection{Peak Heap and Resident Memory}
+
+Figures~\ref{fig:peak-heap-memory}
+and~\ref{fig:peak-rss-memory} show the peak heap allocation and peak resident
+set size recorded during the experiments.
+
+% \input{frozen_results/figures/mem/mem}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]
+    {frozen_results/figures/report_charts/mem/peak_heap_memory.png}
+  \caption{Peak heap allocation across heap implementations, input graphs, and
+  Dijkstra variants.}
+  \label{fig:peak-heap-memory}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]
+    {frozen_results/figures/report_charts/mem/peak_rss_footprint.png}
+  \caption{Peak resident set size across heap implementations, input graphs,
+  and Dijkstra variants.}
+  \label{fig:peak-rss-memory}
+\end{figure}
+
+The binary heap generally has the lowest peak heap allocation. Its contiguous
+array representation stores queue entries compactly, with limited additional
+metadata for position tracking. The pointer-based pairing and Fibonacci heaps
+require per-node allocations and structural links, which increases their
+memory footprint. The Brodal--Okasaki implementation also incurs additional
+storage for its buffer and tree bookkeeping.
+
+Peak memory increases as graph size and relaxation activity increase. The
+effect is especially visible for the denser and layered inputs, where the
+priority queue processes a larger active frontier. Lazy Dijkstra can further
+increase memory usage because stale entries remain in the queue until they are
+removed.
+
+The resident set size follows the same broad pattern but includes memory
+allocated outside the priority queue, including the graph representation and
+runtime overhead. Consequently, differences in peak RSS are smaller than
+differences in peak heap allocation for some inputs. No negative allocation
+values or leaks were recorded in the frozen results.
+
+\subsubsection{Allocator Activity}
+
+Figure~\ref{fig:allocator-pressure} shows allocator activity across the heap
+implementations and input graphs.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]
+    {frozen_results/figures/report_charts/mem/allocator_pressure.png}
+  \caption{Dynamic allocation activity across heap implementations, input
+  graphs, and Dijkstra variants.}
+  \label{fig:allocator-pressure}
+\end{figure}
+
+The binary and Brodal--Okasaki implementations perform very few allocation
+operations because they primarily use preallocated or buffer-based storage.
+In contrast, the pairing and Fibonacci heaps allocate individual nodes, which
+results in substantially more \code{malloc} and \code{free} calls.
+
+Lazy processing generally increases allocator activity for the pointer-based
+heaps because duplicate queue entries must be created and later released. The
+increase is most visible on the medium, dense, and layered graphs, where more
+relaxations produce more stale entries. All configurations report matching
+allocation and free counts with zero leaked bytes, indicating that the
+additional allocation activity is temporary rather than caused by unreleased
+memory.
+
+These results support the runtime and peak-memory measurements: allocation
+frequency and allocator overhead contribute to the higher cost of the
+pointer-based implementations, particularly when lazy Dijkstra increases the
+number of queue entries.
+
+\subsection{Cross-Experiment Analysis}
+
+Taken together, the runtime, hardware-counter, and memory results consistently
+favour the binary heap. Its contiguous array representation gives it the
+lowest runtime in every tested configuration, while also limiting allocation
+activity and peak heap usage. The pairing heap is generally the second-fastest,
+but its pointer-based structure introduces additional memory and allocation
+overhead.
+
+The Fibonacci and Brodal--Okasaki heaps do not overcome their higher constant
+costs in this workload, despite their stronger theoretical bounds for selected
+priority-queue operations. The hardware measurements support this result:
+the slower implementations generally perform more instructions and incur
+greater structural overhead.
+
+The choice of Dijkstra variant also matters. Decrease-key is faster for the
+binary, pairing, and Fibonacci heaps because it avoids stale queue entries.
+The Brodal--Okasaki implementation benefits from lazy processing because its
+decrease-key operation is comparatively expensive. Overall, graph structure
+and heap implementation interact substantially, so theoretical complexity
+alone does not predict the observed end-to-end performance.
