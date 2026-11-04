@@ -4,3 +4,57 @@
 \subsection{Truong Giang Nguyen}
 
 \subsection{Tung Nguyen}
+\subsubsection{Pairing Heap}
+
+The worst case for the pairing heap occurs during \textsc{Delete-Min}. In this implementation, removing the root first pairs its children
+from left to right and then melds the resulting trees from right to left.
+Therefore, an input that creates a large root with many children, such as a
+dense graph with many frontier relaxations, can make one extraction expensive.
+Repeated decrease-key operations can also create irregular tree shapes because
+a decreased node is cut from its current sibling list and melded back with the
+root.
+
+The hardest design issue was maintaining the left-child/right-sibling
+representation correctly. Each node stores a \code{child}, \code{next}, and
+\code{prev} pointer. But, \code{prev} has two meanings as it refers to the parent
+when the node is the first child, and to the previous sibling otherwise. This
+made cutting a node during \textsc{Decrease-Key} particularly error-prone. A
+mistake in either case could disconnect part of the tree or leave an invalid
+pointer for the next operation. I resolved this by treating the two cases
+separately and updating both the predecessor and successor whenever a node was
+removed.
+
+If I implemented the pairing heap again, I would define explicit helper
+functions for unlinking a node and for appending a child before writing the
+main operations. I would also add invariant checks after every operation,
+including checks that the root has no parent, sibling links are symmetric, and
+every node appears in the position array exactly once. This would make pointer
+errors easier to isolate than debugging them through a complete Dijkstra run.
+
+Before this project, I did not fully understand the purpose of \textsc{Meld} in a pairing heap. I now understand that it is the core operation used to combine trees during insertion, \textsc{Decrease-Key}, and \textsc{Delete-Min}. By linking the larger root under the smaller one, the heap preserves the heap-order property without requiring global rebalancing.
+\subsubsection{Fibonacci Heap}
+
+The worst case for the Fibonacci heap is associated with \textsc{Extract-Min}
+and cascading cuts. Extracting the minimum can require consolidating many roots
+of equal degree, while a sequence of decrease-key operations can repeatedly
+cut nodes from their parents and propagate cascading cuts up the tree. Dense
+graphs with many successful edge relaxations are therefore a natural stress
+case because they produce frequent decrease-key operations followed by
+consolidation.
+
+The most difficult part was maintaining the circular doubly-linked root and
+child lists. Every insertion, cut, child promotion, and tree link modifies
+several links at once. In particular, \textsc{Extract-Min} must promote all
+children of the removed node, remove that node from the root list, and then
+rebuild the list after consolidation. I also had to preserve the marked-bit
+invariant, where the first child loss marks a node, while a later loss cuts it and
+continues the cascading cut. I resolved these issues by isolating linking and
+cutting into helper functions and by carefully resetting parent and mark fields
+when nodes became roots.
+
+If I started again, I would first implement and test the circular-list
+operations independently before integrating them with Dijkstra. I would also
+avoid relying on a fixed \code{MAX_DEGREE} without documenting the bound and
+would use a dynamically sized consolidation array based on the heap size.
+
+The main thing I learned is that Fibonacci heaps achieve their theoretical advantage by postponing work rather than eliminating it. At first, I was tempted to optimise the implementation to make every operation appear efficient. But I eventually realised that the main constraint is the trade-off between cheap insertions and decrease-key operations and the more expensive restructuring performed during \textsc{Extract-Min}. I accepted this trade-off as an essential part of the Fibonacci heap rather than trying to eliminate it.
