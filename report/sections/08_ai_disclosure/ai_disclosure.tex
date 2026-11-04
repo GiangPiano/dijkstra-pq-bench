@@ -2,15 +2,63 @@
 
 \subsection{Oscar's Experience}
 
+% Makefile troubles
+% Useful for perf / mem tests and graphics
+
+This was my first time using AI in any meaningful manner. There was both good
+and bad.
+
+When I knew exactly the changes that I wanted LLM's were very helpful to quickly
+make changes that would have otherwise been tedious. Certain tasks were not
+particularly appealing to work on, but using LLM generated code and auditing it
+meant that I could quickly get to a place where I was happy. Notable parts of
+the project that were AI generated are the perf and mem tests, some of the graph
+generation logic, the plot generation, and the presentation.
+
+On the other hand, when not enough specific guidance was given, or if another
+group member who had a less clear image of the outputs they wanted had prompted
+the LLM, I'd often find that the produced code was overly brittle. For instance,
+the early implementations of perf recorded intel specific events, and were not
+portable at all. The early perf and mem tests also hardcoded the graph and heap
+names, and would not have held up well to changes in the inputs.
+
+However, despite these downfalls, it was easy to later correct the LLM, modifing
+the scripts to not hard code the systems by pointing them to good examples and
+motivations for why tasks should be completed in the way I wanted them to be
+done.
+
+One aspect I did not like LLMs touching was the Makefile. They were all too
+happy to forever tack on additional targets and variables without considering
+how to integrate with the existing structures. Often a group member would ask
+the LLM to quick and dirty add their outputs to the Makefile, and then I would
+review and restructure the project's build process as the requirements and
+structure changed. The LLM Makefile contributions were always terribly
+implemented and completely replaced when I would manually audit the file.
+
+Outside of generation, I found that using an LLM was very helpful for analysing
+how to optimise the Brodal-Okasaki heap. Claude identified that meld is not
+used, so bootstrapping is no longer necessary, and gave me the idea to put all
+cells in a buffer by suggesting that I run my own free list for the allocations,
+which is not quite the same thing. After I had rewritten the min heap, Claude
+was able to quickly catch a number of small mistakes I had made in the rewrite,
+before I wasted time running and debugging it. I quite enjoyed this explorative
+and feedback usage, where the LLM did not generate code for me, but was instead
+used to get a different perspective, or to simplify the reasoning about a very
+complex implementation.
+
+For my first experience interacting with LLM's on a larger scale in a project, I
+was quite impressed with how much time it saved the group, but felt I always
+needed to spend time properly posing questions to the LLM and reviewing the
+outputs, as there would always be something wrong with the first attempt. I
+suspect recent improvements in the quality of tools means I'll need to begin
+taking them more seriously, and come to terms that they will be part of software
+development going forward.
+
 \subsection{Truong Giang's Experience}
 
 \subsection{Tung's Experience}
 
 \subsubsection{What AI did wrong}
 When generating the benchmark visualisations, AI overlooked the fact that the benchmarking library already supported exporting results directly to \code{.csv} files. Instead, it created a separate Python parser to read the output and convert it into a pandas DataFrame. This added unnecessary complexity to the workflow. We eventually discarded that implementation and provided AI with more context about the library's existing CSV export functionality so it could use it instead.
-
-TODO
-
-How AI wrote a terrible Makefile (Oscar)
 
 
