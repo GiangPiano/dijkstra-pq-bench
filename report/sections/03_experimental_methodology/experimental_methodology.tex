@@ -2,8 +2,12 @@
 
 \subsection{Overview}
 
-% note: operating system, distro, processor
-All tests were conducted on a TODO. The full set of tests require a linux
+All tests were conducted on a machine equipped with an Intel Core Ultra 7
+165U processor, 12 physical cores and 14 logical CPUs, 30~GiB of RAM, and a
+937~GB NVMe solid-state drive. The machine was running 64-bit \emph{Arch} Linux with
+kernel version 7.2.11-arch1-1. The complete test suite was executed on Linux,
+while macOS supports only the runtime benchmarks because the \code{perf} and
+memory benchmarks depend on Linux-specific facilities. The full set of tests require a linux
 computer to run, but a subset can be run on a darwin machine. Due to high
 variance out of our control we do not expect every machine to produce the same
 results, or even subsequent runs to produce the same results, but they should
@@ -12,17 +16,16 @@ all be relatively similar.
 We tested each heap implementation against two djikstras implementations and
 several input graphs, gathering data about the running time, cpu behaviour, and
 memory use.
-
-In order to reuse code for each task we used `make` to generate several
+In order to reuse code for each task we used \code{make} to generate several
 executables, with each executable testing one aspect of a particular heap
-implementation, each executable links common objects (dijkstras.o, graph.o), the
-input graph objects (graph\_registry.o, uniform\_sparse.o, uniform\_medium.o,
-...), a specific heap implementation's object(s) (binary.o, fibonacci.o, ...),
-and an entry point (runtime/main.o, perf/main.o, mem/main.o). Thus producing an
+implementation, each executable links common objects (\code{dijkstras.o}, \code{graph.o}), the
+input graph objects (\code{graph_registry.o}, \code{uniform_sparse.o}, \code{uniform_medium.o},
+...), a specific heap implementation's object(s) (\code{binary.o}, \code{fibonacci.o}, ...),
+and an entry point (\code{runtime/main.o}, \code{perf/main.o}, \code{mem/main.o}). Thus producing an
 executable that will test the specified performance aspect of a particular heap
 for all the input graphs.
 
-We used python to generate input graphs as source c files, enabling the produced
+We used python to generate input graphs as source C files, enabling the produced
 executables to automatically discover the input graphs. This allows most of the
 test options to be derived from the Makefile. Random number generation during
 this process is done using a fixed seed, ensuring that the input data is always
@@ -32,37 +35,37 @@ quickly, as there isn't additional overhead of reading and parsing large input
 files.
 
 Reproducibility was a focus of the test setup. A guix manifest file allows a
-user to get all the dependencies of the project on linux and run the full
+user to get all the dependencies of the project on Linux and run the full
 pipeline in an isolated container easily.
 
 % TODO: link to ubench
-We used ubench, a single header c benchmarking library to run our runtime
-benchmarks. ubench runs djikstras a minimum of 100 times, increasing the number
+We used \code{ubench}, a single header C benchmarking library to run our runtime
+benchmarks. \code{ubench} runs Dijkstras a minimum of 100 times, increasing the number
 of attempts if the variance is high. This allows us to gather a good estimate of
-the running time of each heap implementation in both decrease\_key and lazy
-dijkstras implementations. We took care to ensure that the benchmarks were only
-measuring the running time of dijkstras over the heap implementation, and that
+the running time of each heap implementation in both \code{decrease_key} and \code{lazy}
+Dijkstras implementations. We took care to ensure that the benchmarks were only
+measuring the running time of Dijkstras over the heap implementation, and that
 we were not including static overheads due to test initialisation or additional
 allocations into the benchmarks.
 
-On linux, we use the `perf` tool to measure data about the cycles, branching,
-and cache loads and misses that occur as dijkstras runs. These tests are more
+On Linux, we use the \code{perf} tool to measure data about the cycles, branching,
+and cache loads and misses that occur as Dijkstras runs. These tests are more
 expensive but we only run them a single time. We were interested in measuring
 the reasons behind the performance differences, and in modern processors cache
 locality has a massive impact on program performance. This is where the
-difference between the theoretical big O performance of each heap and the
+difference between the theoretical big $O$ performance of each heap and the
 reality will be made apparent. We use a python script to run the binaries and
 collate the produced data.
 
-Also on linux we do a separate test for memory usage, this time wrapping the
-stdlib's `malloc`, `calloc`, `realloc`, and `free` with custom functions to
+Also on Linux we do a separate test for memory usage, this time wrapping the
+stdlib's \code{malloc}, \code{calloc}, \code{realloc}, and \code{free} with custom functions to
 capture the allocation behaviours and memory usage of each heap. This data is
-related to the cache performance measured in perf, but measured using totally
-different techniques, so we are looking to compare the data from mem against the
-data from perf to see how allocations relate to cache locality. This benchmark
+related to the cache performance measured in \code{perf}, but measured using totally
+different techniques, so we are looking to compare the data from \code{mem} against the
+data from \code{perf} to see how allocations relate to cache locality. This benchmark
 also uses a python script to run the binaries and collate the produced data.
 
-Each test (runtime, perf, mem) produces csvs of the results, which we then
+Each test (\code{runtime}, \code{perf}, \code{mem}) produces csvs of the results, which we then
 process into svg graphics and \TeX\ files using more python scripts, allowing
 them to be easily embedded into the report.
 

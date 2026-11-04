@@ -78,7 +78,7 @@ The theoretical merit of priority queues in shortest-path algorithms can be eval
     \item \code{Item item}: 16~bytes (offsets $0 \dots 15$)
     \item \code{int degree}: 4~bytes (offsets $16 \dots 19$)
     \item \code{bool marked}: 1~byte (offset $20$)
-    \item \emph{Compiler alignment padding}: 3~bytes (offsets $21 \dots 23$) to align the subsequent pointer fields to an 8-byte boundary.
+    \item Compiler alignment padding: 3~bytes (offsets $21 \dots 23$) to align the subsequent pointer fields to an 8-byte boundary.
     \item Four pointers (\code{parent}, \code{child}, \code{left}, \code{right}): $4 \times 8 = 32\text{ bytes}$ (offsets $24 \dots 55$)
   \end{itemize}
   This sums to $\texttt{sizeof}(\code{Node}) = 56\text{ bytes}$. With the 8-byte external \code{pos} handle, each settled vertex incurs a memory commitment of $64\text{ bytes}$.
