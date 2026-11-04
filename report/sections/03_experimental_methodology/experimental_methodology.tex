@@ -1,6 +1,71 @@
 \section{Experimental Methodology}
-\subsection{Hardware and compiling setup}
 
-\subsection{Input graph representation}
+\subsection{Overview}
 
-\subsection{Runner for each experiment}
+% note: operating system, distro, processor
+All tests were conducted on a TODO. The full set of tests require a linux
+computer to run, but a subset can be run on a darwin machine. Due to high
+variance out of our control we do not expect every machine to produce the same
+results, or even subsequent runs to produce the same results, but they should
+all be relatively similar.
+
+We tested each heap implementation against two djikstras implementations and
+several input graphs, gathering data about the running time, cpu behaviour, and
+memory use.
+
+In order to reuse code for each task we used `make` to generate several
+executables, with each executable testing one aspect of a particular heap
+implementation, each executable links common objects (dijkstras.o, graph.o), the
+input graph objects (graph\_registry.o, uniform\_sparse.o, uniform\_medium.o,
+...), a specific heap implementation's object(s) (binary.o, fibonacci.o, ...),
+and an entry point (runtime/main.o, perf/main.o, mem/main.o). Thus producing an
+executable that will test the specified performance aspect of a particular heap
+for all the input graphs.
+
+We used python to generate input graphs as source c files, enabling the produced
+executables to automatically discover the input graphs. This allows most of the
+test options to be derived from the Makefile. Random number generation during
+this process is done using a fixed seed, ensuring that the input data is always
+the same across different machines and builds. Compiling and linking the large
+graphs means that fresh build times are higher, but all the benchmarks run
+quickly, as there isn't additional overhead of reading and parsing large input
+files.
+
+Reproducibility was a focus of the test setup. A guix manifest file allows a
+user to get all the dependencies of the project on linux and run the full
+pipeline in an isolated container easily.
+
+% TODO: link to ubench
+We used ubench, a single header c benchmarking library to run our runtime
+benchmarks. ubench runs djikstras a minimum of 100 times, increasing the number
+of attempts if the variance is high. This allows us to gather a good estimate of
+the running time of each heap implementation in both decrease\_key and lazy
+dijkstras implementations. We took care to ensure that the benchmarks were only
+measuring the running time of dijkstras over the heap implementation, and that
+we were not including static overheads due to test initialisation or additional
+allocations into the benchmarks.
+
+On linux, we use the `perf` tool to measure data about the cycles, branching,
+and cache loads and misses that occur as dijkstras runs. These tests are more
+expensive but we only run them a single time. We were interested in measuring
+the reasons behind the performance differences, and in modern processors cache
+locality has a massive impact on program performance. This is where the
+difference between the theoretical big O performance of each heap and the
+reality will be made apparent. We use a python script to run the binaries and
+collate the produced data.
+
+Also on linux we do a separate test for memory usage, this time wrapping the
+stdlib's `malloc`, `calloc`, `realloc`, and `free` with custom functions to
+capture the allocation behaviours and memory usage of each heap. This data is
+related to the cache performance measured in perf, but measured using totally
+different techniques, so we are looking to compare the data from mem against the
+data from perf to see how allocations relate to cache locality. This benchmark
+also uses a python script to run the binaries and collate the produced data.
+
+Each test (runtime, perf, mem) produces csvs of the results, which we then
+process into svg graphics and \TeX\ files using more python scripts, allowing
+them to be easily embedded into the report.
+
+\subsection{Input Graphs}
+
+
