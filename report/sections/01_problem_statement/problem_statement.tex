@@ -23,7 +23,7 @@ reachable $v$, and the sentinel $-1$ where no $s \rightarrow v$ path
 exists. The path trace are not reconstructed, since that process is identical across every implementation and would add a constant to all
 measurements without discriminating between them.
 
-The input graph must have the following two properties for Dijkstra's algorithm to be functional. Firstly, weights are strictly positive integers, since Dijkstra's algorithm depends on the greedy approach that the distance to a processed node is fixed once it is relaxed. 
+The input graph must have the following two properties for Dijkstra's algorithm to be functional. Firstly, weights are strictly positive integers, since Dijkstra's algorithm depends on the greedy approach that the distance to a processed node is fixed once it is relaxed.
 
 
 The input graph must satisfy one condition for Dijkstra's algorithm to work correctly. All edge weights must be strictly positive integers. This is because the algorithm relies on a greedy approach, where it chooses the next vertex to process by their current shortest distance. This choice is guaranteed to be correct as long as there are no negative edge weights. The input graphs are generated with a fixed pseudo-random seed so that every implementation is measured on identical input.
@@ -68,7 +68,7 @@ to make this operation cheap.
 \end{algorithmic}
 \end{algorithm}
 \vspace{-\intextsep}
-{\small \textbf{Author:} Truong Giang Nguyen} 
+{\small \textbf{Author:} Truong Giang Nguyen}
 
 The algorithm performs a fixed amount of work outside the queue. Each vertex is settled once and each arc is examined once, which accounts for $\Theta(n + m)$ . Everything else is queue work. A vertex's edges are scanned only the first time it is extracted, because stale entries are skipped before the loop. Every edge is therefore relaxed at most once, so there are at most $m$ pushes plus the initial one. Every pushed entry is eventually extracted, giving at most $m + 1$ pops, of which at most $n$ settle a vertex and the rest are stale. Eventually, the running time is:
 
@@ -109,7 +109,7 @@ For the eager variant, the work outside the queue is the same $\Theta(n + m)$, b
 
 \subsubsection{Binary heap}
 \vspace{-0.2cm}
-{\small \textbf{Author:} Truong Giang Nguyen} 
+{\small \textbf{Author:} Truong Giang Nguyen}
 
 \vspace{0.2cm}
 \noindent
@@ -120,25 +120,43 @@ decrease. The tree structure is based on indices arithmetic rather than poinster
 
 \subsubsection{Pairing heap}
 \vspace{-0.2cm}
-{\small \textbf{Author:} Tung Nguyen} 
+{\small \textbf{Author:} Tung Nguyen}
 
 \vspace{0.2cm}
 \noindent
-A pairing heap is a self-adjusting multi-way tree implemented using a Left-Child Right-Sibling (LCRS) layout. Each node stores three pointers: \code{child}, \code{next}, and \code{prev} (points to its left sibling, or to its parent if it is the first child, allowing $O(1)$ detachment). Tree combinations rely on \textsc{Meld}, which attaches the root with the larger key as the leftmost child of the smaller root in $O(1)$ time. Consequently, \textsc{Push} melds a newly allocated node into the root, and \textsc{Decrease-Key} cuts the target node from its siblings via $\texttt{pos}[v]$ and melds it into the root in $O(1)$ worst-case time without disturbing other nodes' handles. 
+A pairing heap is a self-adjusting multi-way tree implemented using a Left-Child Right-Sibling (LCRS) layout. Each node stores three pointers: \code{child}, \code{next}, and \code{prev} (points to its left sibling, or to its parent if it is the first child, allowing $O(1)$ detachment). Tree combinations rely on \textsc{Meld}, which attaches the root with the larger key as the leftmost child of the smaller root in $O(1)$ time. Consequently, \textsc{Push} melds a newly allocated node into the root, and \textsc{Decrease-Key} cuts the target node from its siblings via $\texttt{pos}[v]$ and melds it into the root in $O(1)$ worst-case time without disturbing other nodes' handles.
 All structural rebalancing is deferred lazily to \textsc{Pop}: after removing the root, its orphaned children are merged via a \emph{two-pass pairing} scheme (pairing adjacent siblings left-to-right, then accumulating them right-to-left) to achieve $O(\log n)$ extraction. Compared to the array-backed binary heap, the pairing heap trades cache locality and per-node dynamic allocation overhead for trivial, $O(1)$-like decrease-key operations.
 \subsubsection{Fibonacci heap}
 \vspace{-0.2cm}
-{\small \textbf{Author:} Tung Nguyen} 
+{\small \textbf{Author:} Tung Nguyen}
 
 \vspace{0.2cm}
 \noindent
-A Fibonacci heap is a collection of min-heap-ordered trees, maintained in a circular doubly-linked root list, with a direct pointer to the minimum root. Each node stores four pointers (\code{parent}, \code{child}, \code{left}, \code{right}), an integer \code{degree}, and a boolean \code{marked} flag indicating whether it has lost a child since becoming a child of its current parent. 
+A Fibonacci heap is a collection of min-heap-ordered trees, maintained in a circular doubly-linked root list, with a direct pointer to the minimum root. Each node stores four pointers (\code{parent}, \code{child}, \code{left}, \code{right}), an integer \code{degree}, and a boolean \code{marked} flag indicating whether it has lost a child since becoming a child of its current parent.
 Operations are designed around lazy consolidation. \textsc{Push} inserts a new node into the root list in $O(1)$ worst-case time. When \textsc{Decrease-Key} violates heap order, the node is severed and moved to the root list via \textsc{Cut}. If its parent was already marked, a \emph{cascading cut} recurses up the ancestor chain until an unmarked node is found and marked. This mechanism preserves an exponential lower bound on tree size relative to degree, achieving $O(1)$ decrease-key. All cleanup occurs during \textsc{Pop}, where the root's children are promoted to the root list, and trees of identical degree are pairwise linked using an auxiliary degree array (\code{A[MAX\_DEGREE]}), yielding $O(\log n)$ extraction. This provides Dijkstra's theoretically optimal $O(m + n \log n)$ bound. However, it carries heavy node structures (4 pointers plus metadata), complex cascading cuts, and poor cache locality.
 
 \subsubsection{Brodal--Okasaki heap}
 \vspace{-0.2cm}
-{\small \textbf{Author:} Oscar Chevalier} 
+{\small \textbf{Author:} Oscar Chevalier}
 
 \vspace{0.2cm}
 \noindent
-TODO
+
+Traditionally, the Brodal--Okasaki is a persistant pure functional heap. It is a
+bootstrapped skew-link binomial heap, which provides the best possible
+theoretical performance bounds for a heap. There is also an imperative variant
+that is more similar to the Fibonnaci heap, but uses skew-links. Brodal--Okaski
+achieves \textsc{Push} in $O(1)$ and \textsc{Pop} in $O(log(n))$,
+\textsc{Decrease-Key} is more complex, but fits in $O(log(n))$.
+
+Several major adjustments have been made to the Brodal--Okasaki implementation
+in order to try to improve its performance. While the overall pure functional
+construction of the heap has been kept, bootstrapping has been removed as the
+meld operation does not get used in dijkstras. Additionally, we decided not to
+worry about the purity of the memory management. When the heap is modified, the
+implementation happily mutates pointers and cells, making the implementation
+`in-place'. In order to improve cache locality, all the cells are allocated in
+one contiguous buffer effectively maintaing a custom free-list / memory
+allocator for the heap. Cells use relative addresses to point to each other,
+allowing the buffer to be reallocated without invalidating the contents.
+Finally, a negative queue has been added to support the decrease-key operation.
