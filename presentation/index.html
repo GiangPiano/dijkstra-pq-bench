@@ -13,36 +13,36 @@
   <style>
     :root {
       /* Tokyo Night Storm Palette */
-      --bg: #24283b;
+      --bg: #1f2335;
       --header-bg: #1f2335;
-      --surface: #1f2335;
-      --surface-subtle: #24283b;
-      --surface-border: #383e5a;
+      --surface: #24283b;
+      --surface-subtle: #1f2335;
+      --surface-border: #414868;
       --surface-border-light: #292e42;
 
       --text-main: #c0caf5;
       --text-muted: #7aa2f7;
-      --text-dim: #565f89;
+      --text-dim: #737aa2;
       --text-heading: #ffffff;
 
       --primary: #7aa2f7;
-      --primary-subtle: rgba(122, 162, 247, 0.12);
+      --primary-subtle: #1d253f;
       --primary-border: #3d59a1;
 
       --accent-green: #9ece6a;
-      --accent-green-subtle: rgba(158, 206, 106, 0.12);
+      --accent-green-subtle: #1b2927;
       --accent-green-border: #41a6b5;
 
       --accent-purple: #bb9af7;
-      --accent-purple-subtle: rgba(187, 154, 247, 0.12);
+      --accent-purple-subtle: #25203b;
       --accent-purple-border: #7dcfff;
 
       --accent-amber: #e0af68;
-      --accent-amber-subtle: rgba(224, 175, 104, 0.12);
+      --accent-amber-subtle: #2b231a;
       --accent-amber-border: #ff9e64;
 
       --accent-red: #f7768e;
-      --accent-red-subtle: rgba(247, 118, 142, 0.12);
+      --accent-red-subtle: #2d1e27;
 
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -94,7 +94,7 @@
       text-align: right;
     }
 
-    /* Flat Progress Bar (No Gradient) */
+    /* Flat Solid Progress Bar */
     .progress-bar-container {
       width: 100%;
       height: 4px;
@@ -129,7 +129,7 @@
       background: var(--surface);
       border: 1px solid var(--surface-border);
       border-radius: 14px;
-      box-shadow: 0 16px 45px rgba(15, 17, 26, 0.45);
+      box-shadow: 0 12px 32px rgba(15, 17, 26, 0.45);
       padding: 2.25rem 3rem;
       display: none;
       flex-direction: column;
@@ -333,7 +333,7 @@
     }
 
     .media-card.diagram {
-      background: #1a1b26;
+      background: #1f2335;
     }
 
     .media-card.chart {
@@ -376,7 +376,7 @@
     .chart-tab-btn.active {
       background: var(--primary);
       border-color: var(--primary);
-      color: #1a1b26;
+      color: #1f2335;
       font-weight: 800;
     }
 
@@ -392,7 +392,7 @@
 
     code {
       font-family: var(--font-mono);
-      background: #1a1b26;
+      background: #1f2335;
       border: 1px solid var(--surface-border);
       padding: 2px 6px;
       border-radius: 4px;
@@ -421,7 +421,7 @@
     <div class="slide-counter" id="slide-num">1 / 15</div>
   </header>
 
-  <!-- Progress bar (No gradient) -->
+  <!-- Progress bar (Solid flat color) -->
   <div class="progress-bar-container">
     <div class="progress-bar" id="progress-bar"></div>
   </div>
@@ -1031,7 +1031,7 @@
         <div class="col col-50">
           <div class="highlight-card amber">
             <h4>Node & Struct Layout</h4>
-            <pre style="font-family:monospace; font-size:0.9rem; color:#7dcfff; background:#1a1b26; border:1px solid var(--surface-border); padding:12px; border-radius:8px; margin:0.6rem 0;">
+            <pre style="font-family:monospace; font-size:0.9rem; color:#7dcfff; background:#1f2335; border:1px solid var(--surface-border); padding:12px; border-radius:8px; margin:0.6rem 0;">
 struct Tree {
   Item it;              // 16 B (distance, vertex)
   size_t rank;          //  8 B
