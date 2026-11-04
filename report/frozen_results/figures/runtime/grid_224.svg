@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" width="720" height="520" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+<defs>
+  <style>
+    .axis { stroke: #CBD5E1; stroke-width: 1; }
+    .grid { stroke: #F1F5F9; stroke-width: 1; stroke-dasharray: 4,4; }
+    .baseline { stroke: #EF4444; stroke-width: 1.5; stroke-dasharray: 3,3; }
+    .tick-label { font-size: 11px; fill: #64748B; }
+    .axis-title { font-size: 12px; font-weight: 600; fill: #334155; }
+    .chart-title { font-size: 16px; font-weight: 700; fill: #0F172A; }
+    .chart-subtitle { font-size: 12px; fill: #64748B; }
+    .bar-label { font-size: 9px; font-weight: 600; fill: #1E293B; text-anchor: middle; }
+    .legend-text { font-size: 12px; fill: #334155; font-weight: 500; dominant-baseline: central; }
+    .bar-label { font-size: 10px; font-weight: 600; fill: #1E293B; text-anchor: middle; }
+  </style>
+</defs>
+<text x="90" y="32" class="chart-title">Dijkstra Runtime Comparison: grid_224</text>
+<text x="90" y="50" class="chart-subtitle">Wall-clock execution time across Priority Queue variants (lower is better)</text>
+<line x1="90" y1="375.0" x2="680" y2="375.0" class="grid" />
+<text x="80" y="379.0" class="tick-label" text-anchor="end">0.0 ns</text>
+<line x1="90" y1="314.0" x2="680" y2="314.0" class="grid" />
+<text x="80" y="318.0" class="tick-label" text-anchor="end">2.82 ms</text>
+<line x1="90" y1="253.0" x2="680" y2="253.0" class="grid" />
+<text x="80" y="257.0" class="tick-label" text-anchor="end">5.65 ms</text>
+<line x1="90" y1="192.0" x2="680" y2="192.0" class="grid" />
+<text x="80" y="196.0" class="tick-label" text-anchor="end">8.47 ms</text>
+<line x1="90" y1="131.0" x2="680" y2="131.0" class="grid" />
+<text x="80" y="135.0" class="tick-label" text-anchor="end">11.29 ms</text>
+<line x1="90" y1="70.0" x2="680" y2="70.0" class="grid" />
+<text x="80" y="74.0" class="tick-label" text-anchor="end">14.12 ms</text>
+<line x1="90" y1="70" x2="90" y2="375" class="axis" />
+<line x1="90" y1="375" x2="680" y2="375" class="axis" />
+<text x="-222.5" y="20" class="axis-title" text-anchor="middle" transform="rotate(-90)">Mean Runtime</text>
+<text x="237.5" y="395" class="axis-title" font-size="11px" text-anchor="middle">Explicit Decrease-Key</text>
+<rect x="167.5" y="321.6" width="32.0" height="53.4" fill="#2563EB" rx="3" ry="3"><title>binary (decrease_key): 2.47 ms</title></rect>
+<text x="183.5" y="316.6" class="bar-label">2.47 ms</text>
+<rect x="203.5" y="109.8" width="32.0" height="265.2" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (decrease_key): 12.28 ms</title></rect>
+<text x="219.5" y="104.8" class="bar-label">12.28 ms</text>
+<rect x="239.5" y="218.5" width="32.0" height="156.5" fill="#9333EA" rx="3" ry="3"><title>fibonacci (decrease_key): 7.24 ms</title></rect>
+<text x="255.5" y="213.5" class="bar-label">7.24 ms</text>
+<rect x="275.5" y="308.1" width="32.0" height="66.9" fill="#16A34A" rx="3" ry="3"><title>pairing (decrease_key): 3.10 ms</title></rect>
+<text x="291.5" y="303.1" class="bar-label">3.10 ms</text>
+<text x="532.5" y="395" class="axis-title" font-size="11px" text-anchor="middle">Lazy Insertion</text>
+<rect x="462.5" y="314.3" width="32.0" height="60.7" fill="#2563EB" rx="3" ry="3"><title>binary (lazy): 2.81 ms</title></rect>
+<text x="478.5" y="309.3" class="bar-label">2.81 ms</text>
+<rect x="498.5" y="160.4" width="32.0" height="214.6" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (lazy): 9.93 ms</title></rect>
+<text x="514.5" y="155.4" class="bar-label">9.93 ms</text>
+<rect x="534.5" y="179.6" width="32.0" height="195.4" fill="#9333EA" rx="3" ry="3"><title>fibonacci (lazy): 9.05 ms</title></rect>
+<text x="550.5" y="174.6" class="bar-label">9.05 ms</text>
+<rect x="570.5" y="298.0" width="32.0" height="77.0" fill="#16A34A" rx="3" ry="3"><title>pairing (lazy): 3.56 ms</title></rect>
+<text x="586.5" y="293.0" class="bar-label">3.56 ms</text>
+<rect x="90.0" y="485.0" width="14" height="14" fill="#2563EB" rx="3" ry="3" />
+<text x="110.0" y="492.0" class="legend-text">binary</text>
+<rect x="230.0" y="485.0" width="14" height="14" fill="#EA580C" rx="3" ry="3" />
+<text x="250.0" y="492.0" class="legend-text">brodal-okasaki</text>
+<rect x="370.0" y="485.0" width="14" height="14" fill="#9333EA" rx="3" ry="3" />
+<text x="390.0" y="492.0" class="legend-text">fibonacci</text>
+<rect x="510.0" y="485.0" width="14" height="14" fill="#16A34A" rx="3" ry="3" />
+<text x="530.0" y="492.0" class="legend-text">pairing</text>
+</svg>

@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1740 520" width="1740" height="520" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+<defs>
+  <style>
+    .axis { stroke: #CBD5E1; stroke-width: 1; }
+    .grid { stroke: #F1F5F9; stroke-width: 1; stroke-dasharray: 4,4; }
+    .baseline { stroke: #EF4444; stroke-width: 1.5; stroke-dasharray: 3,3; }
+    .tick-label { font-size: 11px; fill: #64748B; }
+    .axis-title { font-size: 12px; font-weight: 600; fill: #334155; }
+    .chart-title { font-size: 16px; font-weight: 700; fill: #0F172A; }
+    .chart-subtitle { font-size: 12px; fill: #64748B; }
+    .bar-label { font-size: 9px; font-weight: 600; fill: #1E293B; text-anchor: middle; }
+    .legend-text { font-size: 12px; fill: #334155; font-weight: 500; dominant-baseline: central; }
+  </style>
+</defs>
+<text x="90" y="32" class="chart-title">Peak Heap Memory Allocation (KiB) across Priority Queues</text>
+<text x="90" y="50" class="chart-subtitle">Maximum live heap bytes held simultaneously during Dijkstra execution (lower is better)</text>
+<line x1="90" y1="375.0" x2="1700" y2="375.0" class="grid" />
+<text x="80" y="379.0" class="tick-label" text-anchor="end">0K</text>
+<line x1="90" y1="314.0" x2="1700" y2="314.0" class="grid" />
+<text x="80" y="318.0" class="tick-label" text-anchor="end">960K</text>
+<line x1="90" y1="253.0" x2="1700" y2="253.0" class="grid" />
+<text x="80" y="257.0" class="tick-label" text-anchor="end">1,920K</text>
+<line x1="90" y1="192.0" x2="1700" y2="192.0" class="grid" />
+<text x="80" y="196.0" class="tick-label" text-anchor="end">2,880K</text>
+<line x1="90" y1="131.0" x2="1700" y2="131.0" class="grid" />
+<text x="80" y="135.0" class="tick-label" text-anchor="end">3,840K</text>
+<line x1="90" y1="70.0" x2="1700" y2="70.0" class="grid" />
+<text x="80" y="74.0" class="tick-label" text-anchor="end">4,800K</text>
+<line x1="90" y1="70" x2="90" y2="375" class="axis" />
+<line x1="90" y1="375" x2="1700" y2="375" class="axis" />
+<text x="-222.5" y="20" class="axis-title" text-anchor="middle" transform="rotate(-90)">Peak Heap Allocation (KiB)</text>
+<text x="147.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">grid 224</text>
+<text x="147.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
+<rect x="104.7" y="300.3" width="18.4" height="74.7" fill="#2563EB" rx="3" ry="3"><title>binary (grid_224, decrease_key): 1,176K</title></rect>
+<text x="113.9" y="296.3" class="bar-label">1,176K</text>
+<rect x="127.1" y="250.5" width="18.4" height="124.5" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (grid_224, decrease_key): 1,960K</title></rect>
+<text x="136.3" y="246.5" class="bar-label">1,960K</text>
+<rect x="149.5" y="348.5" width="18.4" height="26.5" fill="#9333EA" rx="3" ry="3"><title>fibonacci (grid_224, decrease_key): 417K</title></rect>
+<text x="158.7" y="344.5" class="bar-label">417K</text>
+<rect x="171.9" y="349.0" width="18.4" height="26.0" fill="#16A34A" rx="3" ry="3"><title>pairing (grid_224, decrease_key): 410K</title></rect>
+<text x="181.1" y="345.0" class="bar-label">410K</text>
+<text x="262.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">grid 224 Lazy</text>
+<rect x="219.7" y="300.3" width="18.4" height="74.7" fill="#2563EB" rx="3" ry="3"><title>binary (grid_224, lazy): 1,176K</title></rect>
+<text x="228.9" y="296.3" class="bar-label">1,176K</text>
+<rect x="242.1" y="250.5" width="18.4" height="124.5" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (grid_224, lazy): 1,960K</title></rect>
+<text x="251.3" y="246.5" class="bar-label">1,960K</text>
+<rect x="264.5" y="347.9" width="18.4" height="27.1" fill="#9333EA" rx="3" ry="3"><title>fibonacci (grid_224, lazy): 426K</title></rect>
+<text x="273.7" y="343.9" class="bar-label">426K</text>
+<rect x="286.9" y="348.5" width="18.4" height="26.5" fill="#16A34A" rx="3" ry="3"><title>pairing (grid_224, lazy): 416K</title></rect>
+<text x="296.1" y="344.5" class="bar-label">416K</text>
+<text x="377.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">hub skewed</text>
+<text x="377.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
+<rect x="334.6" y="345.2" width="18.4" height="29.8" fill="#2563EB" rx="3" ry="3"><title>binary (hub_skewed, decrease_key): 469K</title></rect>
+<text x="343.9" y="341.2" class="bar-label">469K</text>
+<rect x="357.1" y="244.0" width="18.4" height="131.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (hub_skewed, decrease_key): 2,061K</title></rect>
+<text x="366.3" y="240.0" class="bar-label">2,061K</text>
+<rect x="379.5" y="299.0" width="18.4" height="76.0" fill="#9333EA" rx="3" ry="3"><title>fibonacci (hub_skewed, decrease_key): 1,196K</title></rect>
+<text x="388.7" y="295.0" class="bar-label">1,196K</text>
+<rect x="401.9" y="318.1" width="18.4" height="56.9" fill="#16A34A" rx="3" ry="3"><title>pairing (hub_skewed, decrease_key): 896K</title></rect>
+<text x="411.1" y="314.1" class="bar-label">896K</text>
+<text x="492.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">hub skewed Lazy</text>
+<rect x="449.6" y="345.2" width="18.4" height="29.8" fill="#2563EB" rx="3" ry="3"><title>binary (hub_skewed, lazy): 469K</title></rect>
+<text x="458.9" y="341.2" class="bar-label">469K</text>
+<rect x="472.1" y="325.4" width="18.4" height="49.6" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (hub_skewed, lazy): 781K</title></rect>
+<text x="481.3" y="321.4" class="bar-label">781K</text>
+<rect x="494.5" y="297.6" width="18.4" height="77.4" fill="#9333EA" rx="3" ry="3"><title>fibonacci (hub_skewed, lazy): 1,219K</title></rect>
+<text x="503.7" y="293.6" class="bar-label">1,219K</text>
+<rect x="516.9" y="317.0" width="18.4" height="58.0" fill="#16A34A" rx="3" ry="3"><title>pairing (hub_skewed, lazy): 913K</title></rect>
+<text x="526.1" y="313.0" class="bar-label">913K</text>
+<text x="607.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">layered frontier</text>
+<text x="607.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
+<rect x="564.6" y="345.2" width="18.4" height="29.8" fill="#2563EB" rx="3" ry="3"><title>binary (layered_frontier, decrease_key): 469K</title></rect>
+<text x="573.9" y="341.2" class="bar-label">469K</text>
+<rect x="587.1" y="325.4" width="18.4" height="49.6" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (layered_frontier, decrease_key): 781K</title></rect>
+<text x="596.3" y="321.4" class="bar-label">781K</text>
+<rect x="609.5" y="360.2" width="18.4" height="14.8" fill="#9333EA" rx="3" ry="3"><title>fibonacci (layered_frontier, decrease_key): 234K</title></rect>
+<text x="618.7" y="356.2" class="bar-label">234K</text>
+<rect x="631.9" y="361.6" width="18.4" height="13.4" fill="#16A34A" rx="3" ry="3"><title>pairing (layered_frontier, decrease_key): 212K</title></rect>
+<text x="641.1" y="357.6" class="bar-label">212K</text>
+<text x="722.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">layered frontier</text>
+<text x="722.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
+<rect x="679.6" y="345.2" width="18.4" height="29.8" fill="#2563EB" rx="3" ry="3"><title>binary (layered_frontier, lazy): 469K</title></rect>
+<text x="688.9" y="341.2" class="bar-label">469K</text>
+<rect x="702.1" y="325.4" width="18.4" height="49.6" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (layered_frontier, lazy): 781K</title></rect>
+<text x="711.3" y="321.4" class="bar-label">781K</text>
+<rect x="724.5" y="353.8" width="18.4" height="21.2" fill="#9333EA" rx="3" ry="3"><title>fibonacci (layered_frontier, lazy): 334K</title></rect>
+<text x="733.7" y="349.8" class="bar-label">334K</text>
+<rect x="746.9" y="357.0" width="18.4" height="18.0" fill="#16A34A" rx="3" ry="3"><title>pairing (layered_frontier, lazy): 284K</title></rect>
+<text x="756.1" y="353.0" class="bar-label">284K</text>
+<text x="837.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">smoke 1k</text>
+<text x="837.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
+<rect x="794.6" y="373.5" width="18.4" height="1.5" fill="#2563EB" rx="3" ry="3"><title>binary (smoke_1k, decrease_key): 23K</title></rect>
+<text x="803.9" y="369.5" class="bar-label">23K</text>
+<rect x="817.1" y="372.5" width="18.4" height="2.5" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (smoke_1k, decrease_key): 39K</title></rect>
+<text x="826.3" y="368.5" class="bar-label">39K</text>
+<rect x="839.5" y="373.1" width="18.4" height="1.9" fill="#9333EA" rx="3" ry="3"><title>fibonacci (smoke_1k, decrease_key): 30K</title></rect>
+<text x="848.7" y="369.1" class="bar-label">30K</text>
+<rect x="861.9" y="373.5" width="18.4" height="1.5" fill="#16A34A" rx="3" ry="3"><title>pairing (smoke_1k, decrease_key): 24K</title></rect>
+<text x="871.1" y="369.5" class="bar-label">24K</text>
+<text x="952.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">smoke 1k Lazy</text>
+<rect x="909.6" y="373.5" width="18.4" height="1.5" fill="#2563EB" rx="3" ry="3"><title>binary (smoke_1k, lazy): 23K</title></rect>
+<text x="918.9" y="369.5" class="bar-label">23K</text>
+<rect x="932.1" y="372.5" width="18.4" height="2.5" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (smoke_1k, lazy): 39K</title></rect>
+<text x="941.3" y="368.5" class="bar-label">39K</text>
+<rect x="954.5" y="372.6" width="18.4" height="2.4" fill="#9333EA" rx="3" ry="3"><title>fibonacci (smoke_1k, lazy): 38K</title></rect>
+<text x="963.7" y="368.6" class="bar-label">38K</text>
+<rect x="976.9" y="373.1" width="18.4" height="1.9" fill="#16A34A" rx="3" ry="3"><title>pairing (smoke_1k, lazy): 30K</title></rect>
+<text x="986.1" y="369.1" class="bar-label">30K</text>
+<text x="1067.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform dense</text>
+<text x="1067.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
+<rect x="1024.7" y="360.1" width="18.4" height="14.9" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_dense, decrease_key): 234K</title></rect>
+<text x="1033.9" y="356.1" class="bar-label">234K</text>
+<rect x="1047.1" y="131.0" width="18.4" height="244.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_dense, decrease_key): 3,840K</title></rect>
+<text x="1056.3" y="127.0" class="bar-label">3,840K</text>
+<rect x="1069.5" y="338.7" width="18.4" height="36.3" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_dense, decrease_key): 572K</title></rect>
+<text x="1078.7" y="334.7" class="bar-label">572K</text>
+<rect x="1091.9" y="347.7" width="18.4" height="27.3" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_dense, decrease_key): 430K</title></rect>
+<text x="1101.1" y="343.7" class="bar-label">430K</text>
+<text x="1182.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform dense</text>
+<text x="1182.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
+<rect x="1139.7" y="305.5" width="18.4" height="69.5" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_dense, lazy): 1,094K</title></rect>
+<text x="1148.9" y="301.5" class="bar-label">1,094K</text>
+<rect x="1162.1" y="253.0" width="18.4" height="122.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_dense, lazy): 1,920K</title></rect>
+<text x="1171.3" y="249.0" class="bar-label">1,920K</text>
+<rect x="1184.5" y="278.7" width="18.4" height="96.3" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_dense, lazy): 1,515K</title></rect>
+<text x="1193.7" y="274.7" class="bar-label">1,515K</text>
+<rect x="1206.9" y="304.8" width="18.4" height="70.2" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_dense, lazy): 1,105K</title></rect>
+<text x="1216.1" y="300.8" class="bar-label">1,105K</text>
+<text x="1297.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform medium</text>
+<text x="1297.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
+<rect x="1254.7" y="345.2" width="18.4" height="29.8" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_medium, decrease_key): 469K</title></rect>
+<text x="1263.9" y="341.2" class="bar-label">469K</text>
+<rect x="1277.1" y="131.0" width="18.4" height="244.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_medium, decrease_key): 3,840K</title></rect>
+<text x="1286.3" y="127.0" class="bar-label">3,840K</text>
+<rect x="1299.5" y="318.4" width="18.4" height="56.6" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_medium, decrease_key): 891K</title></rect>
+<text x="1308.7" y="314.4" class="bar-label">891K</text>
+<rect x="1321.9" y="331.7" width="18.4" height="43.3" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_medium, decrease_key): 681K</title></rect>
+<text x="1331.1" y="327.7" class="bar-label">681K</text>
+<text x="1412.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform medium</text>
+<text x="1412.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
+<rect x="1369.7" y="305.5" width="18.4" height="69.5" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_medium, lazy): 1,094K</title></rect>
+<text x="1378.9" y="301.5" class="bar-label">1,094K</text>
+<rect x="1392.1" y="244.0" width="18.4" height="131.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_medium, lazy): 2,061K</title></rect>
+<text x="1401.3" y="240.0" class="bar-label">2,061K</text>
+<rect x="1414.5" y="279.9" width="18.4" height="95.1" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_medium, lazy): 1,496K</title></rect>
+<text x="1423.7" y="275.9" class="bar-label">1,496K</text>
+<rect x="1436.9" y="304.3" width="18.4" height="70.7" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_medium, lazy): 1,113K</title></rect>
+<text x="1446.1" y="300.3" class="bar-label">1,113K</text>
+<text x="1527.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform sparse</text>
+<text x="1527.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
+<rect x="1484.7" y="360.1" width="18.4" height="14.9" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_sparse, decrease_key): 234K</title></rect>
+<text x="1493.9" y="356.1" class="bar-label">234K</text>
+<rect x="1507.1" y="350.2" width="18.4" height="24.8" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_sparse, decrease_key): 391K</title></rect>
+<text x="1516.3" y="346.2" class="bar-label">391K</text>
+<rect x="1529.5" y="355.9" width="18.4" height="19.1" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_sparse, decrease_key): 300K</title></rect>
+<text x="1538.7" y="351.9" class="bar-label">300K</text>
+<rect x="1551.9" y="360.0" width="18.4" height="15.0" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_sparse, decrease_key): 237K</title></rect>
+<text x="1561.1" y="356.0" class="bar-label">237K</text>
+<text x="1642.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform sparse</text>
+<text x="1642.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
+<rect x="1599.7" y="360.1" width="18.4" height="14.9" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_sparse, lazy): 234K</title></rect>
+<text x="1608.9" y="356.1" class="bar-label">234K</text>
+<rect x="1622.1" y="350.2" width="18.4" height="24.8" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_sparse, lazy): 391K</title></rect>
+<text x="1631.3" y="346.2" class="bar-label">391K</text>
+<rect x="1644.5" y="351.3" width="18.4" height="23.7" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_sparse, lazy): 373K</title></rect>
+<text x="1653.7" y="347.3" class="bar-label">373K</text>
+<rect x="1666.9" y="356.6" width="18.4" height="18.4" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_sparse, lazy): 289K</title></rect>
+<text x="1676.1" y="352.6" class="bar-label">289K</text>
+<rect x="580.0" y="485.0" width="14" height="14" fill="#2563EB" rx="3" ry="3" />
+<text x="600.0" y="492.0" class="legend-text">binary</text>
+<rect x="725.0" y="485.0" width="14" height="14" fill="#EA580C" rx="3" ry="3" />
+<text x="745.0" y="492.0" class="legend-text">brodal-okasaki</text>
+<rect x="870.0" y="485.0" width="14" height="14" fill="#9333EA" rx="3" ry="3" />
+<text x="890.0" y="492.0" class="legend-text">fibonacci</text>
+<rect x="1015.0" y="485.0" width="14" height="14" fill="#16A34A" rx="3" ry="3" />
+<text x="1035.0" y="492.0" class="legend-text">pairing</text>
+</svg>
