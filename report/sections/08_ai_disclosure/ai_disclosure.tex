@@ -56,6 +56,10 @@ development going forward.
 
 \subsection{Truong Giang's Experience}
 
+I used Claude Code to scaffold the project structure, since my task is the very first step in the project. Initially, Claude implemented a vector to use as adjacency list for the graph representation. Since our project focuses on benchmarking the heap implementation, I wanted to minimise the impact of other operations outside of the heap. So I ask Claude to change that to a more effective format, so it suggested using CSR table. I then announce my group about this change before approving it.
+
+When generating the benchmark visualisations, AI overlooked the fact that the benchmarking library already supported exporting results directly to \code{.csv} files. Instead, it created a separate Python parser to read the output and convert it into a pandas DataFrame. This added unnecessary complexity to the workflow. We eventually discarded that implementation and provided AI with more context about the library's existing CSV export functionality so it could use it instead.
+
 \subsection{Tung's Experience}
 First, I started by digesting this assignment description with Gemini Flash 3.8, I asked it to point out the main pain points to look out while doing this project. Once that is done, I relay my understand with the team. After that, I chose to implement Pairing and Fibonacci heaps. I then ask Gemini to briefly introduce me to these heaps and provide good source on YouTube. I then check my understand with Gemini again by draft up the pseudocode and asking it to correct any mistake. Since these heaps were quite popular, the discussion session with the AI was fruitful as I can cross check myself with the AI and other sources, in which it also provided. So far, the AI has done a good job of helping me to catch up with the knowledge of this project.
 
@@ -67,7 +71,6 @@ Forth, I move onto writing the report. With the help of Copilot, I was able to i
 
 Lastly, I asked the AI to make HTML files for presentation. They contained too much information. So we scraped it and Oscar redesign again with Claude on his time.
 
-\subsubsection{What AI did wrong}
-When generating the benchmark visualisations, AI overlooked the fact that the benchmarking library already supported exporting results directly to \code{.csv} files. Instead, it created a separate Python parser to read the output and convert it into a pandas DataFrame. This added unnecessary complexity to the workflow. We eventually discarded that implementation and provided AI with more context about the library's existing CSV export functionality so it could use it instead.
+
 
 
