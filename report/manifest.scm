@@ -8,4 +8,5 @@
 		"texlive-latexmk"
 		"texlive-svg"
 		"texlive-transparent"
+		"bash"
 		"make"))

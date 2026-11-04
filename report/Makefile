@@ -1,7 +1,13 @@
+#
+# shell
+#
+
+SHELL := /usr/bin/env bash -O globstar
+
 .PHONY:
 all: report.pdf
 
-report.pdf: report.tex
+report.pdf: $(shell ls **/*.tex)
 	latexmk -pdf report.tex
 
 .PHONY:
