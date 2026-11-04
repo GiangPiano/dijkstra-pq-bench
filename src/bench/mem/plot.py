@@ -7,21 +7,16 @@ vector SVG charts, Markdown tables, and LaTeX tables for the report.
 
 import argparse
 import csv
-import html
 import math
 import os
 import sys
 
-DEFAULT_COLORS = ["#2563EB", "#16A34A", "#9333EA", "#EA580C"]
+BENCH_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if BENCH_DIR not in sys.path:
+    sys.path.insert(0, BENCH_DIR)
 
-
-def esc(val):
-    """Escapes string for safe XML/SVG embedding."""
-    return html.escape(str(val), quote=True)
-
-
-def get_color(variant, idx=0):
-    return DEFAULT_COLORS[idx % len(DEFAULT_COLORS)]
+from plotting import (chart_layout, draw_axes, draw_category_label,
+                      draw_legend, esc, get_color, svg_open)
 
 
 def read_memory_csv(csv_path):
@@ -41,16 +36,6 @@ def generate_bar_svg(title, subtitle, y_axis_label, rows, metric_key, val_format
     """
     Renders grouped bar chart for metric_key across generated configurations and modes.
     """
-    width = 760
-    height = 460
-    pad_left = 90
-    pad_right = 40
-    pad_top = 70
-    pad_bottom = 90
-
-    plot_w = width - pad_left - pad_right
-    plot_h = height - pad_top - pad_bottom
-
     configs = sorted({r["config"] for r in rows})
     modes = ["decrease_key", "lazy"]
     group_keys = [
@@ -61,6 +46,12 @@ def generate_bar_svg(title, subtitle, y_axis_label, rows, metric_key, val_format
     ]
 
     variants = sorted({r["variant"] for r in rows})
+    layout = chart_layout(len(group_keys), min_group_width=115)
+    width = layout["width"]
+    height = layout["height"]
+    pad_left = layout["pad_left"]
+    pad_top = layout["pad_top"]
+    plot_h = layout["plot_height"]
 
     all_vals = []
     lookup = {}
@@ -95,60 +86,27 @@ def generate_bar_svg(title, subtitle, y_axis_label, rows, metric_key, val_format
         num_ticks = 5
         ticks = [i * (max_val / num_ticks) for i in range(num_ticks + 1)]
 
-    svg = []
-    svg.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
-               f'width="{width}" height="{height}" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">')
-
-    svg.append('<defs>')
-    svg.append('  <style>')
-    svg.append('    .axis { stroke: #CBD5E1; stroke-width: 1; }')
-    svg.append('    .grid { stroke: #F1F5F9; stroke-width: 1; stroke-dasharray: 4,4; }')
-    svg.append('    .tick-label { font-size: 11px; fill: #64748B; }')
-    svg.append('    .axis-title { font-size: 12px; font-weight: 600; fill: #334155; }')
-    svg.append('    .chart-title { font-size: 16px; font-weight: 700; fill: #0F172A; }')
-    svg.append('    .chart-subtitle { font-size: 12px; fill: #64748B; }')
-    svg.append('    .bar-label { font-size: 9px; font-weight: 600; fill: #1E293B; text-anchor: middle; }')
-    svg.append('    .legend-text { font-size: 12px; fill: #334155; font-weight: 500; dominant-baseline: central; }')
-    svg.append('  </style>')
-    svg.append('</defs>')
+    svg = svg_open(layout)
 
     svg.append(f'<text x="{pad_left}" y="32" class="chart-title">{esc(title)}</text>')
     svg.append(f'<text x="{pad_left}" y="50" class="chart-subtitle">{esc(subtitle)}</text>')
 
-    # Y-axis Grid & Ticks
-    for val in ticks:
-        if log_scale:
-            if val <= 1:
-                y = pad_top + plot_h
-            else:
-                y = pad_top + plot_h - (math.log10(val) / max_log) * plot_h
-            tick_str = f"10^{int(math.log10(val))}" if val > 1 else "1"
-        else:
-            y = pad_top + plot_h - (val / max_val) * plot_h
-            tick_str = val_formatter(val)
-
-        svg.append(f'<line x1="{pad_left}" y1="{y:.1f}" x2="{width - pad_right}" y2="{y:.1f}" class="grid" />')
-        svg.append(f'<text x="{pad_left - 10}" y="{y + 4:.1f}" class="tick-label" text-anchor="end">{esc(tick_str)}</text>')
-
-    # Axes
-    svg.append(f'<line x1="{pad_left}" y1="{pad_top}" x2="{pad_left}" y2="{height - pad_bottom}" class="axis" />')
-    svg.append(f'<line x1="{pad_left}" y1="{height - pad_bottom}" x2="{width - pad_right}" y2="{height - pad_bottom}" class="axis" />')
-    svg.append(f'<text x="-{(pad_top + plot_h / 2):.1f}" y="20" class="axis-title" text-anchor="middle" transform="rotate(-90)">{esc(y_axis_label)}</text>')
+    draw_axes(
+        svg, layout, ticks, max_log if log_scale else max_val, val_formatter,
+        y_axis_label, log_scale=log_scale
+    )
 
     # Grouped Bars
     num_groups = len(group_keys)
-    group_width = plot_w / num_groups
+    group_width = layout["group_width"]
     num_vars = len(variants)
     bar_width = min(28.0, (group_width * 0.78) / max(num_vars, 1))
 
     for g_idx, (cfg, m, label) in enumerate(group_keys):
         g_center = pad_left + g_idx * group_width + group_width / 2
 
-        # Multi-line label under x-axis
-        lines = label.split("\n")
-        svg.append(f'<text x="{g_center:.1f}" y="{height - pad_bottom + 18}" class="axis-title" font-size="11px" text-anchor="middle">{esc(lines[0])}</text>')
-        if len(lines) > 1:
-            svg.append(f'<text x="{g_center:.1f}" y="{height - pad_bottom + 32}" class="tick-label" font-weight="600" text-anchor="middle">{esc(lines[1])}</text>')
+        draw_category_label(svg, g_center, height - layout["pad_bottom"] + 18,
+                            label.replace("\n", " "), group_width)
 
         start_x = g_center - (num_vars * bar_width) / 2
 
@@ -177,18 +135,9 @@ def generate_bar_svg(title, subtitle, y_axis_label, rows, metric_key, val_format
                 label_text = val_formatter(val)
                 svg.append(f'<text x="{x + bar_width / 2:.1f}" y="{max(pad_top + 10, y - 4):.1f}" class="bar-label">{esc(label_text)}</text>')
             else:
-                svg.append(f'<text x="{x + bar_width / 2:.1f}" y="{height - pad_bottom - 8}" class="bar-label" fill="#94A3B8">N/A</text>')
+                svg.append(f'<text x="{x + bar_width / 2:.1f}" y="{height - layout["pad_bottom"] - 8}" class="bar-label" fill="#94A3B8">N/A</text>')
 
-    # Legend Below X-Axis
-    leg_y = height - pad_bottom + 62
-    item_spacing = 145
-    total_w = len(variants) * item_spacing
-    start_lx = max(pad_left, (width - total_w) / 2)
-    for v_idx, v in enumerate(variants):
-        lx = start_lx + v_idx * item_spacing
-        color = get_color(v, v_idx)
-        svg.append(f'<rect x="{lx:.1f}" y="{leg_y - 7:.1f}" width="14" height="14" fill="{color}" rx="3" ry="3" />')
-        svg.append(f'<text x="{lx + 20:.1f}" y="{leg_y:.1f}" class="legend-text">{esc(v)}</text>')
+    draw_legend(svg, variants, layout)
 
     svg.append('</svg>')
 

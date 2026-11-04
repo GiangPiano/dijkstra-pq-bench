@@ -2,8 +2,7 @@
 # shell
 #
 
-SHELL := /usr/bin/env bash -O globstar
-UNAME := $(shell uname)
+SHELL:=/usr/bin/env bash -O globstar
 
 #
 # c compilation vars
@@ -16,8 +15,8 @@ CFLAGS = -Wall -Wextra -g -MMD -MP -O3 -std=c11
 # Linker flags
 LDFLAGS = -lm
 # Alternate linker flags for memory profiling
-MEM_LDFLAGS = $(LDFLAGS) -Wl,--wrap=malloc \
-							-Wl,--wrap=free -Wl,--wrap=calloc -Wl,--wrap=realloc
+MEM_LDFLAGS = $(LDFLAGS) -Wl,--wrap=malloc -Wl,--wrap=free \
+							-Wl,--wrap=calloc -Wl,--wrap=realloc
 
 #
 # cli colour vars
@@ -87,7 +86,7 @@ TEST_SRCS = $(patsubst %,$(TEST_BUILD_DIR)/%.c,$(TEST_SET))
 TEST_OBJS = $(patsubst %,$(TEST_BUILD_DIR)/%.o,$(TEST_SET))
 GRAPH_REGISTRY_SRC = $(TEST_BUILD_DIR)/graph_registry.c
 GRAPH_REGISTRY_OBJ = $(TEST_BUILD_DIR)/graph_registry.o
-GRAPH_METADATA     = $(TEST_BUILD_DIR)/graphs.json
+GRAPH_METADATA = $(TEST_BUILD_DIR)/graphs.json
 
 #
 # report and data outputs
@@ -105,18 +104,8 @@ MEM_FIGURES_DIR     = $(FIGURES_DIR)/mem
 
 # all the runtime csvs
 RUNTIME_CSVS = $(patsubst %,$(RUNTIME_DATA_DIR)/%.csv,$(VARIANTS))
-
-# can only run perf and mem on linux
-ifeq "$(UNAME)" "Linux"
 PERF_CSV     = $(PERF_DATA_DIR)/hardware_counters.csv
 MEM_CSV      = $(MEM_DATA_DIR)/memory_footprint.csv
-endif
-
-ifeq "$(UNAME)" "Linux"
-FIGURES = $(RUNTIME_FIGURES_DIR)/runtime.tex $(PERF_FIGURES_DIR)/perf.tex $(MEM_FIGURES_DIR)/mem.tex
-else
-FIGURES = $(RUNTIME_FIGURES_DIR)/runtime.tex
-endif
 
 .PHONY:
 all: report
@@ -128,7 +117,7 @@ build: $(RUNTIME_BIN_VARIANTS) $(PERF_BIN_VARIANTS) $(MEM_BIN_VARIANTS)
 csvs: $(RUNTIME_CSVS) $(PERF_CSV) $(MEM_CSV)
 
 .PHONY:
-figures: $(FIGURES)
+figures: csvs $(RUNTIME_FIGURES_DIR)/runtime.tex $(PERF_FIGURES_DIR)/perf.tex $(MEM_FIGURES_DIR)/mem.tex
 
 .PHONY:
 report: figures
@@ -203,20 +192,13 @@ $(RUNTIME_CSVS): $(RUNTIME_DATA_DIR)/%.csv: $(RUNTIME_BIN_DIR)/%
 	@mkdir -p $(dir $@)
 	$< --output=$@
 
-# we can only run mem perf on linux, this keeps it all building on mac
-ifeq "$(UNAME)" "Linux"
 $(PERF_CSV): $(PERF_BIN_VARIANTS) $(BENCH_SRC_DIR)/perf/bench.py
 	@mkdir -p $(dir $@)
 	$(BENCH_SRC_DIR)/perf/bench.py -b $(PERF_BIN_DIR) -o $@
-else
-endif
 
-ifeq "$(UNAME)" "Linux"
 $(MEM_CSV): $(MEM_BIN_VARIANTS) $(BENCH_SRC_DIR)/mem/bench.py
 	@mkdir -p $(dir $@)
 	$(BENCH_SRC_DIR)/mem/bench.py -b $(MEM_BIN_DIR) -o $@
-else
-endif
 
 $(RUNTIME_FIGURES_DIR)/runtime.tex: $(RUNTIME_CSVS) $(BENCH_SRC_DIR)/runtime/plot.py
 	$(BENCH_SRC_DIR)/runtime/plot.py -i $(RUNTIME_DATA_DIR) -o $(RUNTIME_FIGURES_DIR)
@@ -231,4 +213,3 @@ $(MEM_FIGURES_DIR)/mem.tex: $(MEM_CSV) $(BENCH_SRC_DIR)/mem/plot.py
 -include $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(shell ls $(SRC_DIR)/**/*.c))
 # include the .d makefiles of all ./build/test/**/*.c files
 -include $(patsubst %,$(TEST_BUILD_DIR)/%.d,$(TEST_SET))
--include $(TEST_BUILD_DIR)/graph_registry.d

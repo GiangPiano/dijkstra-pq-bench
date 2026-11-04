@@ -10,16 +10,17 @@ If matplotlib is installed, it also generates PDF/PNG vector graphics.
 import argparse
 import csv
 import glob
-import html
 import math
 import os
 import sys
 from collections import defaultdict
 
+BENCH_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if BENCH_DIR not in sys.path:
+    sys.path.insert(0, BENCH_DIR)
 
-def esc(val):
-    """Escapes string for safe XML/SVG embedding."""
-    return html.escape(str(val), quote=True)
+from plotting import (chart_layout, draw_axes, draw_category_label,
+                      draw_legend, esc, get_color, svg_open)
 
 
 def parse_csv_files(input_dir):
@@ -93,37 +94,18 @@ def format_time(ns):
         return f"{ns / 1_000_000_000:.2f} s"
 
 
-# Palette configuration
-VARIANT_COLORS = {
-    "binary": "#2563EB",         # Royal Blue
-    "pairing": "#16A34A",        # Emerald Green
-    "fibonacci": "#9333EA",      # Vibrant Purple
-    "brodal-okasaki": "#EA580C", # Deep Orange
-    "stub": "#6B7280",           # Gray
-}
-DEFAULT_COLORS = ["#2563EB", "#16A34A", "#9333EA", "#EA580C", "#0891B2", "#DC2626"]
-
-
-def get_color(variant, idx=0):
-    return VARIANT_COLORS.get(variant, DEFAULT_COLORS[idx % len(DEFAULT_COLORS)])
-
-
 def generate_bar_chart_svg(dataset, mode_data, variants, output_path):
     """
     Generates a grouped bar chart for a single dataset comparing variants
     across decrease_key and lazy modes.
     """
-    width = 720
-    height = 460
-    pad_left = 90
-    pad_right = 40
-    pad_top = 70
-    pad_bottom = 90
-
-    plot_w = width - pad_left - pad_right
-    plot_h = height - pad_top - pad_bottom
-
     modes = ["decrease_key", "lazy"]
+    layout = chart_layout(len(modes), base_width=720, min_group_width=220)
+    width = layout["width"]
+    height = layout["height"]
+    pad_left = layout["pad_left"]
+    pad_top = layout["pad_top"]
+    plot_h = layout["plot_height"]
     # Find max runtime across this dataset
     all_times = []
     for m in modes:
@@ -141,51 +123,25 @@ def generate_bar_chart_svg(dataset, mode_data, variants, output_path):
     num_ticks = 5
     ticks = [min_val + (max_val - min_val) * (i / num_ticks) for i in range(num_ticks + 1)]
 
-    svg = []
-    svg.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
-               f'width="{width}" height="{height}" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">')
-
-    # Definitions (gradients/patterns)
-    svg.append('<defs>')
-    svg.append('  <style>')
-    svg.append('    .axis { stroke: #CBD5E1; stroke-width: 1; }')
-    svg.append('    .grid { stroke: #F1F5F9; stroke-width: 1; stroke-dasharray: 4,4; }')
-    svg.append('    .tick-label { font-size: 11px; fill: #64748B; }')
-    svg.append('    .axis-title { font-size: 12px; font-weight: 600; fill: #334155; }')
-    svg.append('    .chart-title { font-size: 16px; font-weight: 700; fill: #0F172A; }')
-    svg.append('    .chart-subtitle { font-size: 12px; fill: #64748B; }')
-    svg.append('    .bar-label { font-size: 10px; font-weight: 600; fill: #1E293B; text-anchor: middle; }')
-    svg.append('    .legend-text { font-size: 12px; fill: #334155; font-weight: 500; dominant-baseline: central; }')
-    svg.append('  </style>')
-    svg.append('</defs>')
+    svg = svg_open(layout, "    .bar-label { font-size: 10px; font-weight: 600; fill: #1E293B; text-anchor: middle; }")
 
     # Title
     svg.append(f'<text x="{pad_left}" y="32" class="chart-title">Dijkstra Runtime Comparison: {esc(dataset)}</text>')
     svg.append(f'<text x="{pad_left}" y="50" class="chart-subtitle">Wall-clock execution time across Priority Queue variants (lower is better)</text>')
 
-    # Y-axis Grid & Ticks
-    for val in ticks:
-        y = pad_top + plot_h - (val / max_val) * plot_h
-        svg.append(f'<line x1="{pad_left}" y1="{y:.1f}" x2="{width - pad_right}" y2="{y:.1f}" class="grid" />')
-        svg.append(f'<text x="{pad_left - 10}" y="{y + 4:.1f}" class="tick-label" text-anchor="end">{esc(format_time(val))}</text>')
-
-    # Axes
-    svg.append(f'<line x1="{pad_left}" y1="{pad_top}" x2="{pad_left}" y2="{height - pad_bottom}" class="axis" />')
-    svg.append(f'<line x1="{pad_left}" y1="{height - pad_bottom}" x2="{width - pad_right}" y2="{height - pad_bottom}" class="axis" />')
-
-    # Y-axis title
-    svg.append(f'<text x="-{(pad_top + plot_h / 2):.1f}" y="20" class="axis-title" text-anchor="middle" transform="rotate(-90)">Mean Runtime</text>')
+    draw_axes(svg, layout, ticks, max_val, format_time, "Mean Runtime")
 
     # Grouped Bars
     num_groups = len(modes)
-    group_width = plot_w / num_groups
+    group_width = layout["group_width"]
     num_vars = len(variants)
     bar_width = min(36.0, (group_width * 0.75) / max(num_vars, 1))
 
     for g_idx, m in enumerate(modes):
         g_center = pad_left + g_idx * group_width + group_width / 2
         mode_label = "Explicit Decrease-Key" if m == "decrease_key" else "Lazy Insertion"
-        svg.append(f'<text x="{g_center:.1f}" y="{height - pad_bottom + 25}" class="axis-title" text-anchor="middle">{esc(mode_label)}</text>')
+        draw_category_label(svg, g_center, height - layout["pad_bottom"] + 20,
+                            mode_label, group_width, max_lines=2, font_size=11)
 
         start_x = g_center - (num_vars * bar_width) / 2
 
@@ -206,18 +162,9 @@ def generate_bar_chart_svg(dataset, mode_data, variants, output_path):
                 svg.append(f'<text x="{x + bar_width / 2:.1f}" y="{max(pad_top + 12, y - 5):.1f}" class="bar-label">{esc(format_time(t_val))}</text>')
             else:
                 # No data bar (e.g. timeout / skipped)
-                svg.append(f'<text x="{x + bar_width / 2:.1f}" y="{height - pad_bottom - 10}" class="bar-label" fill="#94A3B8">N/A</text>')
+                svg.append(f'<text x="{x + bar_width / 2:.1f}" y="{height - layout["pad_bottom"] - 10}" class="bar-label" fill="#94A3B8">N/A</text>')
 
-    # Color Legend Placed Below X-Axis
-    leg_y = height - pad_bottom + 58
-    item_spacing = 140
-    total_w = len(variants) * item_spacing
-    start_lx = max(pad_left, (width - total_w) / 2)
-    for v_idx, v in enumerate(variants):
-        lx = start_lx + v_idx * item_spacing
-        color = get_color(v, v_idx)
-        svg.append(f'<rect x="{lx:.1f}" y="{leg_y - 7:.1f}" width="14" height="14" fill="{color}" rx="3" ry="3" />')
-        svg.append(f'<text x="{lx + 20:.1f}" y="{leg_y:.1f}" class="legend-text">{esc(v)}</text>')
+    draw_legend(svg, variants, layout, item_spacing=140)
 
     svg.append('</svg>')
 
@@ -232,20 +179,17 @@ def generate_speedup_svg(data, datasets, variants, output_path):
     Ratio > 1.0 means Decrease-Key is faster.
     Ratio < 1.0 means Lazy is faster.
     """
-    width = 720
-    height = 460
-    pad_left = 80
-    pad_right = 40
-    pad_top = 70
-    pad_bottom = 90
-
-    plot_w = width - pad_left - pad_right
-    plot_h = height - pad_top - pad_bottom
-
     # Find ratios
     valid_datasets = [d for d in datasets if d in data]
     if not valid_datasets:
         return
+    layout = chart_layout(len(valid_datasets), base_width=720, min_group_width=115,
+                          pad_left=80)
+    width = layout["width"]
+    height = layout["height"]
+    pad_left = layout["pad_left"]
+    pad_top = layout["pad_top"]
+    plot_h = layout["plot_height"]
 
     max_ratio = 3.0
     for d in valid_datasets:
@@ -257,53 +201,27 @@ def generate_speedup_svg(data, datasets, variants, output_path):
                 if ratio > max_ratio:
                     max_ratio = math.ceil(ratio * 1.2)
 
-    svg = []
-    svg.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
-               f'width="{width}" height="{height}" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">')
-
-    svg.append('<defs>')
-    svg.append('  <style>')
-    svg.append('    .axis { stroke: #CBD5E1; stroke-width: 1; }')
-    svg.append('    .grid { stroke: #F1F5F9; stroke-width: 1; stroke-dasharray: 4,4; }')
-    svg.append('    .baseline { stroke: #EF4444; stroke-width: 1.5; stroke-dasharray: 3,3; }')
-    svg.append('    .tick-label { font-size: 11px; fill: #64748B; }')
-    svg.append('    .axis-title { font-size: 12px; font-weight: 600; fill: #334155; }')
-    svg.append('    .chart-title { font-size: 16px; font-weight: 700; fill: #0F172A; }')
-    svg.append('    .chart-subtitle { font-size: 12px; fill: #64748B; }')
-    svg.append('    .bar-label { font-size: 10px; font-weight: 600; fill: #1E293B; text-anchor: middle; }')
-    svg.append('    .legend-text { font-size: 12px; fill: #334155; font-weight: 500; dominant-baseline: central; }')
-    svg.append('  </style>')
-    svg.append('</defs>')
+    svg = svg_open(layout, "    .bar-label { font-size: 10px; font-weight: 600; fill: #1E293B; text-anchor: middle; }")
 
     svg.append(f'<text x="{pad_left}" y="32" class="chart-title">Speedup Ratio: Lazy vs. Decrease-Key</text>')
     svg.append(f'<text x="{pad_left}" y="50" class="chart-subtitle">T(lazy) / T(decrease-key) &gt; 1.0 means Decrease-Key is faster; &lt; 1.0 means Lazy is faster</text>')
 
-    # Baseline 1.0 line
-    y_1 = pad_top + plot_h - (1.0 / max_ratio) * plot_h
-    svg.append(f'<line x1="{pad_left}" y1="{y_1:.1f}" x2="{width - pad_right}" y2="{y_1:.1f}" class="baseline" />')
-    svg.append(f'<text x="{width - pad_right + 5}" y="{y_1 + 4:.1f}" class="tick-label" fill="#EF4444" font-weight="600">1.0x (Parity)</text>')
-
-    # Grid ticks
-    for tick_val in [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]:
-        if tick_val <= max_ratio:
-            y = pad_top + plot_h - (tick_val / max_ratio) * plot_h
-            svg.append(f'<line x1="{pad_left}" y1="{y:.1f}" x2="{width - pad_right}" y2="{y:.1f}" class="grid" />')
-            svg.append(f'<text x="{pad_left - 10}" y="{y + 4:.1f}" class="tick-label" text-anchor="end">{tick_val:.1f}x</text>')
-
-    # Axes
-    svg.append(f'<line x1="{pad_left}" y1="{pad_top}" x2="{pad_left}" y2="{height - pad_bottom}" class="axis" />')
-    svg.append(f'<line x1="{pad_left}" y1="{height - pad_bottom}" x2="{width - pad_right}" y2="{height - pad_bottom}" class="axis" />')
-    svg.append(f'<text x="-{(pad_top + plot_h / 2):.1f}" y="20" class="axis-title" text-anchor="middle" transform="rotate(-90)">Speedup Factor</text>')
+    draw_axes(svg, layout, [tick for tick in [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
+                            if tick <= max_ratio], max_ratio,
+              lambda value: f"{value:.1f}x", "Speedup Factor", baseline=1.0)
+    y_1 = layout["pad_top"] + layout["plot_height"] - (1.0 / max_ratio) * layout["plot_height"]
+    svg.append(f'<text x="{width - layout["pad_right"] + 5}" y="{y_1 + 4:.1f}" class="tick-label" fill="#EF4444" font-weight="600">1.0x (Parity)</text>')
 
     # Grouped bars per dataset
     num_groups = len(valid_datasets)
-    group_width = plot_w / num_groups
+    group_width = layout["group_width"]
     num_vars = len(variants)
     bar_width = min(32.0, (group_width * 0.75) / max(num_vars, 1))
 
     for g_idx, d in enumerate(valid_datasets):
         g_center = pad_left + g_idx * group_width + group_width / 2
-        svg.append(f'<text x="{g_center:.1f}" y="{height - pad_bottom + 25}" class="axis-title" text-anchor="middle">{esc(d)}</text>')
+        draw_category_label(svg, g_center, height - layout["pad_bottom"] + 20,
+                            d, group_width)
 
         start_x = g_center - (num_vars * bar_width) / 2
 
@@ -322,16 +240,7 @@ def generate_speedup_svg(data, datasets, variants, output_path):
                            f'fill="{color}" rx="3" ry="3"><title>{esc(v)} on {esc(d)}: {ratio:.2f}x</title></rect>')
                 svg.append(f'<text x="{x + bar_width / 2:.1f}" y="{max(pad_top + 12, y - 5):.1f}" class="bar-label">{ratio:.2f}x</text>')
 
-    # Color Legend Placed Below X-Axis
-    leg_y = height - pad_bottom + 58
-    item_spacing = 140
-    total_w = len(variants) * item_spacing
-    start_lx = max(pad_left, (width - total_w) / 2)
-    for v_idx, v in enumerate(variants):
-        lx = start_lx + v_idx * item_spacing
-        color = get_color(v, v_idx)
-        svg.append(f'<rect x="{lx:.1f}" y="{leg_y - 7:.1f}" width="14" height="14" fill="{color}" rx="3" ry="3" />')
-        svg.append(f'<text x="{lx + 20:.1f}" y="{leg_y:.1f}" class="legend-text">{esc(v)}</text>')
+    draw_legend(svg, variants, layout, item_spacing=140)
 
     svg.append('</svg>')
 
