@@ -158,39 +158,37 @@ system.
 
 \subsubsection{Branch and Cache Behaviour}
 
-Figure~\ref{fig:l1-cache-miss-rate} shows the measured L1 data-cache miss
-rates across the heap implementations, input graphs, and Dijkstra variants.
+Figure~\ref{fig:l1-cache-miss-rate} presents the measured L1 data-cache
+miss-rate percentages across the heap implementations, graphs, and Dijkstra
+variants.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.95\textwidth]
     {frozen_results/figures/report_charts/perf/l1_cache_miss_rate.png}
-  \caption{L1 data-cache miss rates across heaps, input graphs, and Dijkstra
-  variants.}
+  \caption{L1 data-cache miss rates across heap implementations, input graphs,
+  and Dijkstra variants.}
   \label{fig:l1-cache-miss-rate}
 \end{figure}
 
-The cache results help explain the runtime differences observed in
-Section~4.2. The binary heap generally benefits from its contiguous array
-representation, which improves spatial locality and avoids repeated pointer
-dereferences. The pairing and Fibonacci heaps use pointer-linked nodes, while
-the Brodal--Okasaki implementation performs additional structural bookkeeping;
-these designs can increase memory-access overhead during queue operations.
+The results do not support the prediction that the binary heap would have the
+lowest cache-miss rate. Averaged across all graphs, the binary heap has the
+highest L1 miss-rate percentage in both \code{decrease_key} mode
+($13.91\%$) and lazy mode ($13.27\%$). The corresponding decrease-key rates
+are $12.92\%$ for pairing, $10.63\%$ for Fibonacci, and $8.22\%$ for
+Brodal--Okasaki.
 
-The cache behaviour also varies with graph structure. Larger and denser graphs
-perform more relaxations and access more heap entries, making locality effects
-more visible than in the small \code{smoke_1k} case. Structured graphs such as
-\code{grid_224}, \code{hub_skewed}, and \code{layered_frontier} further
-change the pattern of heap accesses, so cache-miss rates do not increase
-uniformly with graph size.
+Miss-rate percentages must be interpreted alongside the number of memory
+accesses. In decrease-key mode, Brodal--Okasaki performs approximately
+$32.3$ million L1 loads and records $2.21$ million L1 misses on average,
+compared with $12.5$ million loads and $1.68$ million misses for the binary
+heap. Thus, its lower miss rate does not imply lower memory cost.
 
-Overall, the cache measurements are consistent with the binary heap's runtime
-advantage, although cache miss rate alone does not determine execution time.
-The total number of instructions, allocation behaviour, branch behaviour, and
-heap operations also contribute to the observed performance. These results
-should therefore be interpreted as supporting evidence for the runtime
-measurements rather than as an independent ranking of the implementations.
-
+Branch behaviour also differs: the average branch-miss rate is approximately
+$2.24\%$ for binary and $8.13\%$ for Brodal--Okasaki in decrease-key mode.
+Overall, the cache and branch counters show that no single miss-rate metric
+explains the runtime ranking. They instead indicate that total work, memory
+activity, and branch behaviour must be considered together.
 \subsection{Memory Results}
 \subsubsection{Peak Heap and Resident Memory}
 
