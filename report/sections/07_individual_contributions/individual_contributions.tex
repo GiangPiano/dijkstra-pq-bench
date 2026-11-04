@@ -3,6 +3,16 @@
 
 \subsection{Truong Giang Nguyen}
 
+I implemented the base Dijkstra's algorithm for benchmarking. Since C has no dynamically sized array, I could not simply represent the graph using a normal adjacency matrix. Implementing one from scratch could introduce allocation overhead unrelated to the benchmark, so I implemented the shared graph representation using Compressed Sparse Row (CSR) format.
+
+My algorithm is the binary heap. It has logarithmic time complexity for push, pop, and decrease-key, and offers constant-time minimum queries. The worst case happens when relaxation keeps succeeding and constantly pushes new lower values onto the heap. For the lazy variant, this causes the heap to store a large number of stale entries and grow in size, making the bubble-up and sink-down operations longer. If every newly encountered edge adds a new entry to the heap, the result is $O(\log m)$ push and pop operations, where $m$ is the number of edges. Stale entries also cause more pops, which wastes computation just to reach a valid entry. The second variant, eager, mitigates this by calling \code{heap_decrease_key()}, which directly alters the entry instead of pushing a new one. This approach, however, requires an extra index array to store each entry's position in the heap. The number of successful relaxations is positively correlated with graph density, as more edges come in and out of each vertex. Although the worst case can be crafted manually by deliberately placing edge weights in a certain order, it is extremely rare with randomised input. As a result, the binary heap won all test cases because of its contiguous data allocation, which gives it a large advantage in cache locality.
+
+The hardest bug I encountered was in \code{heap_pop}. The assertion I wrote fired in \code{heap_decrease_key} instead, so I spent a lot of time around the wrong function. I decided to use Claude Code to review my code, and it turned out I copied the last element to the root before decrementing \code{size}, so \code{h->data[0] = h->data[h->size]} read the slot one past the end. This only corrupts the heap when that stale slot happens to hold a value smaller than the true minimum, so small graphs passed while large ones returned wrong distances. The fix was simply to decrement first, then copy.
+
+A key design decision I made was the \code{pos[]} array mapping for the vertices. Without it, decrease-key would need a $\Theta(n)$ scan to find the corresponding key. I had to refactor almost every function in the binary heap implementation, as all operations need to update and keep track of the position of each added or removed node. It also introduces an extra memory allocation for the array, which affects the lazy variant even though it never reads it.
+
+If I were to do it differently, I would split the heap into two versions: \code{lazy_binary_heap}, which does not support \code{decrease_key}, and \code{eager_binary_heap}. This would give me the rawest benchmark of the lazy variant of Dijkstra's algorithm. I would then compare it to C++'s \code{std::priority_queue}, as it is also implemented as a binary heap and does not support \code{decrease_key}.
+
 \subsection{Tung Nguyen}
 \subsubsection{Pairing Heap}
 
