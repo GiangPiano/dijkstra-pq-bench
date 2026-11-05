@@ -176,7 +176,7 @@ def generate_bar_svg(title, subtitle, y_axis_label, rows, metric_key, val_format
         g_center = pad_left + g_idx * group_width + group_width / 2
 
         draw_category_label(svg, g_center, height - layout["pad_bottom"] + 18,
-                            label.replace("\n", " "), group_width)
+                            label, group_width)
 
         start_x = g_center - (num_vars * bar_width) / 2
 

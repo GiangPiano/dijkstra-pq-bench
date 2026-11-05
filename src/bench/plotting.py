@@ -123,11 +123,21 @@ def draw_axes(svg, layout, ticks, max_value, y_formatter, y_axis_label,
 
 
 def draw_category_label(svg, x, y, text, group_width, max_lines=3, font_size=10):
-    """Draw a centered, bounded multi-line category label."""
+    """
+    Draw a centered, bounded multi-line category label.
+
+    A newline in `text` separates the main label from a sub-label, e.g.
+    "grid_224\nLazy". The main label is word-wrapped and drawn in bold; the
+    sub-label always starts on its own line underneath it in the lighter
+    style, so it never ends up beside the main label when that happens to fit.
+    """
     max_chars = max(10, int(group_width / 7))
-    lines = wrap_label(text, max_chars, max_lines=max_lines)
+    main, _, sub = text.partition("\n")
+    main_lines = wrap_label(main, max_chars, max_lines=max_lines - 1 if sub else max_lines)
+    sub_lines = wrap_label(sub, max_chars, max_lines=1) if sub else []
+    lines = main_lines + sub_lines
     for index, line in enumerate(lines):
-        css_class = "axis-title" if index == 0 else "tick-label"
+        css_class = "axis-title" if index < len(main_lines) else "tick-label"
         svg.append(
             f'<text x="{x:.1f}" y="{y + index * 14}" class="{css_class}" '
             f'font-size="{font_size}px" text-anchor="middle">{esc(line)}</text>'
