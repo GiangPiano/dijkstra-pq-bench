@@ -18,36 +18,36 @@
 <line x1="90" y1="375.0" x2="680" y2="375.0" class="grid" />
 <text x="80" y="379.0" class="tick-label" text-anchor="end">0.0 ns</text>
 <line x1="90" y1="314.0" x2="680" y2="314.0" class="grid" />
-<text x="80" y="318.0" class="tick-label" text-anchor="end">3.55 ms</text>
+<text x="80" y="318.0" class="tick-label" text-anchor="end">5.15 ms</text>
 <line x1="90" y1="253.0" x2="680" y2="253.0" class="grid" />
-<text x="80" y="257.0" class="tick-label" text-anchor="end">7.10 ms</text>
+<text x="80" y="257.0" class="tick-label" text-anchor="end">10.29 ms</text>
 <line x1="90" y1="192.0" x2="680" y2="192.0" class="grid" />
-<text x="80" y="196.0" class="tick-label" text-anchor="end">10.64 ms</text>
+<text x="80" y="196.0" class="tick-label" text-anchor="end">15.44 ms</text>
 <line x1="90" y1="131.0" x2="680" y2="131.0" class="grid" />
-<text x="80" y="135.0" class="tick-label" text-anchor="end">14.19 ms</text>
+<text x="80" y="135.0" class="tick-label" text-anchor="end">20.59 ms</text>
 <line x1="90" y1="70.0" x2="680" y2="70.0" class="grid" />
-<text x="80" y="74.0" class="tick-label" text-anchor="end">17.74 ms</text>
+<text x="80" y="74.0" class="tick-label" text-anchor="end">25.73 ms</text>
 <line x1="90" y1="70" x2="90" y2="375" class="axis" />
 <line x1="90" y1="375" x2="680" y2="375" class="axis" />
 <text x="-222.5" y="20" class="axis-title" text-anchor="middle" transform="rotate(-90)">Mean Runtime</text>
 <text x="237.5" y="395" class="axis-title" font-size="11px" text-anchor="middle">Explicit Decrease-Key</text>
-<rect x="167.5" y="338.5" width="32.0" height="36.5" fill="#2563EB" rx="3" ry="3"><title>binary (decrease_key): 2.12 ms</title></rect>
-<text x="183.5" y="333.5" class="bar-label">2.12 ms</text>
-<rect x="203.5" y="109.8" width="32.0" height="265.2" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (decrease_key): 15.43 ms</title></rect>
-<text x="219.5" y="104.8" class="bar-label">15.43 ms</text>
-<rect x="239.5" y="292.2" width="32.0" height="82.8" fill="#9333EA" rx="3" ry="3"><title>fibonacci (decrease_key): 4.82 ms</title></rect>
-<text x="255.5" y="287.2" class="bar-label">4.82 ms</text>
-<rect x="275.5" y="324.2" width="32.0" height="50.8" fill="#16A34A" rx="3" ry="3"><title>pairing (decrease_key): 2.95 ms</title></rect>
-<text x="291.5" y="319.2" class="bar-label">2.95 ms</text>
+<rect x="167.5" y="349.2" width="32.0" height="25.8" fill="#2563EB" rx="3" ry="3"><title>binary (decrease_key): 2.18 ms</title></rect>
+<text x="183.5" y="344.2" class="bar-label">2.18 ms</text>
+<rect x="203.5" y="186.7" width="32.0" height="188.3" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (decrease_key): 15.88 ms</title></rect>
+<text x="219.5" y="181.7" class="bar-label">15.88 ms</text>
+<rect x="239.5" y="318.9" width="32.0" height="56.1" fill="#9333EA" rx="3" ry="3"><title>fibonacci (decrease_key): 4.73 ms</title></rect>
+<text x="255.5" y="313.9" class="bar-label">4.73 ms</text>
+<rect x="275.5" y="339.9" width="32.0" height="35.1" fill="#16A34A" rx="3" ry="3"><title>pairing (decrease_key): 2.96 ms</title></rect>
+<text x="291.5" y="334.9" class="bar-label">2.96 ms</text>
 <text x="532.5" y="395" class="axis-title" font-size="11px" text-anchor="middle">Lazy Insertion</text>
-<rect x="462.5" y="319.8" width="32.0" height="55.2" fill="#2563EB" rx="3" ry="3"><title>binary (lazy): 3.21 ms</title></rect>
-<text x="478.5" y="314.8" class="bar-label">3.21 ms</text>
-<rect x="498.5" y="195.2" width="32.0" height="179.8" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (lazy): 10.46 ms</title></rect>
-<text x="514.5" y="190.2" class="bar-label">10.46 ms</text>
-<rect x="534.5" y="238.3" width="32.0" height="136.7" fill="#9333EA" rx="3" ry="3"><title>fibonacci (lazy): 7.95 ms</title></rect>
-<text x="550.5" y="233.3" class="bar-label">7.95 ms</text>
-<rect x="570.5" y="299.6" width="32.0" height="75.4" fill="#16A34A" rx="3" ry="3"><title>pairing (lazy): 4.38 ms</title></rect>
-<text x="586.5" y="294.6" class="bar-label">4.38 ms</text>
+<rect x="462.5" y="337.0" width="32.0" height="38.0" fill="#2563EB" rx="3" ry="3"><title>binary (lazy): 3.21 ms</title></rect>
+<text x="478.5" y="332.0" class="bar-label">3.21 ms</text>
+<rect x="498.5" y="252.7" width="32.0" height="122.3" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (lazy): 10.32 ms</title></rect>
+<text x="514.5" y="247.7" class="bar-label">10.32 ms</text>
+<rect x="534.5" y="109.8" width="32.0" height="265.2" fill="#9333EA" rx="3" ry="3"><title>fibonacci (lazy): 22.38 ms</title></rect>
+<text x="550.5" y="104.8" class="bar-label">22.38 ms</text>
+<rect x="570.5" y="322.8" width="32.0" height="52.2" fill="#16A34A" rx="3" ry="3"><title>pairing (lazy): 4.40 ms</title></rect>
+<text x="586.5" y="317.8" class="bar-label">4.40 ms</text>
 <rect x="90.0" y="485.0" width="14" height="14" fill="#2563EB" rx="3" ry="3" />
 <text x="110.0" y="492.0" class="legend-text">binary</text>
 <rect x="230.0" y="485.0" width="14" height="14" fill="#EA580C" rx="3" ry="3" />

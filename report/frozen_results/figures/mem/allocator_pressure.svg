@@ -39,7 +39,8 @@
 <text x="158.7" y="84.3" class="bar-label">50k</text>
 <rect x="171.9" y="88.3" width="18.4" height="286.7" fill="#16A34A" rx="3" ry="3"><title>pairing (grid_224, decrease_key): 50k</title></rect>
 <text x="181.1" y="84.3" class="bar-label">50k</text>
-<text x="262.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">grid 224 Lazy</text>
+<text x="262.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">grid 224</text>
+<text x="262.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
 <rect x="219.7" y="345.9" width="18.4" height="29.1" fill="#2563EB" rx="3" ry="3"><title>binary (grid_224, lazy): 3</title></rect>
 <text x="228.9" y="341.9" class="bar-label">3</text>
 <rect x="242.1" y="356.6" width="18.4" height="18.4" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (grid_224, lazy): 2</title></rect>
@@ -58,7 +59,8 @@
 <text x="388.7" y="108.6" class="bar-label">20k</text>
 <rect x="401.9" y="112.6" width="18.4" height="262.4" fill="#16A34A" rx="3" ry="3"><title>pairing (hub_skewed, decrease_key): 20k</title></rect>
 <text x="411.1" y="108.6" class="bar-label">20k</text>
-<text x="492.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">hub skewed Lazy</text>
+<text x="492.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">hub skewed</text>
+<text x="492.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
 <rect x="449.6" y="345.9" width="18.4" height="29.1" fill="#2563EB" rx="3" ry="3"><title>binary (hub_skewed, lazy): 3</title></rect>
 <text x="458.9" y="341.9" class="bar-label">3</text>
 <rect x="472.1" y="356.6" width="18.4" height="18.4" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (hub_skewed, lazy): 2</title></rect>
@@ -97,7 +99,8 @@
 <text x="848.7" y="188.6" class="bar-label">978</text>
 <rect x="861.9" y="192.6" width="18.4" height="182.4" fill="#16A34A" rx="3" ry="3"><title>pairing (smoke_1k, decrease_key): 978</title></rect>
 <text x="871.1" y="188.6" class="bar-label">978</text>
-<text x="952.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">smoke 1k Lazy</text>
+<text x="952.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">smoke 1k</text>
+<text x="952.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
 <rect x="909.6" y="345.9" width="18.4" height="29.1" fill="#2563EB" rx="3" ry="3"><title>binary (smoke_1k, lazy): 3</title></rect>
 <text x="918.9" y="341.9" class="bar-label">3</text>
 <rect x="932.1" y="356.6" width="18.4" height="18.4" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (smoke_1k, lazy): 2</title></rect>

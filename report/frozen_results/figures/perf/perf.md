@@ -1,60 +1,62 @@
 # Experiment 2: Microarchitectural Profiling (perf stat)
 
-| Variant | Config | Mode | L1-D Miss (%) | LLC Miss (%) | Branch Miss (%) | IPC | Instructions | Cycles |
-|:---|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| binary | smoke_1k | decrease_key | 17.05% | 93.67% | 0.42% | 0.88 | 26,091,322 | 29,708,049 |
-| brodal-okasaki | smoke_1k | decrease_key | 15.80% | 94.44% | 2.02% | 0.88 | 27,788,611 | 31,418,375 |
-| fibonacci | smoke_1k | decrease_key | 16.34% | 95.08% | 1.17% | 0.88 | 27,820,765 | 31,436,728 |
-| pairing | smoke_1k | decrease_key | 16.77% | 94.87% | 0.51% | 0.87 | 26,556,282 | 30,359,310 |
-| binary | smoke_1k | lazy | 17.00% | 93.48% | 0.45% | 0.92 | 26,259,934 | 28,514,200 |
-| brodal-okasaki | smoke_1k | lazy | 16.13% | 94.69% | 1.66% | 0.86 | 27,383,020 | 31,737,695 |
-| fibonacci | smoke_1k | lazy | 16.06% | 95.20% | 1.31% | 0.92 | 28,550,695 | 31,132,052 |
-| pairing | smoke_1k | lazy | 16.65% | 95.08% | 0.54% | 0.88 | 26,840,439 | 30,432,090 |
-| binary | uniform_sparse | decrease_key | 15.50% | 94.52% | 2.04% | 0.94 | 35,172,506 | 37,504,657 |
-| brodal-okasaki | uniform_sparse | decrease_key | 10.04% | 93.19% | 8.01% | 0.92 | 59,235,265 | 64,504,091 |
-| fibonacci | uniform_sparse | decrease_key | 11.94% | 95.19% | 4.12% | 1.09 | 53,970,931 | 49,519,799 |
-| pairing | uniform_sparse | decrease_key | 14.61% | 94.84% | 2.12% | 1.02 | 39,958,497 | 39,150,521 |
-| binary | uniform_sparse | lazy | 15.45% | 94.24% | 2.04% | 0.98 | 37,475,579 | 38,328,296 |
-| brodal-okasaki | uniform_sparse | lazy | 10.90% | 94.99% | 7.35% | 0.91 | 53,343,639 | 58,383,014 |
-| fibonacci | uniform_sparse | lazy | 11.23% | 95.56% | 4.16% | 1.13 | 62,004,607 | 54,819,551 |
-| pairing | uniform_sparse | lazy | 14.38% | 94.20% | 1.98% | 1.05 | 43,366,993 | 41,166,466 |
-| binary | uniform_medium | decrease_key | 15.40% | 65.76% | 3.28% | 0.92 | 51,909,512 | 56,381,781 |
-| brodal-okasaki | uniform_medium | decrease_key | 6.85% | 44.43% | 9.61% | 0.88 | 169,174,370 | 192,157,848 |
-| fibonacci | uniform_medium | decrease_key | 10.60% | 55.40% | 4.94% | 1.08 | 90,476,556 | 83,981,955 |
-| pairing | uniform_medium | decrease_key | 13.72% | 60.92% | 2.96% | 0.95 | 63,840,812 | 67,495,468 |
-| binary | uniform_medium | lazy | 13.37% | 67.38% | 2.94% | 1.00 | 68,752,820 | 68,483,838 |
-| brodal-okasaki | uniform_medium | lazy | 7.84% | 53.51% | 8.85% | 0.92 | 125,512,313 | 136,633,363 |
-| fibonacci | uniform_medium | lazy | 8.27% | 44.01% | 4.63% | 1.24 | 144,323,923 | 116,414,105 |
-| pairing | uniform_medium | lazy | 12.09% | 51.40% | 2.30% | 1.08 | 87,968,376 | 81,094,784 |
-| binary | uniform_dense | decrease_key | 14.45% | 77.77% | 2.44% | 0.95 | 49,212,596 | 51,597,422 |
-| brodal-okasaki | uniform_dense | decrease_key | 6.90% | 49.16% | 9.13% | 0.91 | 171,292,469 | 187,622,366 |
-| fibonacci | uniform_dense | decrease_key | 12.16% | 68.03% | 3.82% | 1.01 | 67,203,457 | 66,283,525 |
-| pairing | uniform_dense | decrease_key | 13.98% | 71.82% | 2.36% | 0.98 | 56,982,280 | 58,185,812 |
-| binary | uniform_dense | lazy | 12.74% | 74.09% | 2.29% | 1.08 | 69,319,082 | 64,450,581 |
-| brodal-okasaki | uniform_dense | lazy | 8.15% | 63.32% | 7.96% | 0.94 | 116,784,381 | 123,996,581 |
-| fibonacci | uniform_dense | lazy | 8.47% | 60.51% | 4.21% | 1.29 | 132,829,331 | 102,999,029 |
-| pairing | uniform_dense | lazy | 11.92% | 63.26% | 1.82% | 1.17 | 86,822,485 | 73,933,368 |
-| binary | grid_224 | decrease_key | 9.54% | 93.08% | 3.20% | 1.26 | 66,259,353 | 52,623,477 |
-| brodal-okasaki | grid_224 | decrease_key | 4.17% | 93.14% | 9.88% | 1.05 | 157,844,892 | 150,278,801 |
-| fibonacci | grid_224 | decrease_key | 5.44% | 93.22% | 4.17% | 1.47 | 148,770,618 | 101,389,182 |
-| pairing | grid_224 | decrease_key | 8.21% | 93.50% | 3.22% | 1.33 | 81,364,219 | 61,088,999 |
-| binary | grid_224 | lazy | 9.11% | 92.80% | 2.96% | 1.33 | 75,042,961 | 56,214,799 |
-| brodal-okasaki | grid_224 | lazy | 4.72% | 93.29% | 9.06% | 1.06 | 135,355,950 | 127,147,116 |
-| fibonacci | grid_224 | lazy | 4.91% | 92.92% | 4.02% | 1.57 | 186,130,681 | 118,808,873 |
-| pairing | grid_224 | lazy | 7.79% | 93.19% | 2.87% | 1.48 | 94,496,503 | 63,762,272 |
-| binary | hub_skewed | decrease_key | 13.36% | 79.90% | 2.20% | 1.07 | 48,635,072 | 45,308,068 |
-| brodal-okasaki | hub_skewed | decrease_key | 7.88% | 62.71% | 8.19% | 0.97 | 90,054,602 | 92,922,696 |
-| fibonacci | hub_skewed | decrease_key | 9.02% | 58.11% | 4.33% | 1.24 | 89,764,811 | 72,556,092 |
-| pairing | hub_skewed | decrease_key | 11.80% | 63.47% | 1.65% | 1.17 | 62,260,756 | 53,141,869 |
-| binary | hub_skewed | lazy | 13.64% | 79.72% | 2.30% | 1.07 | 51,064,033 | 47,884,045 |
-| brodal-okasaki | hub_skewed | lazy | 8.57% | 69.32% | 7.99% | 0.97 | 82,450,136 | 85,204,743 |
-| fibonacci | hub_skewed | lazy | 8.87% | 58.01% | 4.40% | 1.27 | 97,685,601 | 77,199,330 |
-| pairing | hub_skewed | lazy | 12.00% | 62.10% | 1.72% | 1.22 | 65,136,068 | 53,499,489 |
-| binary | layered_frontier | decrease_key | 12.05% | 90.06% | 2.13% | 1.13 | 46,879,189 | 41,350,360 |
-| brodal-okasaki | layered_frontier | decrease_key | 5.87% | 91.94% | 10.09% | 0.98 | 147,412,227 | 149,679,111 |
-| fibonacci | layered_frontier | decrease_key | 8.88% | 91.85% | 4.82% | 1.25 | 81,155,013 | 65,145,953 |
-| pairing | layered_frontier | decrease_key | 11.34% | 89.99% | 2.57% | 1.18 | 55,698,985 | 47,235,188 |
-| binary | layered_frontier | lazy | 11.59% | 89.40% | 2.66% | 1.20 | 62,085,138 | 51,882,054 |
-| brodal-okasaki | layered_frontier | lazy | 7.00% | 89.13% | 9.19% | 1.10 | 109,051,474 | 99,543,400 |
-| fibonacci | layered_frontier | lazy | 7.46% | 92.60% | 4.80% | 1.48 | 130,832,689 | 88,534,118 |
-| pairing | layered_frontier | lazy | 11.16% | 89.01% | 2.50% | 1.60 | 75,396,049 | 47,173,835 |
+Counts are per Dijkstra run; per-vertex columns divide by the graph's vertex count.
+
+| Variant | Config | Mode | L1-D Miss (%) | LLC Miss (%) | Branch Miss (%) | IPC | Instructions | Cycles | Instr/vertex | L1 misses/vertex | Branch misses/vertex | LLC misses/vertex |
+|:---|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| binary | smoke_1k | decrease_key | 1.71% | 50.00% | 2.49% | 2.41 | 395,719 | 164,217 | 396 | 1.6 | 1.7 | 0 |
+| brodal-okasaki | smoke_1k | decrease_key | 0.99% | 68.42% | 11.71% | 1.10 | 1,244,958 | 1,136,056 | 1.24k | 3.3 | 26 | 0 |
+| fibonacci | smoke_1k | decrease_key | 1.55% | 57.14% | 4.55% | 1.82 | 1,258,004 | 690,225 | 1.26k | 3.9 | 14 | 0 |
+| pairing | smoke_1k | decrease_key | 1.90% | 61.11% | 2.12% | 2.53 | 625,946 | 247,692 | 626 | 2.8 | 2.5 | 0 |
+| binary | smoke_1k | lazy | 1.72% | 75.00% | 2.60% | 2.23 | 480,532 | 215,103 | 481 | 1.8 | 2.2 | 0 |
+| brodal-okasaki | smoke_1k | lazy | 0.98% | 63.64% | 11.04% | 1.12 | 1,041,636 | 929,464 | 1.04k | 2.7 | 21 | 0 |
+| fibonacci | smoke_1k | lazy | 1.60% | 70.00% | 4.49% | 1.86 | 1,631,462 | 877,729 | 1.63k | 5.1 | 17 | 0 |
+| pairing | smoke_1k | lazy | 1.98% | 81.97% | 2.05% | 2.41 | 767,323 | 318,659 | 767 | 3.4 | 2.9 | 0.001 |
+| binary | uniform_sparse | decrease_key | 9.15% | 89.80% | 4.91% | 1.44 | 4,936,273 | 3,436,525 | 494 | 9.9 | 4.2 | 0.0047 |
+| brodal-okasaki | uniform_sparse | decrease_key | 3.98% | 58.81% | 11.35% | 1.03 | 16,967,609 | 16,443,637 | 1.7k | 18 | 34 | 0.0087 |
+| fibonacci | uniform_sparse | decrease_key | 4.92% | 48.42% | 5.68% | 1.52 | 14,310,136 | 9,384,373 | 1.43k | 14 | 19 | 0.0029 |
+| pairing | uniform_sparse | decrease_key | 8.43% | 65.03% | 4.02% | 1.63 | 7,307,217 | 4,485,078 | 731 | 14 | 5.2 | 0.0038 |
+| binary | uniform_sparse | lazy | 9.57% | 76.54% | 4.35% | 1.49 | 6,087,798 | 4,096,378 | 609 | 12 | 4.6 | 0.0014 |
+| brodal-okasaki | uniform_sparse | lazy | 4.39% | 65.23% | 11.07% | 1.05 | 14,021,787 | 13,407,739 | 1.4k | 16 | 28 | 0.01 |
+| fibonacci | uniform_sparse | lazy | 4.83% | 33.97% | 5.39% | 1.57 | 18,232,600 | 11,612,334 | 1.82k | 17 | 23 | 0.015 |
+| pairing | uniform_sparse | lazy | 8.67% | 15.69% | 3.42% | 1.71 | 9,010,049 | 5,280,019 | 901 | 17 | 5.4 | 0.0042 |
+| binary | uniform_medium | decrease_key | 12.83% | 0.69% | 5.13% | 1.28 | 13,304,567 | 10,414,668 | 665 | 20 | 5.8 | 0.013 |
+| brodal-okasaki | uniform_medium | decrease_key | 4.77% | 2.33% | 10.58% | 0.94 | 71,935,964 | 76,447,767 | 3.6k | 46 | 67 | 0.14 |
+| fibonacci | uniform_medium | decrease_key | 7.06% | 0.85% | 5.75% | 1.39 | 32,661,349 | 23,521,559 | 1.63k | 24 | 22 | 0.03 |
+| pairing | uniform_medium | decrease_key | 10.63% | 0.86% | 4.04% | 1.35 | 19,183,864 | 14,237,496 | 959 | 24 | 6.9 | 0.022 |
+| binary | uniform_medium | lazy | 10.46% | 1.82% | 3.94% | 1.41 | 21,725,944 | 15,439,694 | 1.09k | 23 | 7.3 | 0.041 |
+| brodal-okasaki | uniform_medium | lazy | 5.16% | 5.16% | 10.11% | 1.01 | 50,105,527 | 49,713,533 | 2.51k | 34 | 45 | 0.16 |
+| fibonacci | uniform_medium | lazy | 5.38% | 4.46% | 5.06% | 1.48 | 59,357,847 | 40,200,688 | 2.97k | 31 | 35 | 0.22 |
+| pairing | uniform_medium | lazy | 9.14% | 2.27% | 2.82% | 1.46 | 31,177,877 | 21,372,270 | 1.56k | 31 | 7.8 | 0.085 |
+| binary | uniform_dense | decrease_key | 11.00% | 2.09% | 3.92% | 1.52 | 11,956,267 | 7,860,343 | 1.2k | 36 | 7.9 | 0.046 |
+| brodal-okasaki | uniform_dense | decrease_key | 4.90% | 8.22% | 10.04% | 0.95 | 72,994,736 | 76,818,359 | 7.3k | 97 | 129 | 0.72 |
+| fibonacci | uniform_dense | decrease_key | 8.59% | 1.02% | 4.86% | 1.50 | 20,895,934 | 13,884,551 | 2.09k | 44 | 22 | 0.041 |
+| pairing | uniform_dense | decrease_key | 10.98% | 0.75% | 3.38% | 1.56 | 15,788,524 | 10,094,852 | 1.58k | 46 | 9.6 | 0.025 |
+| binary | uniform_dense | lazy | 9.27% | 8.19% | 3.04% | 1.50 | 22,010,022 | 14,706,182 | 2.2k | 43 | 12 | 0.24 |
+| brodal-okasaki | uniform_dense | lazy | 5.31% | 8.25% | 9.22% | 1.03 | 45,741,253 | 44,447,167 | 4.57k | 65 | 76 | 0.39 |
+| fibonacci | uniform_dense | lazy | 5.41% | 7.63% | 4.65% | 1.58 | 53,367,064 | 33,846,940 | 5.34k | 59 | 57 | 0.41 |
+| pairing | uniform_dense | lazy | 8.91% | 1.95% | 2.21% | 1.67 | 30,597,201 | 18,313,444 | 3.06k | 61 | 12 | 0.091 |
+| binary | grid_224 | decrease_key | 3.57% | 0.95% | 4.26% | 1.74 | 20,479,809 | 11,783,205 | 408 | 3.4 | 3 | 0.00022 |
+| brodal-okasaki | grid_224 | decrease_key | 1.36% | 12.24% | 10.91% | 1.12 | 66,271,806 | 59,149,403 | 1.32k | 4.8 | 26 | 0.0065 |
+| fibonacci | grid_224 | decrease_key | 1.84% | 5.15% | 4.54% | 1.75 | 61,731,389 | 35,212,486 | 1.23k | 4.5 | 13 | 0.0024 |
+| pairing | grid_224 | decrease_key | 3.14% | 0.92% | 3.96% | 1.83 | 28,030,468 | 15,275,914 | 559 | 4.2 | 3.8 | 0.00036 |
+| binary | grid_224 | lazy | 3.27% | 0.25% | 3.78% | 1.85 | 24,871,597 | 13,426,326 | 496 | 3.4 | 3.3 | 8e-05 |
+| brodal-okasaki | grid_224 | lazy | 1.45% | 25.46% | 10.22% | 1.15 | 55,027,323 | 47,910,777 | 1.1k | 4.2 | 20 | 0.014 |
+| fibonacci | grid_224 | lazy | 1.88% | 58.77% | 4.28% | 1.79 | 80,413,189 | 44,815,964 | 1.6k | 5.8 | 16 | 0.039 |
+| pairing | grid_224 | lazy | 3.14% | 15.05% | 3.42% | 2.03 | 34,598,650 | 17,070,014 | 690 | 4.8 | 4 | 0.0073 |
+| binary | hub_skewed | decrease_key | 7.44% | 1.48% | 3.54% | 1.55 | 11,667,320 | 7,521,968 | 583 | 9.5 | 3.5 | 0.0095 |
+| brodal-okasaki | hub_skewed | decrease_key | 3.79% | 2.19% | 9.99% | 1.06 | 32,377,208 | 30,592,383 | 1.62k | 17 | 29 | 0.034 |
+| fibonacci | hub_skewed | decrease_key | 4.27% | 0.44% | 5.06% | 1.63 | 32,247,722 | 19,765,969 | 1.61k | 14 | 19 | 0.0099 |
+| pairing | hub_skewed | decrease_key | 6.76% | 0.37% | 2.22% | 1.76 | 18,375,745 | 10,416,410 | 919 | 14 | 3.7 | 0.0066 |
+| binary | hub_skewed | lazy | 8.24% | 0.79% | 3.56% | 1.53 | 12,881,786 | 8,434,209 | 644 | 11 | 4 | 0.0051 |
+| brodal-okasaki | hub_skewed | lazy | 4.18% | 0.64% | 9.97% | 1.06 | 28,575,248 | 27,007,631 | 1.43k | 16 | 26 | 0.0078 |
+| fibonacci | hub_skewed | lazy | 4.34% | 0.14% | 5.07% | 1.64 | 36,072,222 | 22,049,368 | 1.8k | 15 | 21 | 0.0031 |
+| pairing | hub_skewed | lazy | 7.39% | 0.21% | 2.26% | 1.73 | 19,786,395 | 11,416,730 | 989 | 16 | 4.1 | 0.0037 |
+| binary | layered_frontier | decrease_key | 4.04% | 0.21% | 3.45% | 1.91 | 10,789,370 | 5,660,559 | 539 | 5.1 | 3.2 | 0.00025 |
+| brodal-okasaki | layered_frontier | decrease_key | 3.23% | 18.53% | 11.28% | 1.05 | 61,056,237 | 58,048,361 | 3.05k | 26 | 61 | 0.034 |
+| fibonacci | layered_frontier | decrease_key | 3.57% | 2.81% | 5.72% | 1.56 | 27,921,222 | 17,954,101 | 1.4k | 10 | 19 | 0.0045 |
+| pairing | layered_frontier | decrease_key | 5.08% | 0.37% | 3.63% | 1.82 | 15,189,696 | 8,325,962 | 759 | 9.2 | 4.8 | 0.00055 |
+| binary | layered_frontier | lazy | 5.68% | 0.95% | 3.66% | 1.65 | 18,392,317 | 11,156,726 | 920 | 11 | 5.8 | 0.0013 |
+| brodal-okasaki | layered_frontier | lazy | 3.08% | 4.11% | 10.78% | 1.08 | 41,875,202 | 38,674,316 | 2.09k | 17 | 41 | 0.0046 |
+| fibonacci | layered_frontier | lazy | 3.64% | 3.23% | 5.27% | 1.62 | 52,743,852 | 32,473,247 | 2.64k | 19 | 32 | 0.0047 |
+| pairing | layered_frontier | lazy | 6.31% | 3.37% | 3.15% | 1.82 | 25,025,725 | 13,772,001 | 1.25k | 17 | 6.7 | 0.0056 |

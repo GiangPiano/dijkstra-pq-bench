@@ -17,155 +17,158 @@
 <line x1="90" y1="375.0" x2="1700" y2="375.0" class="grid" />
 <text x="80" y="379.0" class="tick-label" text-anchor="end">0.0 MB</text>
 <line x1="90" y1="314.0" x2="1700" y2="314.0" class="grid" />
-<text x="80" y="318.0" class="tick-label" text-anchor="end">13.5 MB</text>
+<text x="80" y="318.0" class="tick-label" text-anchor="end">13.1 MB</text>
 <line x1="90" y1="253.0" x2="1700" y2="253.0" class="grid" />
-<text x="80" y="257.0" class="tick-label" text-anchor="end">26.9 MB</text>
+<text x="80" y="257.0" class="tick-label" text-anchor="end">26.3 MB</text>
 <line x1="90" y1="192.0" x2="1700" y2="192.0" class="grid" />
-<text x="80" y="196.0" class="tick-label" text-anchor="end">40.4 MB</text>
+<text x="80" y="196.0" class="tick-label" text-anchor="end">39.4 MB</text>
 <line x1="90" y1="131.0" x2="1700" y2="131.0" class="grid" />
-<text x="80" y="135.0" class="tick-label" text-anchor="end">53.8 MB</text>
+<text x="80" y="135.0" class="tick-label" text-anchor="end">52.6 MB</text>
 <line x1="90" y1="70.0" x2="1700" y2="70.0" class="grid" />
-<text x="80" y="74.0" class="tick-label" text-anchor="end">67.3 MB</text>
+<text x="80" y="74.0" class="tick-label" text-anchor="end">65.7 MB</text>
 <line x1="90" y1="70" x2="90" y2="375" class="axis" />
 <line x1="90" y1="375" x2="1700" y2="375" class="axis" />
 <text x="-222.5" y="20" class="axis-title" text-anchor="middle" transform="rotate(-90)">Peak RSS (MiB)</text>
 <text x="147.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">grid 224</text>
 <text x="147.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
-<rect x="104.7" y="147.0" width="18.4" height="228.0" fill="#2563EB" rx="3" ry="3"><title>binary (grid_224, decrease_key): 50.3 MB</title></rect>
-<text x="113.9" y="143.0" class="bar-label">50.3 MB</text>
-<rect x="127.1" y="141.1" width="18.4" height="233.9" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (grid_224, decrease_key): 51.6 MB</title></rect>
-<text x="136.3" y="137.1" class="bar-label">51.6 MB</text>
-<rect x="149.5" y="146.4" width="18.4" height="228.6" fill="#9333EA" rx="3" ry="3"><title>fibonacci (grid_224, decrease_key): 50.5 MB</title></rect>
-<text x="158.7" y="142.4" class="bar-label">50.5 MB</text>
-<rect x="171.9" y="146.8" width="18.4" height="228.2" fill="#16A34A" rx="3" ry="3"><title>pairing (grid_224, decrease_key): 50.4 MB</title></rect>
-<text x="181.1" y="142.8" class="bar-label">50.4 MB</text>
-<text x="262.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">grid 224 Lazy</text>
-<rect x="219.7" y="146.5" width="18.4" height="228.5" fill="#2563EB" rx="3" ry="3"><title>binary (grid_224, lazy): 50.4 MB</title></rect>
-<text x="228.9" y="142.5" class="bar-label">50.4 MB</text>
-<rect x="242.1" y="140.6" width="18.4" height="234.4" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (grid_224, lazy): 51.7 MB</title></rect>
-<text x="251.3" y="136.6" class="bar-label">51.7 MB</text>
-<rect x="264.5" y="146.7" width="18.4" height="228.3" fill="#9333EA" rx="3" ry="3"><title>fibonacci (grid_224, lazy): 50.4 MB</title></rect>
-<text x="273.7" y="142.7" class="bar-label">50.4 MB</text>
-<rect x="286.9" y="146.4" width="18.4" height="228.6" fill="#16A34A" rx="3" ry="3"><title>pairing (grid_224, lazy): 50.5 MB</title></rect>
-<text x="296.1" y="142.4" class="bar-label">50.5 MB</text>
+<rect x="104.7" y="141.1" width="18.4" height="233.9" fill="#2563EB" rx="3" ry="3"><title>binary (grid_224, decrease_key): 50.4 MB</title></rect>
+<text x="113.9" y="137.1" class="bar-label">50.4 MB</text>
+<rect x="127.1" y="134.8" width="18.4" height="240.2" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (grid_224, decrease_key): 51.8 MB</title></rect>
+<text x="136.3" y="130.8" class="bar-label">51.8 MB</text>
+<rect x="149.5" y="141.0" width="18.4" height="234.0" fill="#9333EA" rx="3" ry="3"><title>fibonacci (grid_224, decrease_key): 50.4 MB</title></rect>
+<text x="158.7" y="137.0" class="bar-label">50.4 MB</text>
+<rect x="171.9" y="140.9" width="18.4" height="234.1" fill="#16A34A" rx="3" ry="3"><title>pairing (grid_224, decrease_key): 50.5 MB</title></rect>
+<text x="181.1" y="136.9" class="bar-label">50.5 MB</text>
+<text x="262.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">grid 224</text>
+<text x="262.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
+<rect x="219.7" y="141.1" width="18.4" height="233.9" fill="#2563EB" rx="3" ry="3"><title>binary (grid_224, lazy): 50.4 MB</title></rect>
+<text x="228.9" y="137.1" class="bar-label">50.4 MB</text>
+<rect x="242.1" y="134.7" width="18.4" height="240.3" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (grid_224, lazy): 51.8 MB</title></rect>
+<text x="251.3" y="130.7" class="bar-label">51.8 MB</text>
+<rect x="264.5" y="140.9" width="18.4" height="234.1" fill="#9333EA" rx="3" ry="3"><title>fibonacci (grid_224, lazy): 50.4 MB</title></rect>
+<text x="273.7" y="136.9" class="bar-label">50.4 MB</text>
+<rect x="286.9" y="141.3" width="18.4" height="233.7" fill="#16A34A" rx="3" ry="3"><title>pairing (grid_224, lazy): 50.4 MB</title></rect>
+<text x="296.1" y="137.3" class="bar-label">50.4 MB</text>
 <text x="377.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">hub skewed</text>
 <text x="377.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
-<rect x="334.6" y="146.9" width="18.4" height="228.1" fill="#2563EB" rx="3" ry="3"><title>binary (hub_skewed, decrease_key): 50.3 MB</title></rect>
-<text x="343.9" y="142.9" class="bar-label">50.3 MB</text>
-<rect x="357.1" y="142.4" width="18.4" height="232.6" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (hub_skewed, decrease_key): 51.3 MB</title></rect>
-<text x="366.3" y="138.4" class="bar-label">51.3 MB</text>
-<rect x="379.5" y="141.7" width="18.4" height="233.3" fill="#9333EA" rx="3" ry="3"><title>fibonacci (hub_skewed, decrease_key): 51.5 MB</title></rect>
-<text x="388.7" y="137.7" class="bar-label">51.5 MB</text>
-<rect x="401.9" y="142.8" width="18.4" height="232.2" fill="#16A34A" rx="3" ry="3"><title>pairing (hub_skewed, decrease_key): 51.2 MB</title></rect>
-<text x="411.1" y="138.8" class="bar-label">51.2 MB</text>
-<text x="492.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">hub skewed Lazy</text>
-<rect x="449.6" y="146.7" width="18.4" height="228.3" fill="#2563EB" rx="3" ry="3"><title>binary (hub_skewed, lazy): 50.4 MB</title></rect>
-<text x="458.9" y="142.7" class="bar-label">50.4 MB</text>
-<rect x="472.1" y="145.8" width="18.4" height="229.2" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (hub_skewed, lazy): 50.6 MB</title></rect>
-<text x="481.3" y="141.8" class="bar-label">50.6 MB</text>
-<rect x="494.5" y="141.4" width="18.4" height="233.6" fill="#9333EA" rx="3" ry="3"><title>fibonacci (hub_skewed, lazy): 51.5 MB</title></rect>
-<text x="503.7" y="137.4" class="bar-label">51.5 MB</text>
-<rect x="516.9" y="142.8" width="18.4" height="232.2" fill="#16A34A" rx="3" ry="3"><title>pairing (hub_skewed, lazy): 51.2 MB</title></rect>
-<text x="526.1" y="138.8" class="bar-label">51.2 MB</text>
+<rect x="334.6" y="141.4" width="18.4" height="233.6" fill="#2563EB" rx="3" ry="3"><title>binary (hub_skewed, decrease_key): 50.3 MB</title></rect>
+<text x="343.9" y="137.4" class="bar-label">50.3 MB</text>
+<rect x="357.1" y="136.5" width="18.4" height="238.5" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (hub_skewed, decrease_key): 51.4 MB</title></rect>
+<text x="366.3" y="132.5" class="bar-label">51.4 MB</text>
+<rect x="379.5" y="135.9" width="18.4" height="239.1" fill="#9333EA" rx="3" ry="3"><title>fibonacci (hub_skewed, decrease_key): 51.5 MB</title></rect>
+<text x="388.7" y="131.9" class="bar-label">51.5 MB</text>
+<rect x="401.9" y="137.4" width="18.4" height="237.6" fill="#16A34A" rx="3" ry="3"><title>pairing (hub_skewed, decrease_key): 51.2 MB</title></rect>
+<text x="411.1" y="133.4" class="bar-label">51.2 MB</text>
+<text x="492.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">hub skewed</text>
+<text x="492.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
+<rect x="449.6" y="141.4" width="18.4" height="233.6" fill="#2563EB" rx="3" ry="3"><title>binary (hub_skewed, lazy): 50.3 MB</title></rect>
+<text x="458.9" y="137.4" class="bar-label">50.3 MB</text>
+<rect x="472.1" y="139.5" width="18.4" height="235.5" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (hub_skewed, lazy): 50.8 MB</title></rect>
+<text x="481.3" y="135.5" class="bar-label">50.8 MB</text>
+<rect x="494.5" y="135.9" width="18.4" height="239.1" fill="#9333EA" rx="3" ry="3"><title>fibonacci (hub_skewed, lazy): 51.5 MB</title></rect>
+<text x="503.7" y="131.9" class="bar-label">51.5 MB</text>
+<rect x="516.9" y="137.6" width="18.4" height="237.4" fill="#16A34A" rx="3" ry="3"><title>pairing (hub_skewed, lazy): 51.2 MB</title></rect>
+<text x="526.1" y="133.6" class="bar-label">51.2 MB</text>
 <text x="607.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">layered frontier</text>
 <text x="607.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
-<rect x="564.6" y="147.9" width="18.4" height="227.1" fill="#2563EB" rx="3" ry="3"><title>binary (layered_frontier, decrease_key): 50.1 MB</title></rect>
-<text x="573.9" y="143.9" class="bar-label">50.1 MB</text>
-<rect x="587.1" y="145.3" width="18.4" height="229.7" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (layered_frontier, decrease_key): 50.7 MB</title></rect>
-<text x="596.3" y="141.3" class="bar-label">50.7 MB</text>
-<rect x="609.5" y="147.6" width="18.4" height="227.4" fill="#9333EA" rx="3" ry="3"><title>fibonacci (layered_frontier, decrease_key): 50.2 MB</title></rect>
-<text x="618.7" y="143.6" class="bar-label">50.2 MB</text>
-<rect x="631.9" y="148.1" width="18.4" height="226.9" fill="#16A34A" rx="3" ry="3"><title>pairing (layered_frontier, decrease_key): 50.1 MB</title></rect>
-<text x="641.1" y="144.1" class="bar-label">50.1 MB</text>
+<rect x="564.6" y="142.3" width="18.4" height="232.7" fill="#2563EB" rx="3" ry="3"><title>binary (layered_frontier, decrease_key): 50.1 MB</title></rect>
+<text x="573.9" y="138.3" class="bar-label">50.1 MB</text>
+<rect x="587.1" y="139.5" width="18.4" height="235.5" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (layered_frontier, decrease_key): 50.8 MB</title></rect>
+<text x="596.3" y="135.5" class="bar-label">50.8 MB</text>
+<rect x="609.5" y="142.6" width="18.4" height="232.4" fill="#9333EA" rx="3" ry="3"><title>fibonacci (layered_frontier, decrease_key): 50.1 MB</title></rect>
+<text x="618.7" y="138.6" class="bar-label">50.1 MB</text>
+<rect x="631.9" y="142.3" width="18.4" height="232.7" fill="#16A34A" rx="3" ry="3"><title>pairing (layered_frontier, decrease_key): 50.1 MB</title></rect>
+<text x="641.1" y="138.3" class="bar-label">50.1 MB</text>
 <text x="722.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">layered frontier</text>
 <text x="722.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
-<rect x="679.6" y="147.7" width="18.4" height="227.3" fill="#2563EB" rx="3" ry="3"><title>binary (layered_frontier, lazy): 50.1 MB</title></rect>
-<text x="688.9" y="143.7" class="bar-label">50.1 MB</text>
-<rect x="702.1" y="145.9" width="18.4" height="229.1" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (layered_frontier, lazy): 50.5 MB</title></rect>
-<text x="711.3" y="141.9" class="bar-label">50.5 MB</text>
-<rect x="724.5" y="147.5" width="18.4" height="227.5" fill="#9333EA" rx="3" ry="3"><title>fibonacci (layered_frontier, lazy): 50.2 MB</title></rect>
-<text x="733.7" y="143.5" class="bar-label">50.2 MB</text>
-<rect x="746.9" y="147.4" width="18.4" height="227.6" fill="#16A34A" rx="3" ry="3"><title>pairing (layered_frontier, lazy): 50.2 MB</title></rect>
-<text x="756.1" y="143.4" class="bar-label">50.2 MB</text>
+<rect x="679.6" y="142.7" width="18.4" height="232.3" fill="#2563EB" rx="3" ry="3"><title>binary (layered_frontier, lazy): 50.0 MB</title></rect>
+<text x="688.9" y="138.7" class="bar-label">50.0 MB</text>
+<rect x="702.1" y="140.0" width="18.4" height="235.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (layered_frontier, lazy): 50.6 MB</title></rect>
+<text x="711.3" y="136.0" class="bar-label">50.6 MB</text>
+<rect x="724.5" y="141.5" width="18.4" height="233.5" fill="#9333EA" rx="3" ry="3"><title>fibonacci (layered_frontier, lazy): 50.3 MB</title></rect>
+<text x="733.7" y="137.5" class="bar-label">50.3 MB</text>
+<rect x="746.9" y="141.8" width="18.4" height="233.2" fill="#16A34A" rx="3" ry="3"><title>pairing (layered_frontier, lazy): 50.3 MB</title></rect>
+<text x="756.1" y="137.8" class="bar-label">50.3 MB</text>
 <text x="837.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">smoke 1k</text>
 <text x="837.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
-<rect x="794.6" y="148.4" width="18.4" height="226.6" fill="#2563EB" rx="3" ry="3"><title>binary (smoke_1k, decrease_key): 50.0 MB</title></rect>
-<text x="803.9" y="144.4" class="bar-label">50.0 MB</text>
-<rect x="817.1" y="148.4" width="18.4" height="226.6" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (smoke_1k, decrease_key): 50.0 MB</title></rect>
-<text x="826.3" y="144.4" class="bar-label">50.0 MB</text>
-<rect x="839.5" y="148.9" width="18.4" height="226.1" fill="#9333EA" rx="3" ry="3"><title>fibonacci (smoke_1k, decrease_key): 49.9 MB</title></rect>
-<text x="848.7" y="144.9" class="bar-label">49.9 MB</text>
-<rect x="861.9" y="148.9" width="18.4" height="226.1" fill="#16A34A" rx="3" ry="3"><title>pairing (smoke_1k, decrease_key): 49.9 MB</title></rect>
-<text x="871.1" y="144.9" class="bar-label">49.9 MB</text>
-<text x="952.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">smoke 1k Lazy</text>
-<rect x="909.6" y="148.5" width="18.4" height="226.5" fill="#2563EB" rx="3" ry="3"><title>binary (smoke_1k, lazy): 50.0 MB</title></rect>
-<text x="918.9" y="144.5" class="bar-label">50.0 MB</text>
-<rect x="932.1" y="148.9" width="18.4" height="226.1" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (smoke_1k, lazy): 49.9 MB</title></rect>
-<text x="941.3" y="144.9" class="bar-label">49.9 MB</text>
-<rect x="954.5" y="148.5" width="18.4" height="226.5" fill="#9333EA" rx="3" ry="3"><title>fibonacci (smoke_1k, lazy): 50.0 MB</title></rect>
-<text x="963.7" y="144.5" class="bar-label">50.0 MB</text>
-<rect x="976.9" y="148.4" width="18.4" height="226.6" fill="#16A34A" rx="3" ry="3"><title>pairing (smoke_1k, lazy): 50.0 MB</title></rect>
-<text x="986.1" y="144.4" class="bar-label">50.0 MB</text>
+<rect x="794.6" y="143.5" width="18.4" height="231.5" fill="#2563EB" rx="3" ry="3"><title>binary (smoke_1k, decrease_key): 49.9 MB</title></rect>
+<text x="803.9" y="139.5" class="bar-label">49.9 MB</text>
+<rect x="817.1" y="143.1" width="18.4" height="231.9" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (smoke_1k, decrease_key): 50.0 MB</title></rect>
+<text x="826.3" y="139.1" class="bar-label">50.0 MB</text>
+<rect x="839.5" y="143.1" width="18.4" height="231.9" fill="#9333EA" rx="3" ry="3"><title>fibonacci (smoke_1k, decrease_key): 50.0 MB</title></rect>
+<text x="848.7" y="139.1" class="bar-label">50.0 MB</text>
+<rect x="861.9" y="143.1" width="18.4" height="231.9" fill="#16A34A" rx="3" ry="3"><title>pairing (smoke_1k, decrease_key): 50.0 MB</title></rect>
+<text x="871.1" y="139.1" class="bar-label">50.0 MB</text>
+<text x="952.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">smoke 1k</text>
+<text x="952.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
+<rect x="909.6" y="143.1" width="18.4" height="231.9" fill="#2563EB" rx="3" ry="3"><title>binary (smoke_1k, lazy): 50.0 MB</title></rect>
+<text x="918.9" y="139.1" class="bar-label">50.0 MB</text>
+<rect x="932.1" y="143.1" width="18.4" height="231.9" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (smoke_1k, lazy): 50.0 MB</title></rect>
+<text x="941.3" y="139.1" class="bar-label">50.0 MB</text>
+<rect x="954.5" y="143.1" width="18.4" height="231.9" fill="#9333EA" rx="3" ry="3"><title>fibonacci (smoke_1k, lazy): 50.0 MB</title></rect>
+<text x="963.7" y="139.1" class="bar-label">50.0 MB</text>
+<rect x="976.9" y="143.1" width="18.4" height="231.9" fill="#16A34A" rx="3" ry="3"><title>pairing (smoke_1k, lazy): 50.0 MB</title></rect>
+<text x="986.1" y="139.1" class="bar-label">50.0 MB</text>
 <text x="1067.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform dense</text>
 <text x="1067.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
-<rect x="1024.7" y="148.0" width="18.4" height="227.0" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_dense, decrease_key): 50.1 MB</title></rect>
-<text x="1033.9" y="144.0" class="bar-label">50.1 MB</text>
-<rect x="1047.1" y="131.0" width="18.4" height="244.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_dense, decrease_key): 53.8 MB</title></rect>
-<text x="1056.3" y="127.0" class="bar-label">53.8 MB</text>
-<rect x="1069.5" y="145.5" width="18.4" height="229.5" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_dense, decrease_key): 50.6 MB</title></rect>
-<text x="1078.7" y="141.5" class="bar-label">50.6 MB</text>
-<rect x="1091.9" y="146.2" width="18.4" height="228.8" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_dense, decrease_key): 50.5 MB</title></rect>
-<text x="1101.1" y="142.2" class="bar-label">50.5 MB</text>
+<rect x="1024.7" y="142.6" width="18.4" height="232.4" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_dense, decrease_key): 50.1 MB</title></rect>
+<text x="1033.9" y="138.6" class="bar-label">50.1 MB</text>
+<rect x="1047.1" y="131.0" width="18.4" height="244.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_dense, decrease_key): 52.6 MB</title></rect>
+<text x="1056.3" y="127.0" class="bar-label">52.6 MB</text>
+<rect x="1069.5" y="140.0" width="18.4" height="235.0" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_dense, decrease_key): 50.6 MB</title></rect>
+<text x="1078.7" y="136.0" class="bar-label">50.6 MB</text>
+<rect x="1091.9" y="140.7" width="18.4" height="234.3" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_dense, decrease_key): 50.5 MB</title></rect>
+<text x="1101.1" y="136.7" class="bar-label">50.5 MB</text>
 <text x="1182.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform dense</text>
 <text x="1182.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
-<rect x="1139.7" y="145.5" width="18.4" height="229.5" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_dense, lazy): 50.6 MB</title></rect>
-<text x="1148.9" y="141.5" class="bar-label">50.6 MB</text>
-<rect x="1162.1" y="142.0" width="18.4" height="233.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_dense, lazy): 51.4 MB</title></rect>
-<text x="1171.3" y="138.0" class="bar-label">51.4 MB</text>
-<rect x="1184.5" y="139.5" width="18.4" height="235.5" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_dense, lazy): 52.0 MB</title></rect>
-<text x="1193.7" y="135.5" class="bar-label">52.0 MB</text>
-<rect x="1206.9" y="141.5" width="18.4" height="233.5" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_dense, lazy): 51.5 MB</title></rect>
-<text x="1216.1" y="137.5" class="bar-label">51.5 MB</text>
+<rect x="1139.7" y="139.2" width="18.4" height="235.8" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_dense, lazy): 50.8 MB</title></rect>
+<text x="1148.9" y="135.2" class="bar-label">50.8 MB</text>
+<rect x="1162.1" y="137.1" width="18.4" height="237.9" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_dense, lazy): 51.3 MB</title></rect>
+<text x="1171.3" y="133.1" class="bar-label">51.3 MB</text>
+<rect x="1184.5" y="134.3" width="18.4" height="240.7" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_dense, lazy): 51.9 MB</title></rect>
+<text x="1193.7" y="130.3" class="bar-label">51.9 MB</text>
+<rect x="1206.9" y="135.7" width="18.4" height="239.3" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_dense, lazy): 51.6 MB</title></rect>
+<text x="1216.1" y="131.7" class="bar-label">51.6 MB</text>
 <text x="1297.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform medium</text>
 <text x="1297.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
-<rect x="1254.7" y="147.6" width="18.4" height="227.4" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_medium, decrease_key): 50.2 MB</title></rect>
-<text x="1263.9" y="143.6" class="bar-label">50.2 MB</text>
-<rect x="1277.1" y="138.0" width="18.4" height="237.0" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_medium, decrease_key): 52.3 MB</title></rect>
-<text x="1286.3" y="134.0" class="bar-label">52.3 MB</text>
-<rect x="1299.5" y="143.9" width="18.4" height="231.1" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_medium, decrease_key): 51.0 MB</title></rect>
-<text x="1308.7" y="139.9" class="bar-label">51.0 MB</text>
-<rect x="1321.9" y="144.8" width="18.4" height="230.2" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_medium, decrease_key): 50.8 MB</title></rect>
-<text x="1331.1" y="140.8" class="bar-label">50.8 MB</text>
+<rect x="1254.7" y="141.7" width="18.4" height="233.3" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_medium, decrease_key): 50.3 MB</title></rect>
+<text x="1263.9" y="137.7" class="bar-label">50.3 MB</text>
+<rect x="1277.1" y="131.6" width="18.4" height="243.4" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_medium, decrease_key): 52.4 MB</title></rect>
+<text x="1286.3" y="127.6" class="bar-label">52.4 MB</text>
+<rect x="1299.5" y="138.0" width="18.4" height="237.0" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_medium, decrease_key): 51.1 MB</title></rect>
+<text x="1308.7" y="134.0" class="bar-label">51.1 MB</text>
+<rect x="1321.9" y="139.0" width="18.4" height="236.0" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_medium, decrease_key): 50.9 MB</title></rect>
+<text x="1331.1" y="135.0" class="bar-label">50.9 MB</text>
 <text x="1412.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform medium</text>
 <text x="1412.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
-<rect x="1369.7" y="146.3" width="18.4" height="228.7" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_medium, lazy): 50.5 MB</title></rect>
-<text x="1378.9" y="142.3" class="bar-label">50.5 MB</text>
-<rect x="1392.1" y="141.7" width="18.4" height="233.3" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_medium, lazy): 51.5 MB</title></rect>
-<text x="1401.3" y="137.7" class="bar-label">51.5 MB</text>
-<rect x="1414.5" y="139.7" width="18.4" height="235.3" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_medium, lazy): 51.9 MB</title></rect>
-<text x="1423.7" y="135.7" class="bar-label">51.9 MB</text>
-<rect x="1436.9" y="141.3" width="18.4" height="233.7" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_medium, lazy): 51.6 MB</title></rect>
-<text x="1446.1" y="137.3" class="bar-label">51.6 MB</text>
+<rect x="1369.7" y="140.3" width="18.4" height="234.7" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_medium, lazy): 50.6 MB</title></rect>
+<text x="1378.9" y="136.3" class="bar-label">50.6 MB</text>
+<rect x="1392.1" y="135.9" width="18.4" height="239.1" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_medium, lazy): 51.5 MB</title></rect>
+<text x="1401.3" y="131.9" class="bar-label">51.5 MB</text>
+<rect x="1414.5" y="134.0" width="18.4" height="241.0" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_medium, lazy): 51.9 MB</title></rect>
+<text x="1423.7" y="130.0" class="bar-label">51.9 MB</text>
+<rect x="1436.9" y="135.7" width="18.4" height="239.3" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_medium, lazy): 51.6 MB</title></rect>
+<text x="1446.1" y="131.7" class="bar-label">51.6 MB</text>
 <text x="1527.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform sparse</text>
 <text x="1527.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Decrease Key</text>
-<rect x="1484.7" y="148.0" width="18.4" height="227.0" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_sparse, decrease_key): 50.1 MB</title></rect>
-<text x="1493.9" y="144.0" class="bar-label">50.1 MB</text>
-<rect x="1507.1" y="147.2" width="18.4" height="227.8" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_sparse, decrease_key): 50.3 MB</title></rect>
-<text x="1516.3" y="143.2" class="bar-label">50.3 MB</text>
-<rect x="1529.5" y="147.2" width="18.4" height="227.8" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_sparse, decrease_key): 50.3 MB</title></rect>
-<text x="1538.7" y="143.2" class="bar-label">50.3 MB</text>
-<rect x="1551.9" y="147.6" width="18.4" height="227.4" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_sparse, decrease_key): 50.2 MB</title></rect>
-<text x="1561.1" y="143.6" class="bar-label">50.2 MB</text>
+<rect x="1484.7" y="142.7" width="18.4" height="232.3" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_sparse, decrease_key): 50.0 MB</title></rect>
+<text x="1493.9" y="138.7" class="bar-label">50.0 MB</text>
+<rect x="1507.1" y="141.7" width="18.4" height="233.3" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_sparse, decrease_key): 50.3 MB</title></rect>
+<text x="1516.3" y="137.7" class="bar-label">50.3 MB</text>
+<rect x="1529.5" y="141.8" width="18.4" height="233.2" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_sparse, decrease_key): 50.3 MB</title></rect>
+<text x="1538.7" y="137.8" class="bar-label">50.3 MB</text>
+<rect x="1551.9" y="142.1" width="18.4" height="232.9" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_sparse, decrease_key): 50.2 MB</title></rect>
+<text x="1561.1" y="138.1" class="bar-label">50.2 MB</text>
 <text x="1642.5" y="393" class="axis-title" font-size="10px" text-anchor="middle">uniform sparse</text>
 <text x="1642.5" y="407" class="tick-label" font-size="10px" text-anchor="middle">Lazy</text>
-<rect x="1599.7" y="148.1" width="18.4" height="226.9" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_sparse, lazy): 50.1 MB</title></rect>
-<text x="1608.9" y="144.1" class="bar-label">50.1 MB</text>
-<rect x="1622.1" y="147.2" width="18.4" height="227.8" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_sparse, lazy): 50.3 MB</title></rect>
-<text x="1631.3" y="143.2" class="bar-label">50.3 MB</text>
-<rect x="1644.5" y="146.7" width="18.4" height="228.3" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_sparse, lazy): 50.4 MB</title></rect>
-<text x="1653.7" y="142.7" class="bar-label">50.4 MB</text>
-<rect x="1666.9" y="147.1" width="18.4" height="227.9" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_sparse, lazy): 50.3 MB</title></rect>
-<text x="1676.1" y="143.1" class="bar-label">50.3 MB</text>
+<rect x="1599.7" y="143.1" width="18.4" height="231.9" fill="#2563EB" rx="3" ry="3"><title>binary (uniform_sparse, lazy): 50.0 MB</title></rect>
+<text x="1608.9" y="139.1" class="bar-label">50.0 MB</text>
+<rect x="1622.1" y="141.9" width="18.4" height="233.1" fill="#EA580C" rx="3" ry="3"><title>brodal-okasaki (uniform_sparse, lazy): 50.2 MB</title></rect>
+<text x="1631.3" y="137.9" class="bar-label">50.2 MB</text>
+<rect x="1644.5" y="141.3" width="18.4" height="233.7" fill="#9333EA" rx="3" ry="3"><title>fibonacci (uniform_sparse, lazy): 50.4 MB</title></rect>
+<text x="1653.7" y="137.3" class="bar-label">50.4 MB</text>
+<rect x="1666.9" y="141.6" width="18.4" height="233.4" fill="#16A34A" rx="3" ry="3"><title>pairing (uniform_sparse, lazy): 50.3 MB</title></rect>
+<text x="1676.1" y="137.6" class="bar-label">50.3 MB</text>
 <rect x="580.0" y="485.0" width="14" height="14" fill="#2563EB" rx="3" ry="3" />
 <text x="600.0" y="492.0" class="legend-text">binary</text>
 <rect x="725.0" y="485.0" width="14" height="14" fill="#EA580C" rx="3" ry="3" />
