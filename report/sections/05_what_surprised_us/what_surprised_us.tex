@@ -1,43 +1,117 @@
 \section{What Surprised Us}
 
-The most important result was that the binary heap remained the fastest
-implementation in every tested graph and Dijkstra configuration. This supports
-Hypothesis~1.1, which predicted that the binary heap would perform best on
-sparse graphs, but contradicts Hypothesis~1.2. We expected the pairing heap to
-overtake the binary heap on dense graphs because of its cheaper asymptotic
-decrease-key operation. This crossover did not occur. The binary heap's
-contiguous storage and lower constant factors remained more important than the
-pairing heap's theoretical advantage.
+The headline result is that the binary heap was the fastest implementation on
+every graph in both Dijkstra variants, and that the pairing heap never
+overtook it. Hypothesis~1.2 predicted a crossover on dense graphs, where the
+pairing heap's cheap decrease-key should dominate, yet on \code{uniform_dense},
+with 50 edges per vertex, the binary heap still takes $1.69$~ms against
+$2.43$~ms. We expected the explanation to be cache locality. The counters show
+that locality helps, since the binary heap has the fewest L1 misses per
+vertex, but the larger reason was one we had not anticipated at all.
 
-The results for lazy Dijkstra were also different from the original
-prediction. Hypothesis~1.3 predicted that lazy processing could be competitive
-on sparse graphs but would degrade on dense graphs. Lazy processing was indeed
-slower for the binary, pairing, and Fibonacci heaps, and the difference
-generally increased on denser inputs. However, the Brodal-Okasaki heap was
-faster with lazy processing on every graph. This shows that the cost of
-decrease-key depends strongly on the implementation: avoiding an expensive
-decrease-key operation can outweigh the cost of processing stale entries.
+\subsection{Decrease-key is rarely called}
 
-The Fibonacci heap was consistently slower than both the binary and pairing
-heaps. This agrees with the prediction that its cascading cuts and linked
-structure would introduce substantial practical overhead. The Brodal-Okasaki
-implementation was also much slower than expected, particularly with eager
-decrease-key. This supports Hypothesis~1.4, although the observed slowdown is
-better described as a large implementation and constant-factor cost than as a
-universal consequence of the theoretical data structure.
+Hypothesis~1.2 assumed that on dense graphs the $m - n$ possible decrease-key
+calls would overwhelm the $n$ extractions. Counting the calls tells a
+different story. The pointer heaps allocate exactly one node per push, so the
+allocation counts in Section~4.4 give the number of pushes in each variant,
+and the difference between the lazy and \code{decrease_key} counts is the
+number of decrease-key calls (Table~\ref{tab:decrease-key-counts}).
 
-The memory results were broadly consistent with the structural predictions.
-The pointer-based heaps generated substantially more allocation activity than
-the array- and buffer-based implementations, while lazy processing increased
-the number of stored entries on graphs with more relaxations. All measured
-configurations nevertheless released their allocations correctly and reported
-zero leaked bytes.
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Decrease-key calls compared with the $m - n$ assumed in
+  Hypothesis~1.2.}
+  \label{tab:decrease-key-counts}
+  \begin{tabular}{@{}lrrr@{}}
+    \toprule
+    \textbf{Graph} & $\boldsymbol{m - n}$ & \textbf{Decrease-key calls} & \textbf{Per vertex} \\
+    \midrule
+    \code{smoke_1k}         & $3{,}000$   & $304$        & $0.30$ \\
+    \code{uniform_sparse}   & $30{,}000$  & $3{,}066$    & $0.31$ \\
+    \code{uniform_medium}   & $180{,}000$ & $18{,}764$   & $0.94$ \\
+    \code{uniform_dense}    & $490{,}000$ & $22{,}814$   & $2.28$ \\
+    \code{grid_224}         & $149{,}632$ & $16{,}029$   & $0.32$ \\
+    \code{hub_skewed}       & $100{,}000$ & $3{,}362$    & $0.17$ \\
+    \code{layered_frontier} & $138{,}400$ & $19{,}811$   & $0.99$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-Finally, the hardware-counter results showed that theoretical complexity alone
-was not sufficient to predict practical performance. Once the counters were
-restricted to the Dijkstra loop itself, they explained the ranking clearly:
-the pairing and Fibonacci heaps execute $1.4$ and $2.5$ times the binary heap's
-instructions at a similar IPC, while Brodal-Okasaki executes $4.6$ times as
-many at an IPC of about $1.0$, held back by frequent branch mispredictions. Overall, the experiments demonstrate that memory layout,
-allocation behaviour, and constant factors can dominate asymptotic advantages
-for this workload.
+On \code{uniform_dense} only $22{,}814$ of the $490{,}000$ possible calls
+happen, under $5\%$, and no graph reaches even $15\%$. Most relaxations fail
+because, with random weights, the first tentative distance found for a vertex
+is usually already close to its final distance. This matches a classical
+result: for random edge weights the expected number of decrease-key
+operations grows only like $n \log(m/n)$ (Noshita, 1985), about $39{,}000$ for
+\code{uniform_dense}, the same order of magnitude as we measured.
+
+This one fact explains three of our wrong predictions. The pairing heap's
+cheaper decrease-key saves time on only about two operations per vertex, too
+few to pay for its pointer-based layout, so there is no crossover. The lazy
+variant never holds anywhere near $m$ entries, since it makes at most $3.3$
+pushes per vertex, so lazy Dijkstra is $1.1$ to $2.3$ times slower rather than
+severely degraded (Hypothesis~1.3). And the pointer heaps make $1.2n$ to
+$3.3n$ allocations in lazy mode, not the roughly $m$ predicted by
+Hypothesis~3.2. A graph that really favours a cheap decrease-key needs edge
+weights arranged so that relaxations keep succeeding, which uniform random
+weights do not produce.
+
+\subsection{Brodal-Okasaki's decrease-key is lazy Dijkstra with extra work}
+
+Brodal-Okasaki was the only heap that ran faster in lazy mode, on every graph
+and by up to $41\%$ ($9.57$ against $16.11$~ms on \code{uniform_dense}), and
+it used half as much memory doing so ($1{,}920$ against $3{,}840$~KiB). The
+implementation explains why. A functional heap has no handles, so
+decrease-key cannot find and change an existing entry. Instead it inserts a
+tombstone for the old (distance, vertex) pair into a negative queue and
+inserts the new pair, and both stay in the buffer until they meet at the top
+and cancel. Every decrease-key therefore costs two insertions now and two
+delete-min operations later, where lazy Dijkstra pays one insertion and one
+delete-min for the same relaxation. In effect, the \code{decrease_key} variant
+is lazy Dijkstra with tombstones added, so it can only be slower. This also
+overturns Hypothesis~3.1, which placed Brodal-Okasaki second-smallest in
+memory: it has the largest peak in 13 of the 14 configurations.
+
+\subsection{The heap with the fewest cache misses had the highest miss rate}
+
+Our L1 miss-rate figure ranked the binary heap worst, which seemed to
+contradict its speed. Counted per vertex, it has the fewest misses ($12.1$,
+against $30.3$ for Brodal-Okasaki); its rate is high only because it makes so
+few loads ($147$ per vertex against $763$). A rate divides by a denominator
+that differs between implementations, so it can rank them in the opposite
+order to their cost, which is why Section~4.3 reports counts instead.
+
+\subsection{Our measurements were wrong twice before they were right}
+
+The first hardware-counter results showed every heap running at an IPC close
+to $1$ and retiring $26$ to $28$ million instructions on \code{smoke_1k}, even
+though the heaps' runtimes on that graph ranged from $30$ to $230$
+microseconds. The counters were recording the whole process, including
+start-up and graph construction, rather than Dijkstra alone. With the counting
+window fixed, the binary heap retires $0.40$ million instructions on that graph
+and Brodal-Okasaki $1.24$ million. Later, a full rerun made the Fibonacci heap
+about three times slower on several graphs while the other heaps were
+unchanged. Dividing the \code{perf} cycle counts by the measured runtimes
+showed that the processor had run at about $1.7$~GHz during those
+benchmarks, against roughly $4.8$~GHz elsewhere: the laptop had throttled.
+Both errors produced plausible-looking results, and both were caught only by
+checking one measurement against another.
+
+\subsection{What held}
+
+Several predictions did hold. The Fibonacci heap never beat the pairing heap,
+as Hypothesis~1.2 expected of its cascading cuts and four-pointer nodes, and it
+suffers the most from lazy processing ($2.28\times$ slower on
+\code{uniform_dense}). Brodal-Okasaki was the slowest heap on every graph,
+supporting Hypothesis~1.4, although its slowdown is better described as a
+constant-factor cost of this implementation than as a consequence of the data
+structure itself. Once the counters were restricted to the Dijkstra loop, they
+explained the ranking clearly: the pairing and Fibonacci heaps execute $1.4$
+and $2.5$ times the binary heap's instructions at a similar IPC, while
+Brodal-Okasaki executes $4.6$ times as many at an IPC of about $1.0$, held
+back by frequent branch mispredictions. Overall, the experiments show that
+for this workload, how often each operation is actually used matters as much
+as its asymptotic cost, and memory layout and constant factors decide the
+rest.

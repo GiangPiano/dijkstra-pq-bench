@@ -50,7 +50,7 @@ The theoretical merit of priority queues in shortest-path algorithms can be eval
   \end{tabular}
   \vspace{0.1cm}
   \flushleft
-  {\footnotesize \textit{Note:} In eager Dijkstra, all variants additionally maintain an external vertex lookup array ($\texttt{pos}$), adding 8~bytes per vertex (a \code{size_t} index for Binary, or a \code{Node*} handle for pointer heaps).}
+  {\footnotesize \textit{Note:} The binary, pairing, and Fibonacci heaps additionally maintain an external vertex lookup array ($\texttt{pos}$), adding 8~bytes per vertex (a \code{size_t} index for Binary, or a \code{Node*} handle for pointer heaps). Brodal-Okasaki has no such array: its decrease-key identifies an entry by its (distance, vertex) value.}
 \end{table}
 
 \noindent On standard 64-bit systems (\texttt{x86\_64}), pointers and \code{size_t} primitives are 8~bytes in size and require 8-byte alignment boundaries. The physical memory footprint of each node is determined as follows:

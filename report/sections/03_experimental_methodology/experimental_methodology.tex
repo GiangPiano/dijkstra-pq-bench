@@ -5,7 +5,11 @@
 All tests were conducted on a machine equipped with an Intel Core Ultra 7
 165U processor, 12 physical cores and 14 logical CPUs, 30~GiB of RAM, and a
 937~GB NVMe solid-state drive. The machine was running 64-bit \emph{Arch} Linux with
-kernel version 7.2.11-arch1-1. The complete test suite was executed on Linux, while macOS supports only the runtime benchmarks because the \code{perf} and memory benchmarks depend on Linux-specific facilities. Due to high
+kernel version 7.2.11-arch1-1. All code was compiled with GCC using
+\code{-O3 -std=c11}. The final measurements were taken on mains power with the
+operating system's performance power profile; an earlier run on default
+settings let the processor throttle partway through one benchmark (Section~5).
+The complete test suite was executed on Linux, while macOS supports only the runtime benchmarks because the \code{perf} and memory benchmarks depend on Linux-specific facilities. Due to high
 variance out of our control we do not expect every machine to produce the same
 results, or even subsequent runs to produce the same results, but they should
 all be relatively similar.
@@ -45,7 +49,11 @@ the running time of each heap implementation in both \code{decrease_key} and \co
 Dijkstras implementations. We took care to ensure that the benchmarks were only
 measuring the running time of Dijkstras over the heap implementation, and that
 we were not including static overheads due to test initialisation or additional
-allocations into the benchmarks.
+allocations into the benchmarks. Before timing, each runtime benchmark runs
+Dijkstra once and compares a checksum of the resulting distance array with one
+computed by an independent Python implementation when the graph was generated,
+so every timed configuration is also verified to be correct. This pass also
+warms the caches before the timed runs begin.
 
 The runtime and \code{perf} benchmarks are pinned to a single CPU with
 \code{taskset}. On a hybrid processor such as the Core Ultra 7 165U the type of
@@ -84,8 +92,9 @@ To compare the priority queues under different workload shapes, we use seven
 deterministically generated directed graphs. The graph definitions are kept in
 the Makefile, while \code{src/bench/gen.py} generates the corresponding C
 source files. Every graph uses the fixed seed \code{67}, positive integer edge
-weights, and the same generated input for every heap implementation and
-Dijkstra variant.
+weights drawn uniformly from 1 to 100 (1 to 50 for \code{smoke_1k}), and the
+same generated input for every heap implementation and Dijkstra variant.
+Dijkstra always starts from vertex~0.
 
 The suite combines uniform random graphs with structured graphs. The uniform
 graphs vary the number of vertices and average out-degree, allowing us to
@@ -171,13 +180,19 @@ The three uniform graphs provide a controlled progression from sparse to dense
 connectivity. Their increasing average out-degree produces more edge
 relaxations and changes the amount of work performed by the priority queue.
 
-The \code{grid_224} graph is a directed four-neighbour grid. Each interior
+The uniform graphs sample $m$ distinct ordered vertex pairs without
+replacement, so they contain no self-loops or parallel edges. The
+\code{grid_224} graph is a directed four-neighbour grid. Each interior
 vertex has up to four outgoing edges, producing a bounded-degree graph with
 spatial structure and longer paths than the uniform random graphs. The
 \code{hub_skewed} graph contains a concentrated set of 32 hubs together with
-background edges. This creates highly uneven vertex degrees and bursts of
+background edges: every other vertex has an edge to and from hub $u \bmod 32$,
+and each remaining edge has a random source and, with probability $0.75$, a
+hub as its target. This creates highly uneven vertex degrees and bursts of
 relaxation activity. Finally, \code{layered_frontier} contains 100 layers of
-200 vertices, with deterministic forward edges between consecutive layers.
+200 vertices, with deterministic forward edges between consecutive layers: each vertex
+has edges to 8 vertices of the next layer chosen by a fixed pattern, so only
+the weights are random.
 Its broad active frontier is useful for observing heap growth and the
 difference between eager decrease-key and lazy duplicate-entry Dijkstra.
 

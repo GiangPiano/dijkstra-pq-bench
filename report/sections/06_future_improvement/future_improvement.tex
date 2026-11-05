@@ -18,7 +18,14 @@ negative cancellation lists in Brodal-Okasaki that slow the implementation down.
 Since the edge case that would cause an incorrect \code{heap_decrease_key}
 does not arise under Dijkstra's algorithm, we decided to skip this feature.
 
-Lastly, we could run very large graphs that would exhaust the L1 cache, to see
-if the current findings hold up under degrading cache performance. Maybe at this
-scale we would see that the theoretical big-$\mathcal{O}$ performance would shine back
-through.
+Our hardware counters show that every working set stayed on chip: last-level
+cache misses never exceeded $1.2$ per vertex. Running graphs whose working set
+is several times the 12~MiB last-level cache would test whether the binary
+heap's lead holds, or grows, once heap accesses have to go to main memory.
+
+Finally, a direct test of Hypothesis~1.2 needs inputs that actually exercise
+decrease-key. Uniform random weights cause at most about two decrease-key calls
+per vertex (Section~5). Constructions in which most vertices are first reached
+through heavy edges and then improved repeatedly by lighter paths can make
+almost every relaxation succeed, giving the pairing and Fibonacci heaps the
+workload their theoretical bounds are designed for.

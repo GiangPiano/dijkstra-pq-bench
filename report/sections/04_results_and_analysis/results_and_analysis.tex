@@ -106,9 +106,10 @@ on \code{uniform_dense}, \code{uniform_medium}, and
 \code{layered_frontier}. For example, on \code{uniform_dense}, lazy
 processing takes approximately $9.57$~ms compared with $16.11$~ms for
 \code{decrease_key}. This result is specific to the current implementation:
-the decrease-key operation requires additional tree-search and bookkeeping
-work, whereas the lazy variant avoids those updates at the cost of processing
-stale entries.
+because the heap has no handles, each decrease-key inserts a tombstone into the
+negative queue as well as the new entry, and both must later be removed by
+delete-min operations when they cancel, whereas the lazy variant inserts only
+the new entry (Section~5).
 
 Overall, the results show that lazy processing is not uniformly inferior.
 For the binary, pairing, and Fibonacci heaps, explicitly maintaining
@@ -274,28 +275,41 @@ set size recorded during the experiments.
   \label{fig:peak-rss-memory}
 \end{figure}
 
-The binary heap generally has the lowest peak heap allocation. Its contiguous
-array representation stores queue entries compactly, with limited additional
-metadata for position tracking. The exceptions are \code{grid_224} and
-\code{layered_frontier}, where the pairing and Fibonacci heaps use less: the
-binary heap (like Brodal-Okasaki) allocates space for every vertex up front,
-whereas the pointer-based heaps allocate only the entries currently in the
-queue, and these two graphs keep a narrow frontier. The pointer-based pairing and Fibonacci heaps
-require per-node allocations and structural links, which increases their
-memory footprint. The Brodal-Okasaki implementation also incurs additional
-storage for its buffer and tree bookkeeping.
+In \code{decrease_key} mode the pointer-based heaps track the analytical node
+sizes of Section~2.1.2 closely. On \code{uniform_dense}, the pairing heap
+peaks at $430$~KiB and the Fibonacci heap at $572$~KiB, or $44$ and $59$ bytes
+per vertex against the predicted $48$ and $64$; they fall slightly short
+because not every vertex is in the queue at once. The binary heap allocates its
+$24$ bytes per vertex up front and peaks at $234$~KiB. It has the lowest peak in
+10 of the 14 configurations. The exceptions are \code{grid_224} and
+\code{layered_frontier}, where the pairing and Fibonacci heaps use less because
+they allocate only the entries currently in the queue, and these two graphs
+keep a narrow frontier.
 
-Peak memory increases as graph size and relaxation activity increase. The
-effect is especially visible for the denser and layered inputs, where the
-priority queue processes a larger active frontier. Lazy Dijkstra can further
-increase memory usage because stale entries remain in the queue until they are
-removed.
+Brodal-Okasaki does not fit the prediction. Hypothesis~3.1 placed it second,
+behind only the binary heap, but it has the largest peak in 13 of the 14
+configurations, reaching $3{,}840$~KiB on \code{uniform_dense} in
+\code{decrease_key} mode, nine times the pairing heap. Its decrease-key never
+removes the old entry: it adds a tombstone to the negative queue and inserts the
+new entry, and neither cell is freed until the two cancel at the top of the
+heap. On \code{uniform_medium}, \code{uniform_dense}, and \code{hub_skewed}
+the live entries and tombstones outgrow the buffer's initial capacity of one
+cell per vertex, forcing it to grow, and its lazy variant needs less memory
+($1{,}920$~KiB on \code{uniform_dense}, half the eager figure), the opposite of
+the predicted direction.
 
-The resident set size follows the same broad pattern but includes memory
-allocated outside the priority queue, including the graph representation and
-runtime overhead. Consequently, differences in peak RSS are smaller than
-differences in peak heap allocation for some inputs. No negative allocation
-values or leaks were recorded in the frozen results.
+For the other heaps, lazy processing does increase peak memory, as predicted,
+but not in proportion to $m$. On \code{uniform_dense} the binary heap's peak
+rises from $234$ to $1{,}094$~KiB and the pairing heap's from $430$ to
+$1{,}105$~KiB, yet the total number of entries ever pushed ($32{,}814$) is only
+about one fifteenth of the $500{,}000$ edges (Section~5).
+
+Peak resident set size (Figure~\ref{fig:peak-rss-memory}) lies between $49.9$
+and $52.6$~MiB in every configuration. Each benchmark executable contains all
+seven input graphs as static data, which dominates the resident set, so RSS
+cannot distinguish the heaps and the fragmentation effect anticipated in
+Hypothesis~3.1 is not measurable at these sizes. No negative allocation values
+or leaks were recorded.
 
 \subsubsection{Allocator Activity}
 
@@ -311,23 +325,54 @@ implementations and input graphs.
   \label{fig:allocator-pressure}
 \end{figure}
 
-The binary and Brodal-Okasaki implementations perform very few allocation
-operations because they primarily use preallocated or buffer-based storage.
-In contrast, the pairing and Fibonacci heaps allocate individual nodes, which
-results in substantially more \code{malloc} and \code{free} calls.
+The buffer-based heaps make at most seven allocator calls per run, as
+Hypothesis~3.2 predicted: the binary heap allocates its arrays once, and
+Brodal-Okasaki manages its own free list inside a single buffer. The pairing
+and Fibonacci heaps allocate one node per push. In \code{decrease_key} mode
+that is one node per reached vertex ($10{,}000$ on \code{uniform_dense}, plus
+two allocations for the heap structure and position array), also as
+predicted. In lazy mode it is one node per entry pushed, $32{,}814$ on
+\code{uniform_dense}, against the prediction of roughly $m = 500{,}000$;
+Section~5 explains the difference. All configurations report matching
+allocation and free counts with zero leaked bytes.
 
-Lazy processing generally increases allocator activity for the pointer-based
-heaps because duplicate queue entries must be created and later released. The
-increase is most visible on the medium, dense, and layered graphs, where more
-relaxations produce more stale entries. All configurations report matching
-allocation and free counts with zero leaked bytes, indicating that the
-additional allocation activity is temporary rather than caused by unreleased
-memory.
+These allocation counts are consistent with the runtime results: the pointer
+heaps pay for an allocator call on every push, and lazy processing adds more
+of them, while the two buffer-based heaps avoid the allocator almost entirely.
 
-These results support the runtime and peak-memory measurements: allocation
-frequency and allocator overhead contribute to the higher cost of the
-pointer-based implementations, particularly when lazy Dijkstra increases the
-number of queue entries.
+\subsection{Hypotheses Revisited}
+
+Table~\ref{tab:hypotheses} summarises each prediction from Section~2.2 against
+the measurements.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Predictions from Section~2.2 compared with the results.}
+  \label{tab:hypotheses}
+  \begin{tabular}{@{}p{0.07\textwidth}p{0.38\textwidth}p{0.47\textwidth}@{}}
+    \toprule
+    & \textbf{Prediction} & \textbf{Outcome} \\
+    \midrule
+    1.1 & Binary heap fastest on sparse graphs.
+        & Supported: fastest on every graph in both variants. \\
+    1.2 & Pairing overtakes binary on dense graphs; Fibonacci never beats pairing.
+        & First part refuted (binary $1.69$ against $2.43$~ms on \code{uniform_dense}); second part supported. \\
+    1.3 & Lazy competitive for binary on sparse graphs; severe slowdown for all heaps on dense graphs.
+        & Partly: lazy is $1.2\times$ slower for binary even on sparse graphs; on dense graphs the slowdown is $1.8$ to $2.3\times$, and Brodal-Okasaki is faster lazily. \\
+    1.4 & Brodal-Okasaki uncompetitive with imperative heaps.
+        & Supported: slowest on every graph, $9.5\times$ the binary heap on \code{uniform_dense}. \\
+    2.1 & Binary has the fewest cache misses; Fibonacci the most.
+        & Partly: binary has the fewest L1 misses per vertex, but Brodal-Okasaki, not Fibonacci, has the most; no DRAM traffic occurs. \\
+    2.2 & Array heaps run at lower IPC but retire orders of magnitude fewer instructions.
+        & Not supported: $1.4$ to $4.6\times$ fewer instructions, at a similar IPC. \\
+    3.1 & Peak memory Binary $<$ Brodal-Okasaki $<$ Pairing $<$ Fibonacci; lazy memory scales with $m$.
+        & Partly: pairing $<$ Fibonacci and binary usually lowest, but Brodal-Okasaki is the largest; lazy memory grows with pushes, not $m$, and shrinks for Brodal-Okasaki. \\
+    3.2 & Buffer heaps make $O(1)$ allocations; pointer heaps about $n$ (eager) and $m$ (lazy).
+        & Partly: the first two hold; lazy allocations are $1.2n$ to $3.3n$, far below $m$. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \subsection{Cross-Experiment Analysis}
 
