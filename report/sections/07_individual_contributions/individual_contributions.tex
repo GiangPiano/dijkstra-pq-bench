@@ -32,9 +32,9 @@ buffer-relative addressing, the problem seems to have been addressed rather
 well, and it was a fun solution to the problem.
 
 The worst cases for Brodal-Okasaki are made very apparent in this experiment,
-decrease_key is a nightmare! Supporting it was a lot of extra work, and not a
+\code{decrease_key} is a nightmare! Supporting it was a lot of extra work, and not a
 part of the original paper due to how unfriendly the operation is to persistant
-data structures. I believe there are other approachs to support decrease_key in
+data structures. I believe there are other approachs to support \code{decrease_key} in
 persistant min heaps, but the negative queue idea seemed appealing to try. The
 additional invariants that needed to be maintained around negative queue
 elements added significant complexity to the design.
