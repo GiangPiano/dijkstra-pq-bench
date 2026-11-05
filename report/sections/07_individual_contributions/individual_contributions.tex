@@ -16,11 +16,11 @@ presentation slides.
 The Brodal-Okasaki heap is a very complex design. While I understand the major
 design aspects of Brodal-Okasaki, I am not sure I fully understand the way in
 which those aspects interact and flow together. Specifically, I understand that
-the skew-binomial tree allows for $\mathcal{O}(1)$ \code{heap_push} operations, and much
-of the complexity comes from maintaining the invariants of skew-binomial tree
-links. However, looking at the functions and code that maintain those invariants
-makes this understanding go out the window, especially when it comes to removing
-the minimum element.
+the skew-binomial tree allows for $\mathcal{O}(1)$ \code{heap_push} operations,
+and much of the complexity comes from maintaining the invariants of
+skew-binomial tree links. However, looking at the functions and code that
+maintain those invariants makes this understanding go out the window, especially
+when it comes to removing the minimum element.
 
 Further optimising it for cache locality made this even harder to understand.
 It was particularly difficult to get all the little helper methods correct
@@ -32,12 +32,12 @@ buffer-relative addressing, the problem seems to have been addressed rather
 well, and it was a fun solution to the problem.
 
 The worst cases for Brodal-Okasaki are made very apparent in this experiment,
-\code{decrease_key} is a nightmare! Supporting it was a lot of extra work, and not a
-part of the original paper due to how unfriendly the operation is to persistant
-data structures. I believe there are other approachs to support \code{decrease_key} in
-persistant min heaps, but the negative queue idea seemed appealing to try. The
-additional invariants that needed to be maintained around negative queue
-elements added significant complexity to the design.
+\code{decrease_key} is a nightmare! Supporting it was a lot of extra work, and
+not a part of the original paper due to how unfriendly the operation is to
+persistant data structures. I believe there are other approachs to support
+\code{decrease_key} in persistant min heaps, but the negative queue idea seemed
+appealing to try. The additional invariants that needed to be maintained around
+negative queue elements added significant complexity to the design.
 
 If starting the project again, I think I'd pick the regular Brodal queue, which
 is also a skew-binomial tree, but more similar to the fibonacci heap, using
@@ -68,15 +68,52 @@ which is always a good way to expand your skillset.
 
 \subsection{Truong Giang Nguyen}
 
-I implemented the base Dijkstra's algorithm for benchmarking. Since C has no dynamically sized array, I could not simply represent the graph using a normal adjacency matrix. Implementing one from scratch could introduce allocation overhead unrelated to the benchmark, so I implemented the shared graph representation using Compressed Sparse Row (CSR) format.
+I implemented the base Dijkstra's algorithm for benchmarking. Since C has no
+dynamically sized array, I could not simply represent the graph using a normal
+adjacency matrix. Implementing one from scratch could introduce allocation
+overhead unrelated to the benchmark, so I implemented the shared graph
+representation using Compressed Sparse Row (CSR) format.
 
-My algorithm is the binary heap. It has logarithmic time complexity for push, pop, and decrease-key, and offers constant-time minimum queries. The worst case happens when relaxation keeps succeeding and constantly pushes new lower values onto the heap. For the lazy variant, this causes the heap to store a large number of stale entries and grow in size, making the bubble-up and sink-down operations longer. If every newly encountered edge adds a new entry to the heap, the result is $\mathcal{O}(\log m)$ push and pop operations, where $m$ is the number of edges. Stale entries also cause more pops, which wastes computation just to reach a valid entry. The second variant, eager, mitigates this by calling \code{heap_decrease_key()}, which directly alters the entry instead of pushing a new one. This approach, however, requires an extra index array to store each entry's position in the heap. The number of successful relaxations is positively correlated with graph density, as more edges come in and out of each vertex. Although the worst case can be crafted manually by deliberately placing edge weights in a certain order, it is extremely rare with randomised input. As a result, the binary heap won all test cases because of its contiguous data allocation, which gives it a large advantage in cache locality.
+My algorithm is the binary heap. It has logarithmic time complexity for push,
+pop, and decrease-key, and offers constant-time minimum queries. The worst case
+happens when relaxation keeps succeeding and constantly pushes new lower values
+onto the heap. For the lazy variant, this causes the heap to store a large
+number of stale entries and grow in size, making the bubble-up and sink-down
+operations longer. If every newly encountered edge adds a new entry to the heap,
+the result is $\mathcal{O}(\log m)$ push and pop operations, where $m$ is the
+number of edges. Stale entries also cause more pops, which wastes computation
+just to reach a valid entry. The second variant, eager, mitigates this by
+calling \code{heap_decrease_key()}, which directly alters the entry instead of
+pushing a new one. This approach, however, requires an extra index array to
+store each entry's position in the heap. The number of successful relaxations is
+positively correlated with graph density, as more edges come in and out of each
+vertex. Although the worst case can be crafted manually by deliberately placing
+edge weights in a certain order, it is extremely rare with randomised input. As
+a result, the binary heap won all test cases because of its contiguous data
+allocation, which gives it a large advantage in cache locality.
 
-The hardest bug I encountered was in \code{heap_pop}. The assertion I wrote fired in \code{heap_decrease_key} instead, so I spent a lot of time around the wrong function. I decided to use Claude Code to review my code, and it turned out I copied the last element to the root before decrementing \code{size}, so \code{h->data[0] = h->data[h->size]} read the slot one past the end. This only corrupts the heap when that stale slot happens to hold a value smaller than the true minimum, so small graphs passed while large ones returned wrong distances. The fix was simply to decrement first, then copy.
+The hardest bug I encountered was in \code{heap_pop}. The assertion I wrote
+fired in \code{heap_decrease_key} instead, so I spent a lot of time around the
+wrong function. I decided to use Claude Code to review my code, and it turned
+out I copied the last element to the root before decrementing \code{size}, so
+\code{h->data[0] = h->data[h->size]} read the slot one past the end. This only
+corrupts the heap when that stale slot happens to hold a value smaller than the
+true minimum, so small graphs passed while large ones returned wrong distances.
+The fix was simply to decrement first, then copy.
 
-A key design decision I made was the \code{pos[]} array mapping for the vertices. Without it, decrease-key would need a $\Theta(n)$ scan to find the corresponding key. I had to refactor almost every function in the binary heap implementation, as all operations need to update and keep track of the position of each added or removed node. It also introduces an extra memory allocation for the array, which affects the lazy variant even though it never reads it.
+A key design decision I made was the \code{pos[]} array mapping for the
+vertices. Without it, decrease-key would need a $\Theta(n)$ scan to find the
+corresponding key. I had to refactor almost every function in the binary heap
+implementation, as all operations need to update and keep track of the position
+of each added or removed node. It also introduces an extra memory allocation for
+the array, which affects the lazy variant even though it never reads it.
 
-If I were to do it differently, I would split the heap into two versions: \code{lazy_binary_heap}, which does not support \code{decrease_key}, and \code{eager_binary_heap}. This would give me the rawest benchmark of the lazy variant of Dijkstra's algorithm. I would then compare it to C++'s \code{std::priority_queue}, as it is also implemented as a binary heap and does not support \code{decrease_key}.
+If I were to do it differently, I would split the heap into two versions:
+\code{lazy_binary_heap}, which does not support \code{decrease_key}, and
+\code{eager_binary_heap}. This would give me the rawest benchmark of the lazy
+variant of Dijkstra's algorithm. I would then compare it to C++'s
+\code{std::priority_queue}, as it is also implemented as a binary heap and does
+not support \code{decrease_key}.
 
 \subsection{Tung Nguyen}
 \subsubsection{Pairing Heap}

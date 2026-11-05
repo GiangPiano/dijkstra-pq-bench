@@ -1,9 +1,55 @@
 \section{AI Disclosure}
 
-\subsection{Oscar's Experience}
+Each individual experience contains longer reflection on cases where the AI
+tools used in this project went wrong, summarised here:
+\begin{enumerate}
+	\item [Oscar]
+		LLMs generated brittle code, hardcoding the names of graph inputs, or
+		generating tests that were tuned to only work on a specific CPU, causing
+		portability issues.
 
-% Makefile troubles
-% Useful for perf / mem tests and graphics
+	\item [Oscar]
+		The LLM generated perf tests were incorrectly measuring program startup
+		events, and the logic to measure only the correct sections of the code was
+		half implemented.
+
+	\item [Oscar]
+		LLM recommended figures were misrepresenting the data, or not presenting
+		measured data.
+
+	\item [Oscar]
+		LLM adjustments to the Makefile without specific instructions made it
+		unmaintainable.
+
+	\item [Giang]
+		AI overengineered solutions when given an non-specific request, like adding
+		the \code{heap_decrease_key} Dijkstra's variant.
+
+	\item [Giang]
+		AI generated presentation slides were noisy, halucinated benchmark figures,
+		and tried to pack too much detail into a 15 minute presentation.
+
+	\item [Giang]
+		AI overlooked prexisiting features, generating more code to solve data parsing
+		problems that did not exist.
+
+	\item [Tung]
+		AI was overenthusiastic about suggesting hardware tests that the team was
+		unfamiliar with, and when implementing them would cut corners, and skip test
+		inputs already present in the project, being exceptionally lazy.
+
+	\item [Tung]
+		LLM analysis of the produced data produced inaccurate claims and introduced
+		pre-conceived biases into the writing, rather than accurately describe the
+		findings.
+
+	\item [Tung]
+		A second attempt at generating presentation slides with a different agent
+		caused the same over complication issues for a 15 minute presentation.
+
+\end{enumerate}
+
+\subsection{Oscar's Experience}
 
 This was my first time using AI in any meaningful manner. There was both good
 and bad.
@@ -22,10 +68,22 @@ the early implementations of perf recorded intel specific events, and were not
 portable at all. The early perf and mem tests also hardcoded the graph and heap
 names, and would not have held up well to changes in the inputs.
 
-However, despite these downfalls, it was easy to later correct the LLM, modifying
-the scripts to not hard code the systems by pointing them to good examples and
-motivations for why tasks should be completed in the way I wanted them to be
-done.
+Later, we discovered that the perf tests were only half configured to measure
+just running dijkstras with the heaps, and were actually also capturing all the
+events during program startup, including loading all the graphs into memory.
+This bug was only discovered due to review with an LLM and rendered the results
+completely meaningless. The same review session revealed that the data that we
+were presenting from the perf tests was a misrepresentation of what was actually
+happening, and that the report did not cover the branching events, or
+acknowledge that the data was not all it immediately seemed. This oversight was
+no-doubt introduced because we are not individually experienced and competent at
+working with tools like perf, so we could not see for ourselves that there were
+issues.
+
+However, despite these downfalls, it was easy to later correct the LLM,
+modifying the scripts to not hard code the systems by pointing them to good
+examples and motivations for why tasks should be completed in the way I wanted
+them to be done.
 
 One aspect I did not like LLMs touching was the Makefile. They were all too
 happy to forever tack on additional targets and variables without considering
@@ -56,23 +114,131 @@ development going forward.
 
 \subsection{Truong Giang's Experience}
 
-I used Claude Code to scaffold the project structure, since my task is the very first step in the project. Initially, Claude implemented a vector to use as adjacency list for the graph representation. Since our project focuses on benchmarking the heap implementation, I wanted to minimise the impact of other operations outside of the heap. So I ask Claude to change that to a more effective format, so it suggested using CSR table. I then announce my group about this change before approving it.
+I used Claude Code to scaffold the project structure, since my task is the very
+first step in the project. Initially, Claude implemented a vector to use as
+adjacency list for the graph representation. Since our project focuses on
+benchmarking the heap implementation, I wanted to minimise the impact of other
+operations outside of the heap. So I ask Claude to change that to a more
+effective format, so it suggested using CSR table. I then announce my group
+about this change before approving it.
 
-One thing I found AI to be particularly helpful is when debugging pointers usage and memory allocation. Since C offers raw control over the allocated memory space, it is very easy to miss calculate the required size for the allocation, eventually leading to a silent crash. I encountered a bug in the binary heap's \code{heap_pop} function, but the assert failed in the \code{decrease_key} function instead. Claude Code instantly caught this, saving me a lot of time trying to debug it manually.
+One thing I found AI to be particularly helpful is when debugging pointers usage
+and memory allocation. Since C offers raw control over the allocated memory
+space, it is very easy to miss calculate the required size for the allocation,
+eventually leading to a silent crash. I encountered a bug in the binary heap's
+\code{heap_pop} function, but the assert failed in the \code{heap_decrease_key}
+function instead. Claude Code instantly caught this, saving me a lot of time
+trying to debug it manually.
 
-I noticed that AI tends to overly engineer the solution when the given input is not specific enough. An example is when we decided to implement another variant of the Dijkstra's algorithm. Since we have a single interface to call the Dijkstra's algorithm, it initially duplicated to another file, then rely on Makefile to dynamically link different objects to the selected algorithm. We then simplified it to have just a single file containing both variants.
+I noticed that AI tends to overly engineer the solution when the given input is
+not specific enough. An example is when we decided to implement another variant
+of the Dijkstra's algorithm. Since we have a single interface to call the
+Dijkstra's algorithm, it initially duplicated to another file, then rely on
+Makefile to dynamically link different objects to the selected algorithm. We
+then simplified it to have just a single file containing both variants.
 
-It also hallucinates and overcomplicate the approach on more complex tasks. We used Claude to generate the presentation slides based on our report, the codebase, and the video requirement. This task requires the AI to review everything we have in our repository. Initially, it included some random benchmark figures that does not even exist in our codebase, and it tries to fit too much detail in a 15 minutes video. I then learnt that using AI effectively is not just about giving it as much information as possible, but also to limit on the scope of the problem.
+It also hallucinates and overcomplicate the approach on more complex tasks. We
+used Claude to generate the presentation slides based on our report, the
+codebase, and the video requirement. This task requires the AI to review
+everything we have in our repository. Initially, it included some random
+benchmark figures that does not even exist in our codebase, and it tries to fit
+too much detail in a 15 minutes video. I then learnt that using AI effectively
+is not just about giving it as much information as possible, but also to limit
+on the scope of the problem.
 
-When generating the benchmark visualisations, AI overlooked the fact that the benchmarking library already supported exporting results directly to \code{.csv} files. Instead, it created a separate Python parser to read the output and convert it into a pandas DataFrame. This added unnecessary complexity to the workflow. We eventually discarded that implementation and provided AI with more context about the library's existing CSV export functionality so it could use it instead.
+When generating the benchmark visualisations, AI overlooked the fact that the
+benchmarking library already supported exporting results directly to \code{.csv}
+files. Instead, it created a separate Python parser to read the output and
+convert it into a pandas DataFrame. This added unnecessary complexity to the
+workflow. We eventually discarded that implementation and provided AI with more
+context about the library's existing CSV export functionality so it could use it
+instead.
 
 \subsection{Tung's Experience}
-First, I started by digesting this assignment description with Gemini Flash 3.8. I asked it to point out the main pain points to look out while doing this project. Once that is done, I relay my understand with the team. After that, I chose to implement Pairing and Fibonacci heaps. I then ask Gemini to briefly introduce me to these heaps and provide good source on YouTube. I then check my understand with Gemini again by draft up the pseudocode and asking it to correct any mistake. Since these heaps were quite popular, the discussion session with the AI was fruitful as I can cross check myself with the AI and other sources, in which it also provided. So far, the AI has done a good job of helping me to catch up with the knowledge of this project.
 
-Second, I moved on to implement the code for these heaps, and moved on to using Antigravity with Gemini 3.8 Flash. I wrote the code on my own and then ask the AI to fix it. The AI was very efficient with writing code, it did struggle with syncing my code to the rest of the codebase. Basically, instead of defining two parameters, we group it into an \code{Item}. But, my AI just code out the two parameters individually, a minor mistake and was easily self-checked and fixed. Later on, the we need to add a \code{heap_decrease_key} codebase wide. This was a repetitive task, in which the AI was very good at. 
+First, I started by digesting this assignment description with Gemini Flash 3.8.
+I asked it to point out the main pain points to look out while doing this
+project. Once that is done, I relay my understand with the team. After that, I
+chose to implement Pairing and Fibonacci heaps. I then ask Gemini to briefly
+introduce me to these heaps and provide good source on YouTube. I then check my
+understand with Gemini again by draft up the pseudocode and asking it to correct
+any mistake. Since these heaps were quite popular, the discussion session with
+the AI was fruitful as I can cross check myself with the AI and other sources,
+in which it also provided. So far, the AI has done a good job of helping me to
+catch up with the knowledge of this project.
 
-Third, I then plan ahead for the benchmark, i.e. what kind of experiment we should do. The AI was good here since it suggest hardware test, in which I'm not that familiar with. However, it went over the boat and just list a lot of things. After a team meeting, we only pick some of what it suggested, with the constraint of keeping thing not being too convoluted. I then had a back and forth session with Gemini on Antigravity on design the pipeline for each experiment, which went smoothly. I then ask the AI to implement these pipeline in the codebase. Here, the AI also kept looking for shortcut and was cutting down on test input. I had to explicitly tell it to \emph{not} be lazy, still it did not follow through. It was not until the other day, when me and Oscar were getting together to do some code review, where Oscar was checking the Makefile and looking through the output manually. Here, he pointed out the missing test output from the AI generated pipeline. We were able to track down to the missing input, in which we prompted the AI to simply add them back. In the process, the AI was messing up the Makefile, causing Oscar to have to spend time fixing it. Later on, I switch to GitHub Copilot with ChatGPT 5.6 Sol as backend for better git integration. We used GitHub Copilot to fix what Gemini has done. Oscar and I were going back and forth to locate the error in the Makefile naming scheme, and put together a solid prompt for Copilot, in which at the end it fixed the error. Once that is out of the way, I ask Copilot to reorganise the output directories, convert them to \code{png} for {\LaTeX} import. 
+Second, I moved on to implement the code for these heaps, and moved on to using
+Antigravity with Gemini 3.8 Flash. I wrote the code on my own and then ask the
+AI to fix it. The AI was very efficient with writing code, it did struggle with
+syncing my code to the rest of the codebase. Basically, instead of defining two
+parameters, we group it into an \code{Item}. But, my AI just code out the two
+parameters individually, a minor mistake and was easily self-checked and fixed.
+Later on, the we need to add a \code{heap_decrease_key} codebase wide. This was
+a repetitive task, in which the AI was very good at.
 
-Forth, I moved on to writing the report. With the help of Copilot, I was able to import the charts smoothly. I also asked the AI to read my results analysis and cross-check with the output. However, the AI cross-checked against the graph images than the raw numerical tables, leading to inaccurate claims. For example, it assumed eager decrease-key was universally faster across all heaps, overlooking that the Brodal--Okasaki implementation was actually substantially faster under lazy Dijkstra across all seven graphs. It also failed to notice that Oscar's contiguous buffer optimisation eliminated allocator pressure for Brodal--Okasaki despite its higher runtime. We only noticed these errors when manually verifying the text against the frozen CSV data, after which we re-prompted the AI with strict numerical references.
+Third, I then plan ahead for the benchmark, i.e. what kind of experiment we
+should do. The AI was good here since it suggest hardware test, in which I'm not
+that familiar with. However, it went over the boat and just list a lot of
+things. After a team meeting, we only pick some of what it suggested, with the
+constraint of keeping thing not being too convoluted. I then had a back and
+forth session with Gemini on Antigravity on design the pipeline for each
+experiment, which went smoothly. I then ask the AI to implement these pipeline
+in the codebase. Here, the AI also kept looking for shortcut and was cutting
+down on test input. I had to explicitly tell it to \emph{not} be lazy, still it
+did not follow through. It was not until the other day, when me and Oscar were
+getting together to do some code review, where Oscar was checking the Makefile
+and looking through the output manually. Here, he pointed out the missing test
+output from the AI generated pipeline. We were able to track down to the missing
+input, in which we prompted the AI to simply add them back. In the process, the
+AI was messing up the Makefile, causing Oscar to have to spend time fixing it.
+Later on, I switch to GitHub Copilot with ChatGPT 5.6 Sol as backend for better
+git integration. We used GitHub Copilot to fix what Gemini has done. Oscar and I
+were going back and forth to locate the error in the Makefile naming scheme, and
+put together a solid prompt for Copilot, in which at the end it fixed the error.
+Once that is out of the way, I ask Copilot to reorganise the output directories,
+convert them to \code{png} for {\LaTeX} import.
 
-Lastly, I asked the AI to make HTML files for presentation. They contained too much information. So we scraped it and Oscar redesign again with Claude.
+Fourth, I moved on to writing the report. With the help of Copilot, I was able
+to import the charts smoothly. I also asked the AI to read my results analysis
+and cross-check with the output. However, the AI cross-checked against the graph
+images than the raw numerical tables, leading to inaccurate claims. For example,
+it assumed eager decrease-key was universally faster across all heaps,
+overlooking that the Brodal-Okasaki implementation was actually substantially
+faster under lazy Dijkstra across all seven graphs. It also failed to notice
+that Oscar's contiguous buffer optimisation eliminated allocator pressure for
+Brodal-Okasaki despite its higher runtime. We only noticed these errors when
+manually verifying the text against the frozen CSV data, after which we
+re-prompted the AI with strict numerical references.
+
+Lastly, I asked the AI to make HTML files for presentation. They contained too
+much information. So we scraped it and Oscar redesign again with Claude.
+
+\subsection{AI in Group Work}
+
+While some of our LLM usage was individual, a lot of it was group work. The team
+would work to coordinate our LLM usage and let each other know when we had
+changed a shared part of the project.
+
+In particular, the Makefile was clearly a hot resource. As the project grew, the
+Makefile evolved too, often the LLMs would eagerly introduce poor practices into
+the Makefile, and inter-group communication allowed Oscar to examine and improve
+the LLM generated mess.
+
+The report was a similar contested part of the project, which had a fair amount
+of LLM contribution. Team members would use LLMs to review the report, and then
+report the key findings to the rest of the group, allowing the team to plan how
+issues would be handled, and by whom. At the same time, LLMs produced invalid
+analysis several times, and it required cross checking by group members to
+ensure we were all happy with its validity.
+
+LLMs would also encourage small ideas to quickly snowball out of control, like
+testing for a larger number of hardware events, or adding very time-expensive
+massive graph inputs to the tests. Having a group to review ideas with allowed
+us to review and cull ideas and tests that were not actually useful, but a solo
+developer might not have realised.
+
+Keeping in contact with each other and strong individual task delegation allowed
+us to use LLMs to accelerate the development process and extend the project
+beyond what we could have done without them, however this definitely meant that
+we did not review and understand each others' code as well as we would have
+otherwise.
