@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 600" width="820" height="600" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+<defs>
+  <style>
+    .axis { stroke: #CBD5E1; stroke-width: 1; }
+    .grid { stroke: #F1F5F9; stroke-width: 1; stroke-dasharray: 4,4; }
+    .baseline { stroke: #EF4444; stroke-width: 1.5; stroke-dasharray: 3,3; }
+    .tick-label { font-size: 11px; fill: #64748B; }
+    .axis-title { font-size: 12px; font-weight: 600; fill: #334155; }
+    .chart-title { font-size: 16px; font-weight: 700; fill: #0F172A; }
+    .chart-subtitle { font-size: 12px; fill: #64748B; }
+    .bar-label { font-size: 9px; font-weight: 600; fill: #1E293B; text-anchor: middle; }
+    .legend-text { font-size: 12px; fill: #334155; font-weight: 500; dominant-baseline: central; }
+    .ipc-line { stroke: #94A3B8; stroke-width: 1; stroke-dasharray: 5,4; }
+    .ipc-label { font-size: 10px; fill: #64748B; }
+  </style>
+</defs>
+<text x="90" y="32" class="chart-title">Cycles vs Instructions per Vertex</text>
+<text x="90" y="50" class="chart-subtitle">Right = more work; above a dashed line = lower IPC. Both axes log scale.</text>
+<line x1="90.0" y1="70" x2="90.0" y2="480" class="grid" />
+<text x="90.0" y="496" class="tick-label" text-anchor="middle">100</text>
+<line x1="190.8" y1="70" x2="190.8" y2="480" class="grid" />
+<text x="190.8" y="496" class="tick-label" text-anchor="middle">200</text>
+<line x1="324.2" y1="70" x2="324.2" y2="480" class="grid" />
+<text x="324.2" y="496" class="tick-label" text-anchor="middle">500</text>
+<line x1="425.0" y1="70" x2="425.0" y2="480" class="grid" />
+<text x="425.0" y="496" class="tick-label" text-anchor="middle">1k</text>
+<line x1="525.8" y1="70" x2="525.8" y2="480" class="grid" />
+<text x="525.8" y="496" class="tick-label" text-anchor="middle">2k</text>
+<line x1="659.2" y1="70" x2="659.2" y2="480" class="grid" />
+<text x="659.2" y="496" class="tick-label" text-anchor="middle">5k</text>
+<line x1="760.0" y1="70" x2="760.0" y2="480" class="grid" />
+<text x="760.0" y="496" class="tick-label" text-anchor="middle">10k</text>
+<line x1="90" y1="480.0" x2="760" y2="480.0" class="grid" />
+<text x="80" y="484.0" class="tick-label" text-anchor="end">100</text>
+<line x1="90" y1="418.3" x2="760" y2="418.3" class="grid" />
+<text x="80" y="422.3" class="tick-label" text-anchor="end">200</text>
+<line x1="90" y1="336.7" x2="760" y2="336.7" class="grid" />
+<text x="80" y="340.7" class="tick-label" text-anchor="end">500</text>
+<line x1="90" y1="275.0" x2="760" y2="275.0" class="grid" />
+<text x="80" y="279.0" class="tick-label" text-anchor="end">1k</text>
+<line x1="90" y1="213.3" x2="760" y2="213.3" class="grid" />
+<text x="80" y="217.3" class="tick-label" text-anchor="end">2k</text>
+<line x1="90" y1="131.7" x2="760" y2="131.7" class="grid" />
+<text x="80" y="135.7" class="tick-label" text-anchor="end">5k</text>
+<line x1="90" y1="70.0" x2="760" y2="70.0" class="grid" />
+<text x="80" y="74.0" class="tick-label" text-anchor="end">10k</text>
+<line x1="90" y1="70" x2="90" y2="480" class="axis" />
+<line x1="90" y1="480" x2="760" y2="480" class="axis" />
+<text x="425.0" y="518" class="axis-title" text-anchor="middle">Instructions per vertex</text>
+<text x="-275.0" y="20" class="axis-title" text-anchor="middle" transform="rotate(-90)">Cycles per vertex</text>
+<line x1="90.0" y1="418.3" x2="659.2" y2="70.0" class="ipc-line" />
+<text x="655.2" y="82.0" class="ipc-label" text-anchor="end">IPC 0.5</text>
+<line x1="90.0" y1="480.0" x2="760.0" y2="70.0" class="ipc-line" />
+<text x="756.0" y="82.0" class="ipc-label" text-anchor="end">IPC 1</text>
+<line x1="190.8" y1="480.0" x2="760.0" y2="131.7" class="ipc-line" />
+<text x="756.0" y="143.7" class="ipc-label" text-anchor="end">IPC 2</text>
+<line x1="291.7" y1="480.0" x2="760.0" y2="193.4" class="ipc-line" />
+<text x="756.0" y="205.4" class="ipc-label" text-anchor="end">IPC 4</text>
+<circle cx="290.1" cy="435.8" r="5.5" fill="#2563EB" stroke="#2563EB" stroke-width="2"><title>binary (smoke_1k, decrease_key): 396 instr, 164 cycles per vertex, IPC 2.41</title></circle>
+<circle cx="456.9" cy="263.6" r="5.5" fill="#EA580C" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (smoke_1k, decrease_key): 1.24k instr, 1.14k cycles per vertex, IPC 1.10</title></circle>
+<circle cx="458.4" cy="308.0" r="5.5" fill="#9333EA" stroke="#9333EA" stroke-width="2"><title>fibonacci (smoke_1k, decrease_key): 1.26k instr, 690 cycles per vertex, IPC 1.82</title></circle>
+<circle cx="356.8" cy="399.2" r="5.5" fill="#16A34A" stroke="#16A34A" stroke-width="2"><title>pairing (smoke_1k, decrease_key): 626 instr, 248 cycles per vertex, IPC 2.53</title></circle>
+<circle cx="318.4" cy="411.8" r="5.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"><title>binary (smoke_1k, lazy): 481 instr, 215 cycles per vertex, IPC 2.23</title></circle>
+<circle cx="430.9" cy="281.5" r="5.5" fill="#FFFFFF" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (smoke_1k, lazy): 1.04k instr, 929 cycles per vertex, IPC 1.12</title></circle>
+<circle cx="496.2" cy="286.6" r="5.5" fill="#FFFFFF" stroke="#9333EA" stroke-width="2"><title>fibonacci (smoke_1k, lazy): 1.63k instr, 878 cycles per vertex, IPC 1.86</title></circle>
+<circle cx="386.5" cy="376.8" r="5.5" fill="#FFFFFF" stroke="#16A34A" stroke-width="2"><title>pairing (smoke_1k, lazy): 767 instr, 319 cycles per vertex, IPC 2.41</title></circle>
+<circle cx="322.3" cy="370.1" r="5.5" fill="#2563EB" stroke="#2563EB" stroke-width="2"><title>binary (uniform_sparse, decrease_key): 494 instr, 344 cycles per vertex, IPC 1.44</title></circle>
+<circle cx="501.9" cy="230.7" r="5.5" fill="#EA580C" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (uniform_sparse, decrease_key): 1.7k instr, 1.64k cycles per vertex, IPC 1.03</title></circle>
+<circle cx="477.1" cy="280.7" r="5.5" fill="#9333EA" stroke="#9333EA" stroke-width="2"><title>fibonacci (uniform_sparse, decrease_key): 1.43k instr, 938 cycles per vertex, IPC 1.52</title></circle>
+<circle cx="379.4" cy="346.4" r="5.5" fill="#16A34A" stroke="#16A34A" stroke-width="2"><title>pairing (uniform_sparse, decrease_key): 731 instr, 449 cycles per vertex, IPC 1.63</title></circle>
+<circle cx="352.8" cy="354.5" r="5.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"><title>binary (uniform_sparse, lazy): 609 instr, 410 cycles per vertex, IPC 1.49</title></circle>
+<circle cx="474.2" cy="248.9" r="5.5" fill="#FFFFFF" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (uniform_sparse, lazy): 1.4k instr, 1.34k cycles per vertex, IPC 1.05</title></circle>
+<circle cx="512.4" cy="261.7" r="5.5" fill="#FFFFFF" stroke="#9333EA" stroke-width="2"><title>fibonacci (uniform_sparse, lazy): 1.82k instr, 1.16k cycles per vertex, IPC 1.57</title></circle>
+<circle cx="409.8" cy="331.9" r="5.5" fill="#FFFFFF" stroke="#16A34A" stroke-width="2"><title>pairing (uniform_sparse, lazy): 901 instr, 528 cycles per vertex, IPC 1.71</title></circle>
+<circle cx="365.7" cy="333.1" r="5.5" fill="#2563EB" stroke="#2563EB" stroke-width="2"><title>binary (uniform_medium, decrease_key): 665 instr, 521 cycles per vertex, IPC 1.28</title></circle>
+<circle cx="611.2" cy="155.6" r="5.5" fill="#EA580C" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (uniform_medium, decrease_key): 3.6k instr, 3.82k cycles per vertex, IPC 0.94</title></circle>
+<circle cx="496.4" cy="260.6" r="5.5" fill="#9333EA" stroke="#9333EA" stroke-width="2"><title>fibonacci (uniform_medium, decrease_key): 1.63k instr, 1.18k cycles per vertex, IPC 1.39</title></circle>
+<circle cx="418.9" cy="305.3" r="5.5" fill="#16A34A" stroke="#16A34A" stroke-width="2"><title>pairing (uniform_medium, decrease_key): 959 instr, 712 cycles per vertex, IPC 1.35</title></circle>
+<circle cx="437.0" cy="298.0" r="5.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"><title>binary (uniform_medium, lazy): 1.09k instr, 772 cycles per vertex, IPC 1.41</title></circle>
+<circle cx="558.6" cy="193.9" r="5.5" fill="#FFFFFF" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (uniform_medium, lazy): 2.51k instr, 2.49k cycles per vertex, IPC 1.01</title></circle>
+<circle cx="583.3" cy="212.8" r="5.5" fill="#FFFFFF" stroke="#9333EA" stroke-width="2"><title>fibonacci (uniform_medium, lazy): 2.97k instr, 2.01k cycles per vertex, IPC 1.48</title></circle>
+<circle cx="489.6" cy="269.1" r="5.5" fill="#FFFFFF" stroke="#16A34A" stroke-width="2"><title>pairing (uniform_medium, lazy): 1.56k instr, 1.07k cycles per vertex, IPC 1.46</title></circle>
+<circle cx="451.0" cy="296.4" r="5.5" fill="#2563EB" stroke="#2563EB" stroke-width="2"><title>binary (uniform_dense, decrease_key): 1.2k instr, 786 cycles per vertex, IPC 1.52</title></circle>
+<circle cx="714.2" cy="93.5" r="5.5" fill="#EA580C" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (uniform_dense, decrease_key): 7.3k instr, 7.68k cycles per vertex, IPC 0.95</title></circle>
+<circle cx="532.2" cy="245.8" r="5.5" fill="#9333EA" stroke="#9333EA" stroke-width="2"><title>fibonacci (uniform_dense, decrease_key): 2.09k instr, 1.39k cycles per vertex, IPC 1.50</title></circle>
+<circle cx="491.4" cy="274.2" r="5.5" fill="#16A34A" stroke="#16A34A" stroke-width="2"><title>pairing (uniform_dense, decrease_key): 1.58k instr, 1.01k cycles per vertex, IPC 1.56</title></circle>
+<circle cx="539.8" cy="240.7" r="5.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"><title>binary (uniform_dense, lazy): 2.2k instr, 1.47k cycles per vertex, IPC 1.50</title></circle>
+<circle cx="646.2" cy="142.2" r="5.5" fill="#FFFFFF" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (uniform_dense, lazy): 4.57k instr, 4.44k cycles per vertex, IPC 1.03</title></circle>
+<circle cx="668.6" cy="166.4" r="5.5" fill="#FFFFFF" stroke="#9333EA" stroke-width="2"><title>fibonacci (uniform_dense, lazy): 5.34k instr, 3.38k cycles per vertex, IPC 1.58</title></circle>
+<circle cx="587.7" cy="221.1" r="5.5" fill="#FFFFFF" stroke="#16A34A" stroke-width="2"><title>pairing (uniform_dense, lazy): 3.06k instr, 1.83k cycles per vertex, IPC 1.67</title></circle>
+<circle cx="294.6" cy="404.0" r="5.5" fill="#2563EB" stroke="#2563EB" stroke-width="2"><title>binary (grid_224, decrease_key): 408 instr, 235 cycles per vertex, IPC 1.74</title></circle>
+<circle cx="465.5" cy="260.4" r="5.5" fill="#EA580C" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (grid_224, decrease_key): 1.32k instr, 1.18k cycles per vertex, IPC 1.12</title></circle>
+<circle cx="455.2" cy="306.5" r="5.5" fill="#9333EA" stroke="#9333EA" stroke-width="2"><title>fibonacci (grid_224, decrease_key): 1.23k instr, 702 cycles per vertex, IPC 1.75</title></circle>
+<circle cx="340.3" cy="380.9" r="5.5" fill="#16A34A" stroke="#16A34A" stroke-width="2"><title>pairing (grid_224, decrease_key): 559 instr, 304 cycles per vertex, IPC 1.83</title></circle>
+<circle cx="322.9" cy="392.4" r="5.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"><title>binary (grid_224, lazy): 496 instr, 268 cycles per vertex, IPC 1.85</title></circle>
+<circle cx="438.4" cy="279.1" r="5.5" fill="#FFFFFF" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (grid_224, lazy): 1.1k instr, 955 cycles per vertex, IPC 1.15</title></circle>
+<circle cx="493.6" cy="285.1" r="5.5" fill="#FFFFFF" stroke="#9333EA" stroke-width="2"><title>fibonacci (grid_224, lazy): 1.6k instr, 893 cycles per vertex, IPC 1.79</title></circle>
+<circle cx="370.9" cy="371.0" r="5.5" fill="#FFFFFF" stroke="#16A34A" stroke-width="2"><title>pairing (grid_224, lazy): 690 instr, 340 cycles per vertex, IPC 2.03</title></circle>
+<circle cx="346.6" cy="362.1" r="5.5" fill="#2563EB" stroke="#2563EB" stroke-width="2"><title>binary (hub_skewed, decrease_key): 583 instr, 376 cycles per vertex, IPC 1.55</title></circle>
+<circle cx="495.1" cy="237.2" r="5.5" fill="#EA580C" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (hub_skewed, decrease_key): 1.62k instr, 1.53k cycles per vertex, IPC 1.06</title></circle>
+<circle cx="494.5" cy="276.0" r="5.5" fill="#9333EA" stroke="#9333EA" stroke-width="2"><title>fibonacci (hub_skewed, decrease_key): 1.61k instr, 988 cycles per vertex, IPC 1.63</title></circle>
+<circle cx="412.7" cy="333.1" r="5.5" fill="#16A34A" stroke="#16A34A" stroke-width="2"><title>pairing (hub_skewed, decrease_key): 919 instr, 521 cycles per vertex, IPC 1.76</title></circle>
+<circle cx="361.0" cy="351.9" r="5.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"><title>binary (hub_skewed, lazy): 644 instr, 422 cycles per vertex, IPC 1.53</title></circle>
+<circle cx="476.9" cy="248.3" r="5.5" fill="#FFFFFF" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (hub_skewed, lazy): 1.43k instr, 1.35k cycles per vertex, IPC 1.06</title></circle>
+<circle cx="510.8" cy="266.3" r="5.5" fill="#FFFFFF" stroke="#9333EA" stroke-width="2"><title>fibonacci (hub_skewed, lazy): 1.8k instr, 1.1k cycles per vertex, IPC 1.64</title></circle>
+<circle cx="423.4" cy="324.9" r="5.5" fill="#FFFFFF" stroke="#16A34A" stroke-width="2"><title>pairing (hub_skewed, lazy): 989 instr, 571 cycles per vertex, IPC 1.73</title></circle>
+<circle cx="335.2" cy="387.4" r="5.5" fill="#2563EB" stroke="#2563EB" stroke-width="2"><title>binary (layered_frontier, decrease_key): 539 instr, 283 cycles per vertex, IPC 1.91</title></circle>
+<circle cx="587.4" cy="180.1" r="5.5" fill="#EA580C" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (layered_frontier, decrease_key): 3.05k instr, 2.9k cycles per vertex, IPC 1.05</title></circle>
+<circle cx="473.5" cy="284.6" r="5.5" fill="#9333EA" stroke="#9333EA" stroke-width="2"><title>fibonacci (layered_frontier, decrease_key): 1.4k instr, 898 cycles per vertex, IPC 1.56</title></circle>
+<circle cx="385.0" cy="353.0" r="5.5" fill="#16A34A" stroke="#16A34A" stroke-width="2"><title>pairing (layered_frontier, decrease_key): 759 instr, 416 cycles per vertex, IPC 1.82</title></circle>
+<circle cx="412.8" cy="327.0" r="5.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"><title>binary (layered_frontier, lazy): 920 instr, 558 cycles per vertex, IPC 1.65</title></circle>
+<circle cx="532.5" cy="216.3" r="5.5" fill="#FFFFFF" stroke="#EA580C" stroke-width="2"><title>brodal-okasaki (layered_frontier, lazy): 2.09k instr, 1.93k cycles per vertex, IPC 1.08</title></circle>
+<circle cx="566.1" cy="231.8" r="5.5" fill="#FFFFFF" stroke="#9333EA" stroke-width="2"><title>fibonacci (layered_frontier, lazy): 2.64k instr, 1.62k cycles per vertex, IPC 1.62</title></circle>
+<circle cx="457.6" cy="308.2" r="5.5" fill="#FFFFFF" stroke="#16A34A" stroke-width="2"><title>pairing (layered_frontier, lazy): 1.25k instr, 689 cycles per vertex, IPC 1.82</title></circle>
+<circle cx="290.0" cy="542" r="5.5" fill="#475569" stroke="#475569" stroke-width="2" />
+<text x="302.0" y="542" class="legend-text">decrease-key</text>
+<circle cx="430.0" cy="542" r="5.5" fill="#FFFFFF" stroke="#475569" stroke-width="2" />
+<text x="442.0" y="542" class="legend-text">lazy</text>
+<rect x="120.0" y="565.0" width="14" height="14" fill="#2563EB" rx="3" ry="3" />
+<text x="140.0" y="572.0" class="legend-text">binary</text>
+<rect x="265.0" y="565.0" width="14" height="14" fill="#EA580C" rx="3" ry="3" />
+<text x="285.0" y="572.0" class="legend-text">brodal-okasaki</text>
+<rect x="410.0" y="565.0" width="14" height="14" fill="#9333EA" rx="3" ry="3" />
+<text x="430.0" y="572.0" class="legend-text">fibonacci</text>
+<rect x="555.0" y="565.0" width="14" height="14" fill="#16A34A" rx="3" ry="3" />
+<text x="575.0" y="572.0" class="legend-text">pairing</text>
+</svg>
