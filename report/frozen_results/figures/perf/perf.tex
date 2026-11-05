@@ -8,68 +8,68 @@
     \toprule
     \textbf{Variant} & \textbf{Config} & \textbf{Mode} & \textbf{L1 Miss (\%)} & \textbf{LLC Miss (\%)} & \textbf{Branch Miss (\%)} & \textbf{IPC} \\
     \midrule
-    binary & smoke\_1k & Decr-Key & 1.71\% & 50.00\% & 2.49\% & 2.41 \\
-    brodal-okasaki & smoke\_1k & Decr-Key & 0.99\% & 68.42\% & 11.71\% & 1.10 \\
-    fibonacci & smoke\_1k & Decr-Key & 1.55\% & 57.14\% & 4.55\% & 1.82 \\
-    pairing & smoke\_1k & Decr-Key & 1.90\% & 61.11\% & 2.12\% & 2.53 \\
-    binary & smoke\_1k & Lazy & 1.72\% & 75.00\% & 2.60\% & 2.23 \\
-    brodal-okasaki & smoke\_1k & Lazy & 0.98\% & 63.64\% & 11.04\% & 1.12 \\
-    fibonacci & smoke\_1k & Lazy & 1.60\% & 70.00\% & 4.49\% & 1.86 \\
-    pairing & smoke\_1k & Lazy & 1.98\% & 81.97\% & 2.05\% & 2.41 \\
+    binary & smoke\_1k & Decr-Key & 1.72\% & 40.00\% & 2.44\% & 2.43 \\
+    brodal-okasaki & smoke\_1k & Decr-Key & 1.00\% & 96.97\% & 11.38\% & 1.11 \\
+    fibonacci & smoke\_1k & Decr-Key & 1.59\% & 86.84\% & 4.56\% & 1.82 \\
+    pairing & smoke\_1k & Decr-Key & 1.90\% & 52.94\% & 2.13\% & 2.57 \\
+    binary & smoke\_1k & Lazy & 1.70\% & 70.59\% & 2.62\% & 2.16 \\
+    brodal-okasaki & smoke\_1k & Lazy & 0.99\% & 95.93\% & 10.73\% & 1.13 \\
+    fibonacci & smoke\_1k & Lazy & 1.62\% & 82.35\% & 4.56\% & 1.84 \\
+    pairing & smoke\_1k & Lazy & 1.96\% & 66.67\% & 2.02\% & 2.59 \\
     \addlinespace
-    binary & uniform\_sparse & Decr-Key & 9.15\% & 89.80\% & 4.91\% & 1.44 \\
-    brodal-okasaki & uniform\_sparse & Decr-Key & 3.98\% & 58.81\% & 11.35\% & 1.03 \\
-    fibonacci & uniform\_sparse & Decr-Key & 4.92\% & 48.42\% & 5.68\% & 1.52 \\
-    pairing & uniform\_sparse & Decr-Key & 8.43\% & 65.03\% & 4.02\% & 1.63 \\
-    binary & uniform\_sparse & Lazy & 9.57\% & 76.54\% & 4.35\% & 1.49 \\
-    brodal-okasaki & uniform\_sparse & Lazy & 4.39\% & 65.23\% & 11.07\% & 1.05 \\
-    fibonacci & uniform\_sparse & Lazy & 4.83\% & 33.97\% & 5.39\% & 1.57 \\
-    pairing & uniform\_sparse & Lazy & 8.67\% & 15.69\% & 3.42\% & 1.71 \\
+    binary & uniform\_sparse & Decr-Key & 9.15\% & 12.23\% & 4.90\% & 1.45 \\
+    brodal-okasaki & uniform\_sparse & Decr-Key & 3.98\% & 7.79\% & 11.34\% & 1.03 \\
+    fibonacci & uniform\_sparse & Decr-Key & 4.93\% & 40.67\% & 5.64\% & 1.54 \\
+    pairing & uniform\_sparse & Decr-Key & 8.44\% & 19.14\% & 4.02\% & 1.63 \\
+    binary & uniform\_sparse & Lazy & 9.57\% & 58.19\% & 4.39\% & 1.47 \\
+    brodal-okasaki & uniform\_sparse & Lazy & 4.40\% & 39.51\% & 11.06\% & 1.04 \\
+    fibonacci & uniform\_sparse & Lazy & 4.84\% & 31.47\% & 5.37\% & 1.59 \\
+    pairing & uniform\_sparse & Lazy & 8.64\% & 36.90\% & 3.46\% & 1.70 \\
     \addlinespace
-    binary & uniform\_medium & Decr-Key & 12.83\% & 0.69\% & 5.13\% & 1.28 \\
-    brodal-okasaki & uniform\_medium & Decr-Key & 4.77\% & 2.33\% & 10.58\% & 0.94 \\
-    fibonacci & uniform\_medium & Decr-Key & 7.06\% & 0.85\% & 5.75\% & 1.39 \\
-    pairing & uniform\_medium & Decr-Key & 10.63\% & 0.86\% & 4.04\% & 1.35 \\
-    binary & uniform\_medium & Lazy & 10.46\% & 1.82\% & 3.94\% & 1.41 \\
-    brodal-okasaki & uniform\_medium & Lazy & 5.16\% & 5.16\% & 10.11\% & 1.01 \\
-    fibonacci & uniform\_medium & Lazy & 5.38\% & 4.46\% & 5.06\% & 1.48 \\
-    pairing & uniform\_medium & Lazy & 9.14\% & 2.27\% & 2.82\% & 1.46 \\
+    binary & uniform\_medium & Decr-Key & 12.45\% & 0.97\% & 5.12\% & 1.30 \\
+    brodal-okasaki & uniform\_medium & Decr-Key & 4.78\% & 8.70\% & 10.57\% & 0.94 \\
+    fibonacci & uniform\_medium & Decr-Key & 6.93\% & 2.31\% & 5.78\% & 1.38 \\
+    pairing & uniform\_medium & Decr-Key & 10.60\% & 1.04\% & 4.04\% & 1.33 \\
+    binary & uniform\_medium & Lazy & 10.44\% & 2.43\% & 3.93\% & 1.39 \\
+    brodal-okasaki & uniform\_medium & Lazy & 5.22\% & 6.17\% & 10.12\% & 0.99 \\
+    fibonacci & uniform\_medium & Lazy & 5.37\% & 3.97\% & 5.08\% & 1.51 \\
+    pairing & uniform\_medium & Lazy & 9.13\% & 1.99\% & 2.82\% & 1.42 \\
     \addlinespace
-    binary & uniform\_dense & Decr-Key & 11.00\% & 2.09\% & 3.92\% & 1.52 \\
-    brodal-okasaki & uniform\_dense & Decr-Key & 4.90\% & 8.22\% & 10.04\% & 0.95 \\
-    fibonacci & uniform\_dense & Decr-Key & 8.59\% & 1.02\% & 4.86\% & 1.50 \\
-    pairing & uniform\_dense & Decr-Key & 10.98\% & 0.75\% & 3.38\% & 1.56 \\
-    binary & uniform\_dense & Lazy & 9.27\% & 8.19\% & 3.04\% & 1.50 \\
-    brodal-okasaki & uniform\_dense & Lazy & 5.31\% & 8.25\% & 9.22\% & 1.03 \\
-    fibonacci & uniform\_dense & Lazy & 5.41\% & 7.63\% & 4.65\% & 1.58 \\
-    pairing & uniform\_dense & Lazy & 8.91\% & 1.95\% & 2.21\% & 1.67 \\
+    binary & uniform\_dense & Decr-Key & 11.04\% & 7.59\% & 3.91\% & 1.45 \\
+    brodal-okasaki & uniform\_dense & Decr-Key & 4.87\% & 14.01\% & 10.04\% & 0.96 \\
+    fibonacci & uniform\_dense & Decr-Key & 8.61\% & 4.47\% & 4.87\% & 1.47 \\
+    pairing & uniform\_dense & Decr-Key & 10.98\% & 2.91\% & 3.39\% & 1.52 \\
+    binary & uniform\_dense & Lazy & 9.28\% & 5.11\% & 3.05\% & 1.58 \\
+    brodal-okasaki & uniform\_dense & Lazy & 5.32\% & 10.99\% & 9.21\% & 1.04 \\
+    fibonacci & uniform\_dense & Lazy & 5.43\% & 9.50\% & 4.65\% & 1.60 \\
+    pairing & uniform\_dense & Lazy & 9.08\% & 14.75\% & 2.22\% & 1.49 \\
     \addlinespace
-    binary & grid\_224 & Decr-Key & 3.57\% & 0.95\% & 4.26\% & 1.74 \\
-    brodal-okasaki & grid\_224 & Decr-Key & 1.36\% & 12.24\% & 10.91\% & 1.12 \\
-    fibonacci & grid\_224 & Decr-Key & 1.84\% & 5.15\% & 4.54\% & 1.75 \\
-    pairing & grid\_224 & Decr-Key & 3.14\% & 0.92\% & 3.96\% & 1.83 \\
-    binary & grid\_224 & Lazy & 3.27\% & 0.25\% & 3.78\% & 1.85 \\
-    brodal-okasaki & grid\_224 & Lazy & 1.45\% & 25.46\% & 10.22\% & 1.15 \\
-    fibonacci & grid\_224 & Lazy & 1.88\% & 58.77\% & 4.28\% & 1.79 \\
-    pairing & grid\_224 & Lazy & 3.14\% & 15.05\% & 3.42\% & 2.03 \\
+    binary & grid\_224 & Decr-Key & 3.54\% & 3.40\% & 4.25\% & 1.73 \\
+    brodal-okasaki & grid\_224 & Decr-Key & 1.40\% & 33.99\% & 10.92\% & 1.11 \\
+    fibonacci & grid\_224 & Decr-Key & 1.87\% & 18.34\% & 4.55\% & 1.74 \\
+    pairing & grid\_224 & Decr-Key & 3.15\% & 6.42\% & 3.95\% & 1.84 \\
+    binary & grid\_224 & Lazy & 3.28\% & 9.27\% & 3.81\% & 1.83 \\
+    brodal-okasaki & grid\_224 & Lazy & 1.44\% & 29.08\% & 10.18\% & 1.16 \\
+    fibonacci & grid\_224 & Lazy & 1.88\% & 25.53\% & 4.30\% & 1.81 \\
+    pairing & grid\_224 & Lazy & 3.11\% & 4.70\% & 3.42\% & 2.05 \\
     \addlinespace
-    binary & hub\_skewed & Decr-Key & 7.44\% & 1.48\% & 3.54\% & 1.55 \\
-    brodal-okasaki & hub\_skewed & Decr-Key & 3.79\% & 2.19\% & 9.99\% & 1.06 \\
-    fibonacci & hub\_skewed & Decr-Key & 4.27\% & 0.44\% & 5.06\% & 1.63 \\
-    pairing & hub\_skewed & Decr-Key & 6.76\% & 0.37\% & 2.22\% & 1.76 \\
-    binary & hub\_skewed & Lazy & 8.24\% & 0.79\% & 3.56\% & 1.53 \\
-    brodal-okasaki & hub\_skewed & Lazy & 4.18\% & 0.64\% & 9.97\% & 1.06 \\
-    fibonacci & hub\_skewed & Lazy & 4.34\% & 0.14\% & 5.07\% & 1.64 \\
-    pairing & hub\_skewed & Lazy & 7.39\% & 0.21\% & 2.26\% & 1.73 \\
+    binary & hub\_skewed & Decr-Key & 7.41\% & 0.73\% & 3.54\% & 1.55 \\
+    brodal-okasaki & hub\_skewed & Decr-Key & 3.79\% & 1.65\% & 10.01\% & 1.05 \\
+    fibonacci & hub\_skewed & Decr-Key & 4.28\% & 0.52\% & 5.06\% & 1.61 \\
+    pairing & hub\_skewed & Decr-Key & 6.76\% & 0.19\% & 2.22\% & 1.78 \\
+    binary & hub\_skewed & Lazy & 8.25\% & 0.85\% & 3.56\% & 1.54 \\
+    brodal-okasaki & hub\_skewed & Lazy & 4.19\% & 1.46\% & 9.98\% & 1.06 \\
+    fibonacci & hub\_skewed & Lazy & 4.34\% & 0.76\% & 5.03\% & 1.62 \\
+    pairing & hub\_skewed & Lazy & 7.40\% & 0.29\% & 2.26\% & 1.75 \\
     \addlinespace
-    binary & layered\_frontier & Decr-Key & 4.04\% & 0.21\% & 3.45\% & 1.91 \\
-    brodal-okasaki & layered\_frontier & Decr-Key & 3.23\% & 18.53\% & 11.28\% & 1.05 \\
-    fibonacci & layered\_frontier & Decr-Key & 3.57\% & 2.81\% & 5.72\% & 1.56 \\
-    pairing & layered\_frontier & Decr-Key & 5.08\% & 0.37\% & 3.63\% & 1.82 \\
-    binary & layered\_frontier & Lazy & 5.68\% & 0.95\% & 3.66\% & 1.65 \\
-    brodal-okasaki & layered\_frontier & Lazy & 3.08\% & 4.11\% & 10.78\% & 1.08 \\
-    fibonacci & layered\_frontier & Lazy & 3.64\% & 3.23\% & 5.27\% & 1.62 \\
-    pairing & layered\_frontier & Lazy & 6.31\% & 3.37\% & 3.15\% & 1.82 \\
+    binary & layered\_frontier & Decr-Key & 4.04\% & 0.82\% & 3.46\% & 1.93 \\
+    brodal-okasaki & layered\_frontier & Decr-Key & 3.24\% & 32.91\% & 11.28\% & 1.05 \\
+    fibonacci & layered\_frontier & Decr-Key & 3.60\% & 6.14\% & 5.74\% & 1.55 \\
+    pairing & layered\_frontier & Decr-Key & 5.10\% & 1.62\% & 3.65\% & 1.82 \\
+    binary & layered\_frontier & Lazy & 5.69\% & 3.59\% & 3.67\% & 1.63 \\
+    brodal-okasaki & layered\_frontier & Lazy & 3.17\% & 25.64\% & 10.78\% & 1.06 \\
+    fibonacci & layered\_frontier & Lazy & 3.72\% & 17.00\% & 5.28\% & 1.60 \\
+    pairing & layered\_frontier & Lazy & 6.22\% & 2.96\% & 3.14\% & 1.87 \\
     \bottomrule
   \end{tabular}
 \end{table}
