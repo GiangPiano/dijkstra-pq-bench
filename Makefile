@@ -14,10 +14,30 @@ CC = gcc
 # Compiler flags
 CFLAGS = -Wall -Wextra -g -MMD -MP -O3 -std=c11
 # Linker flags
-LDFLAGS = -lm
+LDFLAGS =
+# Libraries go after the objects: linkers that default to --as-needed
+# (Ubuntu, Debian, ...) drop a library named before the code that uses it
+LDLIBS = -lm
 # Alternate linker flags for memory profiling
 MEM_LDFLAGS = $(LDFLAGS) -Wl,--wrap=malloc \
 							-Wl,--wrap=free -Wl,--wrap=calloc -Wl,--wrap=realloc
+
+#
+# benchmark CPU pinning
+#
+
+# Benchmarks run pinned to one CPU so every graph sees the same caches. On
+# Linux, bench_cpu.py picks a performance core (Intel hybrid or big.LITTLE)
+# that this process is allowed to use; override with `make BENCH_CPU=<n>`, or
+# `make BENCH_CPU=` to run unpinned. Without taskset (e.g. macOS) the
+# benchmarks run unpinned.
+ifeq "$(origin BENCH_CPU)" "undefined"
+ifeq "$(UNAME)" "Linux"
+BENCH_CPU := $(shell ./src/bench/bench_cpu.py 2>/dev/null)
+endif
+endif
+TASKSET := $(shell command -v taskset 2>/dev/null)
+PIN      = $(if $(and $(TASKSET),$(BENCH_CPU)),$(TASKSET) -c $(BENCH_CPU))
 
 #
 # cli colour vars
@@ -195,15 +215,16 @@ $(MEM_BIN_VARIANTS): $(MEM_BIN_DIR)/%: \
 $(RUNTIME_CSVS): $(RUNTIME_DATA_DIR)/%.csv: $(RUNTIME_BIN_DIR)/%
 	@printf "$(GREEN)========================================\n"
 	@printf "Running runtime benchmark: $(WHITE)$*$(GREEN)\n"
+	@printf "Pinned to CPU: $(WHITE)$(if $(PIN),$(BENCH_CPU),none)$(GREEN)\n"
 	@printf "========================================$(RESET)\n"
 	@mkdir -p $(dir $@)
-	$< --output=$@
+	$(PIN) $< --output=$@
 
 # we can only run mem perf on linux, this keeps it all building on mac
 ifeq "$(UNAME)" "Linux"
 $(PERF_CSV): $(PERF_BIN_VARIANTS) $(BENCH_SRC_DIR)/perf/bench.py
 	@mkdir -p $(dir $@)
-	$(BENCH_SRC_DIR)/perf/bench.py -b $(PERF_BIN_DIR) -o $@
+	$(BENCH_SRC_DIR)/perf/bench.py -b $(PERF_BIN_DIR) -o $@ $(if $(BENCH_CPU),-c $(BENCH_CPU))
 else
 endif
 
