@@ -22,15 +22,15 @@ tools used in this project went wrong, summarised here:
 		unmaintainable.
 
 	\item [Giang]
-		AI overengineered solutions when given an non-specific request, like adding
+		AI overengineered solutions when given a non-specific request, like adding
 		the \code{heap_decrease_key} Dijkstra's variant.
 
 	\item [Giang]
-		AI generated presentation slides were noisy, halucinated benchmark figures,
+		AI generated presentation slides were noisy, hallucinated benchmark figures,
 		and tried to pack too much detail into a 15 minute presentation.
 
 	\item [Giang]
-		AI overlooked prexisiting features, generating more code to solve data parsing
+		AI overlooked pre-existing features, generating more code to solve data parsing
 		problems that did not exist.
 
 	\item [Tung]
@@ -54,7 +54,7 @@ tools used in this project went wrong, summarised here:
 This was my first time using AI in any meaningful manner. There was both good
 and bad.
 
-When I knew exactly the changes that I wanted LLM's were very helpful to quickly
+When I knew exactly the changes that I wanted LLMs were very helpful to quickly
 make changes that would have otherwise been tedious. Certain tasks were not
 particularly appealing to work on, but using LLM generated code and auditing it
 meant that I could quickly get to a place where I was happy. Notable parts of
@@ -69,14 +69,14 @@ portable at all. The early perf and mem tests also hardcoded the graph and heap
 names, and would not have held up well to changes in the inputs.
 
 Later, we discovered that the perf tests were only half configured to measure
-just running dijkstras with the heaps, and were actually also capturing all the
+just running Dijkstra's algorithm with the heaps, and were actually also capturing all the
 events during program startup, including loading all the graphs into memory.
 This bug was only discovered due to review with an LLM and rendered the results
 completely meaningless. The same review session revealed that the data that we
 were presenting from the perf tests was a misrepresentation of what was actually
 happening, and that the report did not cover the branching events, or
 acknowledge that the data was not all it immediately seemed. This oversight was
-no-doubt introduced because we are not individually experienced and competent at
+no doubt introduced because we are not individually experienced and competent at
 working with tools like perf, so we could not see for ourselves that there were
 issues.
 
@@ -104,7 +104,7 @@ and feedback usage, where the LLM did not generate code for me, but was instead
 used to get a different perspective, or to simplify the reasoning about a very
 complex implementation.
 
-For my first experience interacting with LLM's on a larger scale in a project, I
+For my first experience interacting with LLMs on a larger scale in a project, I
 was quite impressed with how much time it saved the group, but felt I always
 needed to spend time properly posing questions to the LLM and reviewing the
 outputs, as there would always be something wrong with the first attempt. I
@@ -124,7 +124,7 @@ about this change before approving it.
 
 One thing I found AI to be particularly helpful is when debugging pointers usage
 and memory allocation. Since C offers raw control over the allocated memory
-space, it is very easy to miss calculate the required size for the allocation,
+space, it is very easy to miscalculate the required size for the allocation,
 eventually leading to a silent crash. I encountered a bug in the binary heap's
 \code{heap_pop} function, but the assert failed in the \code{heap_decrease_key}
 function instead. Claude Code instantly caught this, saving me a lot of time
@@ -158,7 +158,7 @@ instead.
 
 First, I started by digesting this assignment description with Gemini Flash 3.8.
 I asked it to point out the main pain points to look out while doing this
-project. Once that is done, I relay my understand with the team. After that, I
+project. Once that is done, I relay my understanding to the team. After that, I
 chose to implement Pairing and Fibonacci heaps. I then ask Gemini to briefly
 introduce me to these heaps and provide good source on YouTube. I then check my
 understand with Gemini again by draft up the pseudocode and asking it to correct
@@ -178,7 +178,7 @@ a repetitive task, in which the AI was very good at.
 
 Third, I then plan ahead for the benchmark, i.e. what kind of experiment we
 should do. The AI was good here since it suggest hardware test, in which I'm not
-that familiar with. However, it went over the boat and just list a lot of
+that familiar with. However, it went overboard and just listed a lot of
 things. After a team meeting, we only pick some of what it suggested, with the
 constraint of keeping thing not being too convoluted. I then had a back and
 forth session with Gemini on Antigravity on design the pipeline for each
@@ -211,7 +211,7 @@ manually verifying the text against the frozen CSV data, after which we
 re-prompted the AI with strict numerical references.
 
 Lastly, I asked the AI to make HTML files for presentation. They contained too
-much information. So we scraped it and Oscar redesign again with Claude.
+much information. So we scrapped it and Oscar redesigned it with Claude.
 
 \subsection{AI in Group Work}
 

@@ -19,7 +19,7 @@ several input graphs, gathering data about the running time, cpu behaviour, and
 memory use.
 In order to reuse code for each task we used \code{make} to generate several
 executables, with each executable testing one aspect of a particular heap
-implementation, each executable links common objects (\code{dijkstras.o}, \code{graph.o}), the
+implementation, each executable links common objects (\code{dijkstra.o}, \code{graph.o}), the
 input graph objects (\code{graph_registry.o}, \code{uniform_sparse.o}, \code{uniform_medium.o},
 ...), a specific heap implementation's object(s) (\code{binary.o}, \code{fibonacci.o}, ...),
 and an entry point (\code{runtime/main.o}, \code{perf/main.o}, \code{mem/main.o}). Thus producing an
@@ -46,8 +46,8 @@ between 10 and 500 runs (about 100~ms of work), then repeats batches of
 increasing size until the 99\% confidence interval of the mean is within 5\%.
 This allows us to gather a good estimate of
 the running time of each heap implementation in both \code{decrease_key} and \code{lazy}
-Dijkstras implementations. We took care to ensure that the benchmarks were only
-measuring the running time of Dijkstras over the heap implementation, and that
+Dijkstra implementations. We took care to ensure that the benchmarks were only
+measuring the running time of Dijkstra over the heap implementation, and that
 we were not including static overheads due to test initialisation or additional
 allocations into the benchmarks. Before timing, each runtime benchmark runs
 Dijkstra once and compares a checksum of the resulting distance array with one

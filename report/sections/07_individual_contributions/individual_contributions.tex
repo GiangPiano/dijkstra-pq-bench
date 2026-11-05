@@ -3,7 +3,7 @@
 
 I worked primarily on the Brodal-Okasaki heap, both initially implementing it
 and optimising it. My next major role was to maintain the project more
-generally. I did all the work on the build system (Makefiles), ensuring the the
+generally. I did all the work on the build system (Makefiles), ensuring the
 build process is flexible, correctly captures dependencies to trigger re-builds,
 and easy to maintain. In order to do this I spent time orchestrating the group
 towards end goals and providing starting points for others to work on, and then
@@ -34,8 +34,8 @@ well, and it was a fun solution to the problem.
 The worst cases for Brodal-Okasaki are made very apparent in this experiment,
 \code{decrease_key} is a nightmare! Supporting it was a lot of extra work, and
 not a part of the original paper due to how unfriendly the operation is to
-persistant data structures. I believe there are other approachs to support
-\code{decrease_key} in persistant min heaps, but the negative queue idea seemed
+persistent data structures. I believe there are other approaches to support
+\code{decrease_key} in persistent min heaps, but the negative queue idea seemed
 appealing to try. The additional invariants that needed to be maintained around
 negative queue elements added significant complexity to the design.
 
@@ -55,7 +55,7 @@ of complexity it was clear that make was barely holding up. I needed to rewrite
 large parts of the Makefile ~4 times as the structure of the project changed,
 and we added more components. Make would do well to be replaced with a more
 capable programming language while still supporting the ability to interact well
-with a wide range of other programs. When issues occured due to variable
+with a wide range of other programs. When issues occurred due to variable
 expansion or similar it was hard to debug the Makefile. Extending this project
 would make me seriously consider writing something to replace make. We also
 temporarily considered \code{nob.h} or \code{nobuild.h} which only uses c to
