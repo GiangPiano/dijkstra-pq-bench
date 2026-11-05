@@ -1,6 +1,6 @@
 # data output dirs
-data/
-figures/
+/data/
+/figures/
 
 # LaTeX build artifacts
 *.pdf
