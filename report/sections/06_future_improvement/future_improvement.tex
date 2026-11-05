@@ -3,22 +3,22 @@
 It would be interesting to try extending this experiment across a wider range of
 heap implementations, especially focusing on making small modifications to each
 of the currently selected heaps. We could observe if different optimisations
-actually produces a real world impact under the fairly complex runtime
-conditions of a min heap. This would be particularly interesting for the
-Brodal-Okasaki, and to also add the imperative Brodal min heap as another point
+actually produce a real-world impact under the fairly complex runtime
+conditions of a min-heap. This would be particularly interesting for the
+Brodal--Okasaki heap, and to also add the imperative Brodal min-heap as another point
 of comparison.
 
-The present interface identifies a queue entry by its vertex number, this
+The present interface identifies a queue entry by its vertex number; this
 requires additional work to support \code{heap_decrease_key}, and the current
 index tables do not support multiple entries for a vertex alongside
 \code{heap_decrease_key}. Instead, each push could be assigned a unique
-identifier, used for looking up the node in \code{heap_decrease_key} which would
-be a more correct implementation, and remove the need for the positive and
-negative cancellation lists in Brodal-Okasaki that slow the implementation down.
+identifier, used for looking up the node in \code{heap_decrease_key}, which would
+be a more correct implementation and remove the need for the positive and
+negative cancellation lists in Brodal--Okasaki that slow the implementation down.
 Since the edge case that would cause an incorrect \code{heap_decrease_key}
-does not arise under dijkstra's we decided to skip this feature.
+does not arise under Dijkstra's algorithm, we decided to skip this feature.
 
 Lastly, we could run very large graphs that would exhaust the L1 cache, to see
 if the current findings hold up under degrading cache performance. Maybe at this
-scale we would see that the theoretical big O performance would shine back
+scale we would see that the theoretical big-$\mathcal{O}$ performance would shine back
 through.

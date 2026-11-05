@@ -3,12 +3,12 @@
 \subsection{The problem}
 
 The object of study is the single-source shortest path (SSSP) problem on
-directed graphs with non-negative weights. The input is a directed graph
-$G = (V, E)$ with $n = |V|$ vertices and $m = |E|$ arcs, a weight function
-$w : E \to \mathbb{Z}^{+}$, and a source $s \in V$. The weight of
-a path $p = \langle v_0, v_1, \ldots, v_k \rangle$ is the total weight of all edges along the path:
-$w(p) = \sum_{i=1}^{k} w(v_{i-1}, v_i)$. The shortest path from
-$s$ to $v$ is
+directed graphs with non-negative edge weights. The input is a directed graph
+$G = (V, E)$ with $n = |V|$ vertices and $m = |E|$ directed edges, a weight function
+$w : E \to \mathbb{Z}_{\ge 0}$, and a source vertex $s \in V$. The weight of
+a directed path $p = \langle v_0, v_1, \ldots, v_k \rangle$ is the total weight of all edges along the path:
+$w(p) = \sum_{i=1}^{k} w(v_{i-1}, v_i)$. The shortest path distance from
+$s$ to $v$ is defined as:
 \[
   \mathit{dist}(s, v) =
   \begin{cases}
@@ -18,90 +18,77 @@ $s$ to $v$ is
   \end{cases}
 \]
 The required output is the full distance vector: an array
-$\code{dist}[0 \ldots n-1]$ with $\texttt{dist}[v] = \mathit{dist}(s, v)$ for every
-reachable $v$, and the sentinel $-1$ where no $s \rightarrow v$ path
-exists. The path trace are not reconstructed, since that process is identical across every implementation and would add a constant to all
-measurements without discriminating between them.
+$\code{dist}[0 \ldots n-1]$ where $\code{dist}[v] = \mathit{dist}(s, v)$ for every
+reachable $v$, and a sentinel value of $-1$ when no path from $s$ to $v$ exists ($\mathit{dist}(s, v) = \infty$).
+Path traces are not reconstructed, since that process is identical across every implementation and would add a constant overhead to all measurements without discriminating between the priority queues.
 
-The input graph must have the following two properties for Dijkstra's algorithm to be functional. Firstly, weights are strictly positive integers, since Dijkstra's algorithm depends on the greedy approach that the distance to a processed node is fixed once it is relaxed.
-
-
-The input graph must satisfy one condition for Dijkstra's algorithm to work correctly. All edge weights must be strictly positive integers. This is because the algorithm relies on a greedy approach, where it chooses the next vertex to process by their current shortest distance. This choice is guaranteed to be correct as long as there are no negative edge weights. The input graphs are generated with a fixed pseudo-random seed so that every implementation is measured on identical input.
+The correctness of Dijkstra's algorithm relies on the greedy invariant that once a vertex with the minimum tentative distance is extracted from the priority queue, its shortest path distance is finalised. This property holds strictly when all edge weights are non-negative ($w(e) \ge 0$). In our benchmark suite, all generated edge weights are drawn as strictly positive integers ($w : E \to \mathbb{Z}^{+}$) with a fixed pseudo-random seed, ensuring no 0-weight cycles exist and guaranteeing that all implementations are evaluated on identical inputs.
 
 \subsection{Dijkstra's algorithm and the role of the heap}
+\vspace{-0.2cm}
+{\small \textbf{Author:} Truong Giang Nguyen}
 
-Dijkstra's algorithm maintains a distance $\code{dist}[v]$ for every vertex $v$. It initialises $\code{dist}[s] = 0$ for the source $s$ and $\code{dist}[v] = \infty$ for all other vertices. At each step it extracts the vertex $u$ with minimum distance, treats $\code{dist}[u]$ as final, and relaxes each outgoing edge $(u,v)$ if
-$\code{dist}[u] + w(u,v) < \code{dist}[v]$. The priority queue is a min-heap, which is the data structure under test in our benchmarks.
+\vspace{0.2cm}
+\noindent
+Dijkstra's algorithm maintains a distance vector $\code{dist}[v]$ for every vertex $v \in V$. It initialises $\code{dist}[s] = 0$ for the source vertex $s$ and $\code{dist}[v] = \infty$ for all other vertices. At each step, it extracts the unsettled vertex $u$ with minimum tentative distance, treats $\code{dist}[u]$ as finalised, and relaxes each outgoing directed edge $(u,v)$ if $\code{dist}[u] + w(u,v) < \code{dist}[v]$. The priority queue is a min-heap, which is the data structure under test in our benchmarks.
 
-We implemented two variants of Dijkstra's algorithm that differ only in how
-they update the queue after a successful relaxation. The first, \emph{lazy}
-variant inserts a new vertex--distance pair every time an edge is relaxed,
-leaving any older entries for the same vertex in the heap. When a stale entry
-is later extracted, its distance is larger than $\code{dist}[v]$, so it is skipped.
-The heap may therefore hold more than one entry per vertex.
-
-The second, \emph{eager} variant keeps at most one entry per vertex. A vertex
-is pushed when it is first reached, and later improvements call the heap's
-\code{decrease\_key()} operation to lower the key of the existing entry. We
-include this variant because some heaps, such as Fibonacci heaps, are designed
-to make this operation cheap.
-
+We implemented two variants of Dijkstra's algorithm that differ only in how they update the queue after a successful relaxation:
+\begin{enumerate}
+  \item \textbf{Lazy formulation:} Inserts a new $(d', v)$ vertex--distance pair every time an edge $(u, v)$ is relaxed, leaving any older entries for the same vertex in the heap. When a stale entry for vertex $u$ is later extracted, its extracted distance $d$ is strictly greater than $\code{dist}[u]$, so it is skipped. The heap may therefore hold more than one entry per vertex.
+  \item \textbf{Eager formulation (\code{decrease_key}):} Keeps at most one entry per vertex in the queue. A vertex is pushed when it is first reached ($\code{dist}[v] = \infty$), and later improvements call the heap's \code{decrease_key()} operation to lower the key of the existing entry. We include this variant because some heaps, such as Fibonacci heaps, are designed to make this operation cheap.
+\end{enumerate}
 
 \begin{algorithm}[H]
 \caption{Dijkstra's algorithm, lazy formulation}
-\begin{algorithmic}
-\STATE $\texttt{dist}[v] \leftarrow \infty$ for all $v \in V$, \quad $\texttt{dist}[s] \leftarrow 0$
+\begin{algorithmic}[1]
+\STATE $\code{dist}[v] \leftarrow \infty$ for all $v \in V$, \quad $\code{dist}[s] \leftarrow 0$
 \STATE $Q \leftarrow$ \textsc{Heap-Create}$()$, \quad \textsc{Push}$(Q, (0, s))$
 \WHILE{$Q$ is not empty}
   \STATE $(d, u) \leftarrow$ \textsc{Min}$(Q)$, \quad \textsc{Pop}$(Q)$
-  \IF{$d > \texttt{dist}[u]$}
+  \IF{$d > \code{dist}[u]$}
     \STATE \textbf{continue} \COMMENT{stale entry}
   \ENDIF
-  \FOR{each edge $(u, v)$ with weight $w(u,v)$}
+  \FOR{each directed edge $(u, v)$ with weight $w(u,v)$}
     \STATE $d' \leftarrow d + w(u,v)$
-    \IF{$d' < \texttt{dist}[v]$}
-      \STATE $\texttt{dist}[v] \leftarrow d'$
+    \IF{$d' < \code{dist}[v]$}
+      \STATE $\code{dist}[v] \leftarrow d'$
       \STATE \textsc{Push}$(Q, (d', v))$
     \ENDIF
   \ENDFOR
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
-\vspace{-\intextsep}
-{\small \textbf{Author:} Truong Giang Nguyen}
 
-The algorithm performs a fixed amount of work outside the queue. Each vertex is settled once and each arc is examined once, which accounts for $\Theta(n + m)$ . Everything else is queue work. A vertex's edges are scanned only the first time it is extracted, because stale entries are skipped before the loop. Every edge is therefore relaxed at most once, so there are at most $m$ pushes plus the initial one. Every pushed entry is eventually extracted, giving at most $m + 1$ pops, of which at most $n$ settle a vertex and the rest are stale. Eventually, the running time is:
-
+The algorithm performs a fixed amount of work outside the queue. Each reachable vertex is settled once and each of its outgoing edges is examined once, which accounts for $\Theta(n + m)$. Everything else is queue work. A vertex's outgoing edges are scanned only the first time it is extracted, because stale entries are skipped before the loop. Every directed edge is therefore relaxed at most once, so there are at most $m$ relaxation pushes plus the initial source push. Every pushed entry is eventually extracted, giving at most $m + 1$ pops, of which at most $n$ settle a vertex and the rest are stale entries. Eventually, the running time is:
 \[
-  O\!\left(n + m + (m + 1)\,T_{\textsc{push}} + (m + 1)\,T_{\textsc{pop}}\right)
+  \mathcal{O}\!\left(n + m + (m + 1)\,T_{\textsc{push}} + (m + 1)\,T_{\textsc{pop}}\right)
 \]
 
 \begin{algorithm}[H]
-\caption{Dijkstra's algorithm, eager update (\texttt{decrease\_key})}
-\begin{algorithmic}
-\STATE $\texttt{dist}[v] \leftarrow \infty$ for all $v \in V$, \quad $\texttt{dist}[s] \leftarrow 0$
+\caption{Dijkstra's algorithm, eager update (\code{decrease_key})}
+\begin{algorithmic}[1]
+\STATE $\code{dist}[v] \leftarrow \infty$ for all $v \in V$, \quad $\code{dist}[s] \leftarrow 0$
 \STATE $Q \leftarrow$ \textsc{Heap-Create}$(n)$, \quad \textsc{Push}$(Q, (0, s))$
 \WHILE{$Q$ is not empty}
   \STATE $(d, u) \leftarrow$ \textsc{Min}$(Q)$, \quad \textsc{Pop}$(Q)$
-  \FOR{each edge $(u, v)$ with weight $w(u,v)$}
+  \FOR{each directed edge $(u, v)$ with weight $w(u,v)$}
     \STATE $d' \leftarrow d + w(u,v)$
-    \IF{$d' < \texttt{dist}[v]$}
-      \IF{$\texttt{dist}[v] = \infty$}
+    \IF{$d' < \code{dist}[v]$}
+      \IF{$\code{dist}[v] = \infty$}
         \STATE \textsc{Push}$(Q, (d', v))$
       \ELSE
         \STATE \textsc{Decrease-Key}$(Q, (d', v))$
       \ENDIF
-      \STATE $\texttt{dist}[v] \leftarrow d'$
+      \STATE $\code{dist}[v] \leftarrow d'$
     \ENDIF
   \ENDFOR
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
 
-For the eager variant, the work outside the queue is the same $\Theta(n + m)$, but the queue work changes. The queue only push vertices that are not yet encountered, so there are $n$ pushes and $n$ pops. \code{decrease_key()} is called when the edge contains a seen vertices, so it is triggered at most $m - n + 1$. Hence the running time:
-
+For the eager variant, the work outside the queue is the same $\Theta(n + m)$, but the queue work changes. The queue only pushes vertices that are not yet encountered, so there are at most $n$ pushes and $n$ pops. \code{decrease_key()} is invoked when an edge relaxation successfully discovers a shorter path to an already-discovered vertex, so it is triggered at most $m - n + 1$ times. Hence the running time:
 \[
-  O\!\left(n + m + n \cdot T_{\textsc{push}} + n \cdot T_{\textsc{pop}}
+  \mathcal{O}\!\left(n + m + n \cdot T_{\textsc{push}} + n \cdot T_{\textsc{pop}}
     + (m - n + 1) \cdot T_{\textsc{dec}}\right)
 \]
 
@@ -113,10 +100,10 @@ For the eager variant, the work outside the queue is the same $\Theta(n + m)$, b
 
 \vspace{0.2cm}
 \noindent
-A complete binary tree of $n$ items stored implicitly in a flat array, with the children of index $i$ at $2i+1$ and $2i+2$ and the parent at
-$\lfloor (i-1)/2 \rfloor$. The heap invariant is that no node's key is smaller than its parent's, so the minimum is always at index $0$ and is read in $O(1)$ time. Insertion appends at the end of the array and \emph{bubbles} the item towards the root while it is smaller than its parent. Extraction overwrites the root with the last item and \emph{sinks} it downwards, swapping with its smaller child while the invariant is violated. Both paths are bounded by the tree height, giving $O(\log n)$ worst-case insertion, extraction, and key
-decrease. The tree structure is based on indices arithmetic rather than poinsters, so the entire heap occupies one contiguous allocation. A separate index array $\texttt{pos}[v]$ records where vertex $v$ currently sits so that
-\textsc{Decrease-Key} can locate it in $O(1)$ time before bubbling.
+The binary heap represents a complete binary tree of $n$ items stored implicitly in a flat array, with the children of index $i$ at $2i+1$ and $2i+2$ and the parent at
+$\lfloor (i-1)/2 \rfloor$. The heap invariant is that no node's key is smaller than its parent's, so the minimum is always at index $0$ and is read in $\mathcal{O}(1)$ time. Insertion appends at the end of the array and \emph{bubbles} the item towards the root while it is smaller than its parent. Extraction overwrites the root with the last item and \emph{sinks} it downwards, swapping with its smaller child while the invariant is violated. Both paths are bounded by the tree height, giving $\mathcal{O}(\log n)$ worst-case insertion, extraction, and key
+decrease. The tree structure is based on index arithmetic rather than pointers, so the entire heap occupies one contiguous allocation. A separate index array $\code{pos}[v]$ records where vertex $v$ currently sits so that
+\textsc{Decrease-Key} can locate it in $\mathcal{O}(1)$ time before bubbling.
 
 \subsubsection{Pairing heap}
 \vspace{-0.2cm}
@@ -124,16 +111,15 @@ decrease. The tree structure is based on indices arithmetic rather than poinster
 
 \vspace{0.2cm}
 \noindent
-A pairing heap is a self-adjusting multi-way tree implemented using a Left-Child Right-Sibling (LCRS) layout. Each node stores three pointers: \code{child}, \code{next}, and \code{prev} (points to its left sibling, or to its parent if it is the first child, allowing $O(1)$ detachment). Tree combinations rely on \textsc{Meld}, which attaches the root with the larger key as the leftmost child of the smaller root in $O(1)$ time. Consequently, \textsc{Push} melds a newly allocated node into the root, and \textsc{Decrease-Key} cuts the target node from its siblings via $\texttt{pos}[v]$ and melds it into the root in $O(1)$ worst-case time without disturbing other nodes' handles.
-All structural rebalancing is deferred lazily to \textsc{Pop}: after removing the root, its orphaned children are merged via a \emph{two-pass pairing} scheme (pairing adjacent siblings left-to-right, then accumulating them right-to-left) to achieve $O(\log n)$ extraction. Compared to the array-backed binary heap, the pairing heap trades cache locality and per-node dynamic allocation overhead for trivial, $O(1)$-like decrease-key operations.
+A pairing heap is a self-adjusting multi-way tree implemented using a Left-Child Right-Sibling (LCRS) layout. Each node stores three pointers: \code{child}, \code{next}, and \code{prev} (which references its left sibling, or its parent if the node is the leftmost child, enabling $\mathcal{O}(1)$ detachment). Tree combinations rely on \textsc{Meld}, which links the root carrying the larger key as the leftmost child of the smaller root in $\mathcal{O}(1)$ time. Consequently, \textsc{Push} melds a freshly allocated node into the root, while \textsc{Decrease-Key} cuts the target node from its siblings via $\code{pos}[v]$ and melds it into the root in $\mathcal{O}(1)$ immediate time (with an amortised cost of $o(\log n)^*$) without invalidating other vertex handles. All structural rebalancing is deferred lazily to \textsc{Pop}: after severing the root, its orphaned children are coalesced via a \emph{two-pass pairing} scheme (pairing adjacent siblings left-to-right, then accumulating them right-to-left) to achieve $\mathcal{O}(\log n)$ amortised extraction. Compared to the array-backed binary heap, the pairing heap trades cache locality and per-node dynamic allocation overhead for cheap, pointer-based decrease-key operations.
 \subsubsection{Fibonacci heap}
 \vspace{-0.2cm}
 {\small \textbf{Author:} Tung Nguyen}
 
 \vspace{0.2cm}
 \noindent
-A Fibonacci heap is a collection of min-heap-ordered trees, maintained in a circular doubly-linked root list, with a direct pointer to the minimum root. Each node stores four pointers (\code{parent}, \code{child}, \code{left}, \code{right}), an integer \code{degree}, and a boolean \code{marked} flag indicating whether it has lost a child since becoming a child of its current parent.
-Operations are designed around lazy consolidation. \textsc{Push} inserts a new node into the root list in $O(1)$ worst-case time. When \textsc{Decrease-Key} violates heap order, the node is severed and moved to the root list via \textsc{Cut}. If its parent was already marked, a \emph{cascading cut} recurses up the ancestor chain until an unmarked node is found and marked. This mechanism preserves an exponential lower bound on tree size relative to degree, achieving $O(1)$ decrease-key. All cleanup occurs during \textsc{Pop}, where the root's children are promoted to the root list, and trees of identical degree are pairwise linked using an auxiliary degree array (\code{A[MAX_DEGREE]}), yielding $O(\log n)$ extraction. This provides Dijkstra's theoretically optimal $O(m + n \log n)$ bound. However, it carries heavy node structures (4 pointers plus metadata), complex cascading cuts, and poor cache locality.
+A Fibonacci heap is a collection of min-heap-ordered trees maintained in a circular doubly-linked root list, with a direct pointer to the minimum root. Each node stores four pointers (\code{parent}, \code{child}, \code{left}, \code{right}), an integer \code{degree}, and a boolean \code{marked} flag indicating whether the node has lost a child since becoming a child of its current parent.
+Operations are structured around lazy consolidation. \textsc{Push} splices a new node into the root list in $\mathcal{O}(1)$ worst-case time. When \textsc{Decrease-Key} violates heap order, the node is severed and appended to the root list via \textsc{Cut}. If its parent was already marked, a \emph{cascading cut} propagates recursively up the ancestor chain until an unmarked node is encountered and marked. This mechanism preserves an exponential lower bound on subtree size relative to degree ($F_{k+2}$ for degree $k$), achieving an amortised $\mathcal{O}(1)$ decrease-key bound. Structural cleanup occurs exclusively during \textsc{Pop}, where the root's children are promoted to the root list and trees of equal degree are pairwise linked using an auxiliary array (\code{A[MAX_DEGREE]}), yielding $\mathcal{O}(\log n)$ amortised extraction. This achieves the theoretically optimal $\mathcal{O}(m + n \log n)$ bound for Dijkstra's algorithm. However, it incurs heavy per-node structures ($56\text{ bytes}$ plus handles), complex cascading cut logic, and poor cache locality.
 
 \subsubsection{Brodal--Okasaki heap}
 \vspace{-0.2cm}
@@ -141,21 +127,21 @@ Operations are designed around lazy consolidation. \textsc{Push} inserts a new n
 
 \vspace{0.2cm}
 \noindent
-Traditionally, the Brodal--Okasaki is a persistant pure functional heap. It is a
+Traditionally, the Brodal--Okasaki heap is a persistent pure functional heap. It is a
 bootstrapped skew-link binomial heap, which provides the best possible
-theoretical performance bounds for a heap. There is also an imperative variant
-that is more similar to the Fibonnaci heap, but uses skew-links. Brodal--Okaski
-achieves \textsc{Push} in $O(1)$ and \textsc{Pop} in $O(\log(n))$,
-\textsc{Decrease-Key} is more complex, but fits in $O(\log(n))$.
+theoretical performance bounds for a functional heap. There is also an imperative variant
+that is more similar to the Fibonacci heap, but uses skew-links. Brodal--Okasaki
+achieves \textsc{Push} in $\mathcal{O}(1)$ and \textsc{Pop} in $\mathcal{O}(\log n)$;
+\textsc{Decrease-Key} is more complex, but fits in $\mathcal{O}(\log n)$.
 
 Several major adjustments have been made to the Brodal--Okasaki implementation
 in order to try to improve its performance. While the overall pure functional
 construction of the heap has been kept, bootstrapping has been removed as the
-meld operation does not get used in Dijkstras. Additionally, we decided not to
+meld operation does not get used in Dijkstra's algorithm. Additionally, we decided not to
 worry about the purity of the memory management. When the heap is modified, the
 implementation happily mutates pointers and cells, making the implementation
 \emph{in-place}. In order to improve cache locality, all the cells are allocated in
-one contiguous buffer effectively maintaing a custom free-list / memory
+one contiguous buffer, effectively maintaining a custom free-list / memory
 allocator for the heap. Cells use relative addresses to point to each other,
 allowing the buffer to be reallocated without invalidating the contents.
 Finally, a negative queue has been added to support the decrease-key operation.

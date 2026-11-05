@@ -5,15 +5,12 @@
 All tests were conducted on a machine equipped with an Intel Core Ultra 7
 165U processor, 12 physical cores and 14 logical CPUs, 30~GiB of RAM, and a
 937~GB NVMe solid-state drive. The machine was running 64-bit \emph{Arch} Linux with
-kernel version 7.2.11-arch1-1. The complete test suite was executed on Linux,
-while macOS supports only the runtime benchmarks because the \code{perf} and
-memory benchmarks depend on Linux-specific facilities. The full set of tests require a linux
-computer to run, but a subset can be run on a darwin machine. Due to high
+kernel version 7.2.11-arch1-1. The complete test suite was executed on Linux, while macOS supports only the runtime benchmarks because the \code{perf} and memory benchmarks depend on Linux-specific facilities. Due to high
 variance out of our control we do not expect every machine to produce the same
 results, or even subsequent runs to produce the same results, but they should
 all be relatively similar.
 
-We tested each heap implementation against two djikstras implementations and
+We tested each heap implementation against two Dijkstra implementations and
 several input graphs, gathering data about the running time, cpu behaviour, and
 memory use.
 In order to reuse code for each task we used \code{make} to generate several
@@ -49,11 +46,11 @@ we were not including static overheads due to test initialisation or additional
 allocations into the benchmarks.
 
 On Linux, we use the \code{perf} tool to measure data about the cycles, branching,
-and cache loads and misses that occur as Dijkstras runs. These tests are more
+and cache loads and misses that occur as Dijkstra runs. These tests are more
 expensive but we only run them a single time. We were interested in measuring
 the reasons behind the performance differences, and in modern processors cache
 locality has a massive impact on program performance. This is where the
-difference between the theoretical big $O$ performance of each heap and the
+difference between the theoretical big-$\mathcal{O}$ performance of each heap and the
 reality will be made apparent. We use a python script to run the binaries and
 collate the produced data.
 

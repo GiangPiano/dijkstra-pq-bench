@@ -16,10 +16,10 @@ The theoretical merit of priority queues in shortest-path algorithms can be eval
     \toprule
     \textbf{Heap Variant} & \textbf{Push} & \textbf{Pop (Extract)} & \textbf{Decrease-Key} & \textbf{Pointers / Node} \\
     \midrule
-    \textbf{Binary}          & $O(\log n)$ & $O(\log n)$   & $O(\log n)$         & 0 (implicit array) \\
-    \textbf{Pairing}         & $O(1)$      & $O(\log n)^*$ & $o(\log n)^*$       & 3 (\code{child, next, prev}) \\
-    \textbf{Fibonacci}       & $O(1)$      & $O(\log n)^*$ & $O(1)^*$            & 4 (\code{parent, child, left, right}) \\
-    \textbf{Brodal--Okasaki} & $O(1)$      & $O(\log n)$   & $O(\log n)^\dagger$ & 0 (buffer indices) \\
+    \textbf{Binary}          & $\mathcal{O}(\log n)$ & $\mathcal{O}(\log n)$   & $\mathcal{O}(\log n)$         & 0 (implicit array) \\
+    \textbf{Pairing}         & $\mathcal{O}(1)$      & $\mathcal{O}(\log n)^*$ & $o(\log n)^*$       & 3 (\code{child, next, prev}) \\
+    \textbf{Fibonacci}       & $\mathcal{O}(1)$      & $\mathcal{O}(\log n)^*$ & $\mathcal{O}(1)^*$            & 4 (\code{parent, child, left, right}) \\
+    \textbf{Brodal--Okasaki} & $\mathcal{O}(1)$      & $\mathcal{O}(\log n)$   & $\mathcal{O}(\log n)^\dagger$ & 0 (buffer indices) \\
     \bottomrule
   \end{tabular}
   \vspace{0.1cm}
@@ -105,14 +105,14 @@ The theoretical merit of priority queues in shortest-path algorithms can be eval
     \textbf{Total \textsc{Pop} Invocations} & Exactly $n$ & At most $m + 1$ \\
     \textbf{Total \textsc{Decrease-Key} Calls} & At most $m - n + 1$ & 0 \\
     \textbf{Handle Tracking (\texttt{pos} array)} & Required & None \\
-    \textbf{Binary Heap Complexity} & $O(m \log n)$ & $O(m \log m) = O(m \log n)$ \\
-    \textbf{Fibonacci Heap Complexity} & $O(m + n \log n)$ & $O(m \log m) = O(m \log n)$ \\
-    \textbf{Memory Footprint Scaling} & $O(n)$ & $O(m)$ \\
+    \textbf{Binary Heap Complexity} & $\mathcal{O}(m \log n)$ & $\mathcal{O}(m \log m) = \mathcal{O}(m \log n)$ \\
+    \textbf{Fibonacci Heap Complexity} & $\mathcal{O}(m + n \log n)$ & $\mathcal{O}(m \log m) = \mathcal{O}(m \log n)$ \\
+    \textbf{Memory Footprint Scaling} & $\mathcal{O}(n)$ & $\mathcal{O}(m)$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-The choice \textsc{Decrease-Key} and \textsc{lazy} insertion fundamentally alters how priority queue overhead is distributed:
+The choice between \textsc{Decrease-Key} and \textsc{lazy} insertion fundamentally alters how priority queue overhead is distributed:
 
 \begin{enumerate}
   \item \textbf{The Position Tracking with \textsc{Decrease-key}:} 
@@ -122,11 +122,11 @@ The choice \textsc{Decrease-Key} and \textsc{lazy} insertion fundamentally alter
   \textsc{Lazy} completely bypasses the need for node handles and position synchronisation. When an edge $(u, v)$ is relaxed, a fresh \code{(distance, v)} tuple is appended with a simple \textsc{Push}. This transforms edge relaxation from a complex tree-restructuring operation into a trivial insertion.
 
   \item \textbf{The Penalty of Queue Bloat on Dense Graphs:} 
-  The vulnerability of the lazy formulation lies in queue inflation on dense topologies ($m \gg n$). Because stale entries linger in the heap until they float to the root, the queue swells from size $n$ to $O(m)$. Consequently:
+  The vulnerability of the lazy formulation lies in queue inflation on dense topologies ($m \gg n$). Because stale entries linger in the heap until they float to the root, the queue swells from size $n$ to $\mathcal{O}(m)$. Consequently:
   \begin{itemize}
     \item Every extraction incurs tree depth penalties proportional to $\log m$ instead of $\log n$.
-    \item The algorithm performs $m$ total extractions rather than $n$. While skipping a stale entry requires only an $O(1)$ scalar distance comparison (\code{d > dist[u]}), getting that stale entry to the top of the heap requires a full, expensive $O(\log m)$ \textsc{Pop} restructuring.
-    \item For Fibonacci and pairing heaps, lazy insertion nullifies their asymptotic advantage: their $O(1)$-like decrease-key is never exercised, reducing their theoretical bound from $O(m + n \log n)$ back to $O(m \log m)$.
+    \item The algorithm performs $m$ total extractions rather than $n$. While skipping a stale entry requires only an $\mathcal{O}(1)$ scalar distance comparison (\code{d > dist[u]}), getting that stale entry to the top of the heap requires a full, expensive $\mathcal{O}(\log m)$ \textsc{Pop} restructuring.
+    \item For Fibonacci and pairing heaps, lazy insertion nullifies their asymptotic advantage: their $\mathcal{O}(1)$-like decrease-key is never exercised, reducing their theoretical bound from $\mathcal{O}(m + n \log n)$ back to $\mathcal{O}(m \log m)$.
   \end{itemize}
 \end{enumerate}
 
@@ -140,14 +140,14 @@ The choice \textsc{Decrease-Key} and \textsc{lazy} insertion fundamentally alter
   \item \textbf{Hypothesis 1.2:} \\
   As graph density increases ($\bar{d} \gg 32$, $m \gg n$), the number of \textsc{Decrease-Key} operations ($m - n$) will overwhelm the $n$ extractions. 
   \begin{itemize}
-    \item We predict that the pairing heap will cross over and beat the binary heap on dense topologies due to its lightweight $O(1)$-like cut-and-meld decrease-key.
+    \item We predict that the pairing heap will cross over and beat the binary heap on dense topologies due to its lightweight $\mathcal{O}(1)$-like cut-and-meld decrease-key.
     \item Conversely, we predict the Fibonacci heap will fail to beat the pairing heap across all graph densities. This is due to the structural tax of maintaining circular doubly-linked lists, degree arrays, and cascading cut bookkeeping.
   \end{itemize}
   \item \textbf{Hypothesis 1.3:} \\
   The relative performance of \textsc{Lazy} against \textsc{decrease-key} will depend strictly on edge density:
   \begin{itemize}
     \item On \emph{sparse graphs}, \textsc{Lazy} will be faster than or strictly competitive with \textsc{decrease-key} for binary heaps, because avoiding the synchronisation writes to $\texttt{pos}[]$ during \code{bubble()} outweighs the cost of processing a small number of duplicate entries.
-    \item On \emph{dense graphs}, \textsc{Lazy} will suffer severe performance degradation across all heaps. The queue will swell to size $O(m)$, forcing the algorithm to execute $m$ full $O(\log m)$ extractions instead of $n$, quickly falling behind \textsc{decrease-key}.
+    \item On \emph{dense graphs}, \textsc{Lazy} will suffer severe performance degradation across all heaps. The queue will swell to size $\mathcal{O}(m)$, forcing the algorithm to execute $m$ full $\mathcal{O}(\log m)$ extractions instead of $n$, quickly falling behind \textsc{decrease-key}.
   \end{itemize}
   \item \textbf{Hypothesis 1.4:} \\
   While purely functional priority queues offer optimal theoretical worst-case bounds, simulating \textsc{Decrease-Key} via positive/negative tree cancellation will introduce quadratic-like slowdowns on dense graphs with repeated key updates, rendering it uncompetitive with imperative heaps.
@@ -160,7 +160,7 @@ The choice \textsc{Decrease-Key} and \textsc{lazy} insertion fundamentally alter
   \begin{itemize}
     \item The \textbf{Binary Heap} will exhibit the lowest cache miss rates because traversing an array index ($2i+1, 2i+2$) exploits CPU spatial locality.
     \item \textbf{Pairing and Brodal--Okasaki} will exhibit significantly higher $L_1$ and Last-Level Cache (LLC) miss rates due to pointer chasing. Since individual nodes are allocated arbitrarily in virtual memory, traversing child and sibling pointers will incur frequent pipeline stalls waiting for DRAM round-trips.
-    \item The \textbf{Fibonacci Heaps} will record the worst cache behavior because its 56-byte node size approaches an entire 64-byte cache line, minimising the probability that a pointer dereference hits already-cached data.
+    \item The \textbf{Fibonacci Heaps} will record the worst cache behaviour because its 56-byte node size approaches an entire 64-byte cache line, minimising the probability that a pointer dereference hits already-cached data.
   \end{itemize}
   \item \textbf{Hypothesis 2.2:} \\
   Array-based heaps will demonstrate lower Instructions per Cycle (IPC) during bubble/sink loops due to data dependency stalls, but will execute orders of magnitude fewer total retired instructions than pointer-based heaps that must maintain multi-way pointer updates per link.
