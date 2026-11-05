@@ -372,10 +372,10 @@ So decrease-key $(v: 9 → 4)$ becomes:
         align: (left, right, right),
         [], [*sparse*], [*dense*],
         table.hline(stroke: 0.3pt),
-        [Binary], [*0.70 ms*], [*1.64 ms*],
-        [Pairing], [0.92 ms], [2.06 ms],
-        [Fibonacci], [1.90 ms], [2.86 ms],
-        [Brodal-Okasaki], [3.39 ms], [15.72 ms],
+        [Binary], [*0.72 ms*], [*1.69 ms*],
+        [Pairing], [0.93 ms], [2.43 ms],
+        [Fibonacci], [2.01 ms], [3.08 ms],
+        [Brodal-Okasaki], [3.46 ms], [16.11 ms],
       )
     ]
     #v(0.3em)
@@ -395,7 +395,7 @@ So decrease-key $(v: 9 → 4)$ becomes:
 #align(center, image(fig("runtime/lazy_vs_decrease_key.png"), height: 275pt))
 
 #text(size: 0.8em)[
-  Above 1: decrease-key faster. Gap grows with density (binary: 1.27× sparse → 1.93× dense). \
+  Above 1: decrease-key faster. Gap grows with density (binary: 1.21× sparse → 1.88× dense). \
   *Brodal-Okasaki is the only heap that prefers lazy.*
 ]
 
@@ -407,18 +407,35 @@ So decrease-key $(v: 9 → 4)$ becomes:
 
 == Why? The slow heaps just do more work
 
-#align(center, image(fig("mem/allocator_pressure.png"), height: 205pt))
+#grid(
+  columns: (1.1fr, 1fr),
+  gutter: 1.2em,
+  align: horizon,
+  image(fig("perf/cycles_vs_instructions.png"), height: 290pt),
+  text(size: 0.8em)[
+    *Instructions per vertex vs binary*
+    - Pairing *1.4×*, Fibonacci *2.5×*, Brodal-Okasaki *4.6×*
 
-#text(size: 0.85em)[
-  - Pairing and Fibonacci: *one `malloc` per node* (10k to 66k). Binary and Brodal-Okasaki: under 10
-  - IPC was about 1 for every heap, and binary even had the *highest* L1 miss rate. \
-    The gap is how much work each heap does, not how well the CPU runs it
-]
+    #v(0.4em)
+    *Binary, pairing, Fibonacci*
+    - Same IPC band (1.6 to 1.8): the gap is *work*
+
+    #v(0.4em)
+    *Brodal-Okasaki*
+    - IPC about 1.0: more work, run *less efficiently*
+    - ~13× the branch mispredictions per vertex
+  ],
+)
 
 #speaker-note[
-  Log scale. Note the cache result: miss rate alone did not explain the
-  ranking. The slower heaps simply execute more instructions and allocations
-  per Dijkstra run, so a lower miss percentage doesn't save them.
+  Each dot is one heap on one graph. Moving right means more instructions per
+  vertex; moving up off a dashed line means a lower IPC. Binary, pairing and
+  Fibonacci sit in the same IPC band, so they differ in how much they do, not
+  in how well the CPU runs it. Brodal-Okasaki sits higher: its linking and
+  cancellation code branches on key comparisons the predictor cannot learn,
+  about 53 mispredictions per vertex against 4 for binary. These counters
+  only cover the Dijkstra loop; our first version also counted start-up,
+  which hid all of this.
 ]
 
 // ===========================================================================
@@ -437,7 +454,7 @@ So decrease-key $(v: 9 → 4)$ becomes:
   #grid(
     columns: 2,
     gutter: 3em,
-    [#big[1.64 ms] \ #muted[binary]], [#big[2.06 ms] \ #muted[pairing]],
+    [#big[1.69 ms] \ #muted[binary]], [#big[2.43 ms] \ #muted[pairing]],
   )
 ]
 
@@ -447,8 +464,10 @@ So decrease-key $(v: 9 → 4)$ becomes:
 
 #speaker-note[
   This was our main hypothesis and it failed cleanly. Even on the densest
-  graph, where decrease-key is called hundreds of thousands of times, the
-  array heap is about 25% faster than the pairing heap.
+  graph the array heap is about 30% faster than the pairing heap. Part of
+  the reason: with random weights decrease-key is called only about 23,000
+  times there, roughly 2.3 per vertex, not the ~490,000 we assumed, so the
+  pairing heap's cheap decrease-key barely gets used.
 ]
 
 == The twist: Brodal-Okasaki prefers *not* to decrease keys
@@ -460,13 +479,13 @@ So decrease-key $(v: 9 → 4)$ becomes:
     *One relaxation, decrease-key*
     - Tombstone insert + new insert
     - Two delete-mins to cancel later
-    - 15.72 ms on `uniform_dense`
+    - 16.11 ms on `uniform_dense`
   ],
   [
     *One relaxation, lazy*
     - One insert
     - One delete-min
-    - *9.10 ms* on `uniform_dense`
+    - *9.57 ms* on `uniform_dense`
   ],
 )
 
