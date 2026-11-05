@@ -34,9 +34,10 @@ configurations nevertheless released their allocations correctly and reported
 zero leaked bytes.
 
 Finally, the hardware-counter results showed that theoretical complexity alone
-was not sufficient to predict practical performance. The slower heaps often
-performed more instructions and incurred additional structural overhead, but
-cache and IPC measurements did not provide a single explanation for every
-runtime difference. Overall, the experiments demonstrate that memory layout,
+was not sufficient to predict practical performance. Once the counters were
+restricted to the Dijkstra loop itself, they explained the ranking clearly:
+the pairing and Fibonacci heaps execute $1.4$ and $2.5$ times the binary heap's
+instructions at a similar IPC, while Brodal-Okasaki executes $4.6$ times as
+many at an IPC of about $1.0$, held back by frequent branch mispredictions. Overall, the experiments demonstrate that memory layout,
 allocation behaviour, and constant factors can dominate asymptotic advantages
 for this workload.

@@ -37,8 +37,10 @@ pipeline in an isolated container easily.
 
 % TODO: link to ubench
 We used \code{ubench}, a single header C benchmarking library to run our runtime
-benchmarks. \code{ubench} runs Dijkstras a minimum of 100 times, increasing the number
-of attempts if the variance is high. This allows us to gather a good estimate of
+benchmarks. \code{ubench} first times a single run to choose a batch of
+between 10 and 500 runs (about 100~ms of work), then repeats batches of
+increasing size until the 99\% confidence interval of the mean is within 5\%.
+This allows us to gather a good estimate of
 the running time of each heap implementation in both \code{decrease_key} and \code{lazy}
 Dijkstras implementations. We took care to ensure that the benchmarks were only
 measuring the running time of Dijkstras over the heap implementation, and that
