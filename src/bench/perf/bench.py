@@ -3,6 +3,16 @@
 Experiment 2: Microarchitectural Profiling Runner (perf stat)
 Orchestrates hardware performance counter collection across heap variants.
 Captures L1 data cache misses, LLC misses, branch mispredictions, and IPC.
+
+Only the timed Dijkstra loop is measured. perf starts with all counters
+disabled (--delay=-1) and the benchmark binary switches them on and off
+around its loop through a pair of control FIFOs (--control fifo:ctl,ack),
+whose paths are passed in PERF_CTL_FIFO / PERF_ACK_FIFO. Process start-up,
+page-faulting the statically linked graph and the warm-up pass are therefore
+excluded. Requires perf 5.10 or newer.
+
+Absolute counts in the CSV are averaged per Dijkstra run (total / iterations);
+rates and IPC are unaffected by the iteration count.
 """
 
 import argparse
@@ -13,6 +23,7 @@ import platform
 import shutil
 import subprocess
 import sys
+import tempfile
 
 MODES = ["decrease_key", "lazy"]
 
@@ -28,6 +39,10 @@ EVENTS = {
 }
 REQUIRED_EVENTS = ("cycles", "instructions", "branches", "branch_misses")
 OPTIONAL_EVENTS = ("L1_loads", "L1_misses", "LLC_loads", "LLC_misses")
+
+# Measured Dijkstra runs per perf invocation. A single run of the small graphs
+# lasts only tens of microseconds, too short for stable counter readings.
+DEFAULT_ITERATIONS = 50
 
 
 def listed_event_names(listing):
@@ -66,19 +81,35 @@ def discover_events(perf):
 
 def run_perf_stat(perf, taskset, binary_path, config, mode, events, iters=1, core_id=0):
     """
-    Executes binary under `taskset -c <core>` and `perf stat -x,`.
-    Returns dict of counter values.
+    Executes binary under `taskset -c <core>` and `perf stat -x,`, counting
+    only the window the binary enables through the perf control FIFOs.
+    Returns dict of counter values summed over all `iters` runs.
     """
     events_str = ",".join(EVENTS[key] for key in events)
-    command = [perf, "stat", "-x,", "-e", events_str, binary_path, config, mode, str(iters)]
-    cmd = [taskset, "-c", str(core_id)] + command if taskset else command
 
-    try:
-        proc = subprocess.run(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=120
-        )
-    except subprocess.TimeoutExpired:
-        return {}, "perf timed out"
+    with tempfile.TemporaryDirectory(prefix="perf-ctl-") as fifo_dir:
+        ctl_fifo = os.path.join(fifo_dir, "ctl")
+        ack_fifo = os.path.join(fifo_dir, "ack")
+        os.mkfifo(ctl_fifo)
+        os.mkfifo(ack_fifo)
+
+        command = [
+            perf, "stat", "-x,",
+            "--delay=-1",                               # start with counters disabled
+            "--control", f"fifo:{ctl_fifo},{ack_fifo}",  # binary enables/disables them
+            "-e", events_str,
+            binary_path, config, mode, str(iters),
+        ]
+        cmd = [taskset, "-c", str(core_id)] + command if taskset else command
+        env = dict(os.environ, PERF_CTL_FIFO=ctl_fifo, PERF_ACK_FIFO=ack_fifo)
+
+        try:
+            proc = subprocess.run(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                timeout=120, env=env,
+            )
+        except subprocess.TimeoutExpired:
+            return {}, "perf timed out"
 
     if proc.returncode != 0:
         detail = proc.stderr.strip().splitlines()[-1] if proc.stderr.strip() else "unknown error"
@@ -98,6 +129,9 @@ def run_perf_stat(perf, taskset, binary_path, config, mode, events, iters=1, cor
                         pass
                     break
 
+    if "Events enabled" not in proc.stderr:
+        return {}, "counters were never enabled (binary did not signal perf)"
+
     return stats, ""
 
 
@@ -106,7 +140,13 @@ def main():
     parser.add_argument("-b", "--bin-dir", default="bin", help="Directory containing perf binaries")
     parser.add_argument("-o", "--output", default="data/out/perf/hardware_counters.csv", help="Output CSV path")
     parser.add_argument("-c", "--core", type=int, default=0, help="CPU Core to pin execution (default 0)")
+    parser.add_argument(
+        "-n", "--iters", type=int, default=DEFAULT_ITERATIONS,
+        help=f"Measured Dijkstra runs per configuration (default {DEFAULT_ITERATIONS})",
+    )
     args = parser.parse_args()
+    if args.iters < 1:
+        parser.error("--iters must be at least 1")
 
     if platform.system() != "Linux":
         parser.error("perf profiling is only supported on Linux")
@@ -143,6 +183,7 @@ def main():
     print("=" * 80)
     print(" Experiment 2: Microarchitectural Profiling (perf stat)")
     print(f" CPU Core Pinned: {args.core}")
+    print(f" Measured runs per configuration: {args.iters} (counts reported per run)")
     print(f"     Configurations are read from the generated graph metadata.")
     print("=" * 80)
 
@@ -158,7 +199,7 @@ def main():
                     print(f"[SKIP] Binary not found: {binary_path}")
                     continue
 
-                iters = 1
+                iters = args.iters
                 sys.stdout.write(f"[*] Running {variant:<15} [{config:<6} | {mode:<12}] (iters={iters}) ... ")
                 sys.stdout.flush()
 
@@ -171,14 +212,15 @@ def main():
                 else:
                     print("OK")
 
-                l1_loads = stats.get("L1_loads", 0)
-                l1_misses = stats.get("L1_misses", 0)
-                llc_loads = stats.get("LLC_loads", 0)
-                llc_misses = stats.get("LLC_misses", 0)
-                branches = stats.get("branches", 0)
-                branch_misses = stats.get("branch_misses", 0)
-                cycles = stats.get("cycles", 0)
-                instructions = stats.get("instructions", 0)
+                # perf sums over every measured run; report per-run averages
+                l1_loads = stats.get("L1_loads", 0) / iters
+                l1_misses = stats.get("L1_misses", 0) / iters
+                llc_loads = stats.get("LLC_loads", 0) / iters
+                llc_misses = stats.get("LLC_misses", 0) / iters
+                branches = stats.get("branches", 0) / iters
+                branch_misses = stats.get("branch_misses", 0) / iters
+                cycles = stats.get("cycles", 0) / iters
+                instructions = stats.get("instructions", 0) / iters
 
                 l1_miss_rate = (l1_misses / l1_loads * 100.0) if l1_loads > 0 else 0.0
                 llc_miss_rate = (llc_misses / llc_loads * 100.0) if llc_loads > 0 else 0.0
@@ -189,18 +231,19 @@ def main():
                     "variant": variant,
                     "config": config,
                     "mode": mode,
-                    "L1_loads": int(l1_loads),
-                    "L1_misses": int(l1_misses),
+                    "L1_loads": round(l1_loads),
+                    "L1_misses": round(l1_misses),
                     "L1_miss_rate_pct": f"{l1_miss_rate:.2f}",
-                    "LLC_loads": int(llc_loads),
-                    "LLC_misses": int(llc_misses),
+                    "LLC_loads": round(llc_loads),
+                    "LLC_misses": round(llc_misses),
                     "LLC_miss_rate_pct": f"{llc_miss_rate:.2f}",
-                    "branches": int(branches),
-                    "branch_misses": int(branch_misses),
+                    "branches": round(branches),
+                    "branch_misses": round(branch_misses),
                     "branch_miss_rate_pct": f"{branch_miss_rate:.2f}",
-                    "cycles": int(cycles),
-                    "instructions": int(instructions),
+                    "cycles": round(cycles),
+                    "instructions": round(instructions),
                     "IPC": f"{ipc:.2f}",
+                    "iterations": iters,
                     "note": note,
                 })
 
@@ -210,7 +253,7 @@ def main():
         "L1_loads", "L1_misses", "L1_miss_rate_pct",
         "LLC_loads", "LLC_misses", "LLC_miss_rate_pct",
         "branches", "branch_misses", "branch_miss_rate_pct",
-        "cycles", "instructions", "IPC", "note"
+        "cycles", "instructions", "IPC", "iterations", "note"
     ]
 
     with open(output_path, "w", newline="", encoding="utf-8") as f:
