@@ -76,7 +76,7 @@ MEM_BIN_VARIANTS     = $(addprefix $(MEM_BIN_DIR)/,$(VARIANTS))
 
 # helper function to get expected .o files
 # for a heap variant
-OBJS_FOR_HEAP = $(patsubst $(HEAP_SRC_DIR)/%.c,$(HEAP_BUILD_DIR)/%.o,$(shell ls $(HEAP_SRC_DIR)$(1)/**/*.c))
+OBJS_FOR_HEAP = $(patsubst $(HEAP_SRC_DIR)/%.c,$(HEAP_BUILD_DIR)/%.o,$(shell echo $(HEAP_SRC_DIR)$(1)/**/*.c))
 # common objects for all executables
 COMMON_OBJS = $(patsubst $(BENCH_SRC_DIR)/%.c,$(BENCH_BUILD_DIR)/%.o,$(wildcard $(BENCH_SRC_DIR)/*.c))
 
@@ -245,7 +245,7 @@ $(MEM_FIGURES_DIR)/mem.tex: $(MEM_CSV) $(BENCH_SRC_DIR)/mem/plot.py
 	$(BENCH_SRC_DIR)/mem/plot.py -i $(MEM_CSV) -o $(MEM_FIGURES_DIR)
 
 # include the .d makefiles of all ./src/**/*.c files
--include $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(shell ls $(SRC_DIR)/**/*.c))
+-include $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(shell echo $(SRC_DIR)/**/*.c))
 # include the .d makefiles of all ./build/test/**/*.c files
 -include $(patsubst %,$(TEST_BUILD_DIR)/%.d,$(TEST_SET))
 -include $(TEST_BUILD_DIR)/graph_registry.d

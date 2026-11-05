@@ -7,7 +7,7 @@ SHELL := /usr/bin/env bash -O globstar
 .PHONY:
 all: report.pdf
 
-report.pdf: $(shell ls **/*.tex)
+report.pdf: $(shell echo **/*.tex) $(shell echo frozen_results/**/*)
 	latexmk -pdf report.tex
 
 .PHONY:
