@@ -5,7 +5,7 @@ heap implementations, especially focusing on making small modifications to each
 of the currently selected heaps. We could observe if different optimisations
 actually produce a real-world impact under the fairly complex runtime
 conditions of a min-heap. This would be particularly interesting for the
-Brodal--Okasaki heap, and to also add the imperative Brodal min-heap as another point
+Brodal-Okasaki heap, and to also add the imperative Brodal min-heap as another point
 of comparison.
 
 The present interface identifies a queue entry by its vertex number; this
@@ -14,7 +14,7 @@ index tables do not support multiple entries for a vertex alongside
 \code{heap_decrease_key}. Instead, each push could be assigned a unique
 identifier, used for looking up the node in \code{heap_decrease_key}, which would
 be a more correct implementation and remove the need for the positive and
-negative cancellation lists in Brodal--Okasaki that slow the implementation down.
+negative cancellation lists in Brodal-Okasaki that slow the implementation down.
 Since the edge case that would cause an incorrect \code{heap_decrease_key}
 does not arise under Dijkstra's algorithm, we decided to skip this feature.
 

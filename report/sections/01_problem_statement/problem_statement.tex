@@ -121,20 +121,20 @@ A pairing heap is a self-adjusting multi-way tree implemented using a Left-Child
 A Fibonacci heap is a collection of min-heap-ordered trees maintained in a circular doubly-linked root list, with a direct pointer to the minimum root. Each node stores four pointers (\code{parent}, \code{child}, \code{left}, \code{right}), an integer \code{degree}, and a boolean \code{marked} flag indicating whether the node has lost a child since becoming a child of its current parent.
 Operations are structured around lazy consolidation. \textsc{Push} splices a new node into the root list in $\mathcal{O}(1)$ worst-case time. When \textsc{Decrease-Key} violates heap order, the node is severed and appended to the root list via \textsc{Cut}. If its parent was already marked, a \emph{cascading cut} propagates recursively up the ancestor chain until an unmarked node is encountered and marked. This mechanism preserves an exponential lower bound on subtree size relative to degree ($F_{k+2}$ for degree $k$), achieving an amortised $\mathcal{O}(1)$ decrease-key bound. Structural cleanup occurs exclusively during \textsc{Pop}, where the root's children are promoted to the root list and trees of equal degree are pairwise linked using an auxiliary array (\code{A[MAX_DEGREE]}), yielding $\mathcal{O}(\log n)$ amortised extraction. This achieves the theoretically optimal $\mathcal{O}(m + n \log n)$ bound for Dijkstra's algorithm. However, it incurs heavy per-node structures ($56\text{ bytes}$ plus handles), complex cascading cut logic, and poor cache locality.
 
-\subsubsection{Brodal--Okasaki heap}
+\subsubsection{Brodal-Okasaki heap}
 \vspace{-0.2cm}
 {\small \textbf{Author:} Oscar Chevalier}
 
 \vspace{0.2cm}
 \noindent
-Traditionally, the Brodal--Okasaki heap is a persistent pure functional heap. It is a
+Traditionally, the Brodal-Okasaki heap is a persistent pure functional heap. It is a
 bootstrapped skew-link binomial heap, which provides the best possible
 theoretical performance bounds for a functional heap. There is also an imperative variant
-that is more similar to the Fibonacci heap, but uses skew-links. Brodal--Okasaki
+that is more similar to the Fibonacci heap, but uses skew-links. Brodal-Okasaki
 achieves \textsc{Push} in $\mathcal{O}(1)$ and \textsc{Pop} in $\mathcal{O}(\log n)$;
 \textsc{Decrease-Key} is more complex, but fits in $\mathcal{O}(\log n)$.
 
-Several major adjustments have been made to the Brodal--Okasaki implementation
+Several major adjustments have been made to the Brodal-Okasaki implementation
 in order to try to improve its performance. While the overall pure functional
 construction of the heap has been kept, bootstrapping has been removed as the
 meld operation does not get used in Dijkstra's algorithm. Additionally, we decided not to

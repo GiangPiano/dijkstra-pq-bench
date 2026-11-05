@@ -13,14 +13,14 @@ The results for lazy Dijkstra were also different from the original
 prediction. Hypothesis~1.3 predicted that lazy processing could be competitive
 on sparse graphs but would degrade on dense graphs. Lazy processing was indeed
 slower for the binary, pairing, and Fibonacci heaps, and the difference
-generally increased on denser inputs. However, the Brodal--Okasaki heap was
+generally increased on denser inputs. However, the Brodal-Okasaki heap was
 faster with lazy processing on every graph. This shows that the cost of
 decrease-key depends strongly on the implementation: avoiding an expensive
 decrease-key operation can outweigh the cost of processing stale entries.
 
 The Fibonacci heap was consistently slower than both the binary and pairing
 heaps. This agrees with the prediction that its cascading cuts and linked
-structure would introduce substantial practical overhead. The Brodal--Okasaki
+structure would introduce substantial practical overhead. The Brodal-Okasaki
 implementation was also much slower than expected, particularly with eager
 decrease-key. This supports Hypothesis~1.4, although the observed slowdown is
 better described as a large implementation and constant-factor cost than as a
