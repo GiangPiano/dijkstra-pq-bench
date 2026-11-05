@@ -116,6 +116,13 @@ variant of Dijkstra's algorithm. I would then compare it to C++'s
 not support \code{decrease_key}.
 
 \subsection{Tung Nguyen}
+Beyond implementing both the pairing heap and Fibonacci heap, my primary group contribution was designing and running the benchmarking suite. I planned the experimental methodology across the three experiments: 
+\begin{itemize}
+    \item Wall-clock execution time with \code{ubench}
+    \item Hardware performance counters using Linux \code{perf stat}
+    \item Dynamic memory footprint via linker-wrapped allocator tracking.
+\end{itemize}
+ I developed the benchmark execution pipelines, collated the experimental output into structured CSV datasets, and integrated the generated figures and result tables into the report.
 \subsubsection{Pairing Heap}
 
 The worst case for the pairing heap occurs during \textsc{Delete-Min}. In this implementation, removing the root first pairs its children
@@ -169,4 +176,4 @@ operations independently before integrating them with Dijkstra. I would also
 avoid relying on a fixed \code{MAX_DEGREE} without documenting the bound and
 would use a dynamically sized consolidation array based on the heap size.
 
-The main thing I learned is that Fibonacci heaps achieve their theoretical advantage by postponing work rather than eliminating it. At first, I was tempted to optimise the implementation to make every operation appear efficient. But I eventually realised that the main constraint is the trade-off between cheap insertions and decrease-key operations and the more expensive restructuring performed during \textsc{Extract-Min}. I accepted this trade-off as an essential part of the Fibonacci heap rather than trying to eliminate it.
+I learned that Fibonacci heaps achieve their theoretical advantage by postponing work rather than eliminating it. At first, I was tempted to optimise the implementation to make every operation appear efficient. But I eventually realised that the main constraint is the trade-off between cheap insertions and decrease-key operations and the more expensive restructuring performed during \textsc{Extract-Min}. I accepted this trade-off as an essential part of the Fibonacci heap rather than trying to eliminate it.
