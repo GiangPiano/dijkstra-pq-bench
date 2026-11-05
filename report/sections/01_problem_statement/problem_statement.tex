@@ -30,7 +30,7 @@ The correctness of Dijkstra's algorithm relies on the greedy invariant that once
 
 \vspace{0.2cm}
 \noindent
-Dijkstra's algorithm maintains a distance vector $\code{dist}[v]$ for every vertex $v \in V$. It initialises $\code{dist}[s] = 0$ for the source vertex $s$ and $\code{dist}[v] = \infty$ for all other vertices. At each step, it extracts the unsettled vertex $u$ with minimum tentative distance, treats $\code{dist}[u]$ as finalised, and relaxes each outgoing directed edge $(u,v)$ if $\code{dist}[u] + w(u,v) < \code{dist}[v]$. The priority queue is a min-heap, which is the data structure under test in our benchmarks.
+Dijkstra's algorithm~\cite{dijkstra1959} maintains a distance vector $\code{dist}[v]$ for every vertex $v \in V$. It initialises $\code{dist}[s] = 0$ for the source vertex $s$ and $\code{dist}[v] = \infty$ for all other vertices. At each step, it extracts the unsettled vertex $u$ with minimum tentative distance, treats $\code{dist}[u]$ as finalised, and relaxes each outgoing directed edge $(u,v)$ if $\code{dist}[u] + w(u,v) < \code{dist}[v]$. The priority queue is a min-heap, which is the data structure under test in our benchmarks.
 
 We implemented two variants of Dijkstra's algorithm that differ only in how they update the queue after a successful relaxation:
 \begin{enumerate}
@@ -100,7 +100,7 @@ For the eager variant, the work outside the queue is the same $\Theta(n + m)$, b
 
 \vspace{0.2cm}
 \noindent
-The binary heap represents a complete binary tree of $n$ items stored implicitly in a flat array, with the children of index $i$ at $2i+1$ and $2i+2$ and the parent at
+The binary heap~\cite{williams1964} represents a complete binary tree of $n$ items stored implicitly in a flat array, with the children of index $i$ at $2i+1$ and $2i+2$ and the parent at
 $\lfloor (i-1)/2 \rfloor$. The heap invariant is that no node's key is smaller than its parent's, so the minimum is always at index $0$ and is read in $\mathcal{O}(1)$ time. Insertion appends at the end of the array and \emph{bubbles} the item towards the root while it is smaller than its parent. Extraction overwrites the root with the last item and \emph{sinks} it downwards, swapping with its smaller child while the invariant is violated. Both paths are bounded by the tree height, giving $\mathcal{O}(\log n)$ worst-case insertion, extraction, and key
 decrease. The tree structure is based on index arithmetic rather than pointers, so the entire heap occupies one contiguous allocation. A separate index array $\code{pos}[v]$ records where vertex $v$ currently sits so that
 \textsc{Decrease-Key} can locate it in $\mathcal{O}(1)$ time before bubbling.
@@ -111,14 +111,14 @@ decrease. The tree structure is based on index arithmetic rather than pointers, 
 
 \vspace{0.2cm}
 \noindent
-A pairing heap is a self-adjusting multi-way tree implemented using a Left-Child Right-Sibling (LCRS) layout. Each node stores three pointers: \code{child}, \code{next}, and \code{prev} (which references its left sibling, or its parent if the node is the leftmost child, enabling $\mathcal{O}(1)$ detachment). Tree combinations rely on \textsc{Meld}, which links the root carrying the larger key as the leftmost child of the smaller root in $\mathcal{O}(1)$ time. Consequently, \textsc{Push} melds a freshly allocated node into the root, while \textsc{Decrease-Key} cuts the target node from its siblings via $\code{pos}[v]$ and melds it into the root in $\mathcal{O}(1)$ immediate time (with an amortised cost of $o(\log n)^*$) without invalidating other vertex handles. All structural rebalancing is deferred lazily to \textsc{Pop}: after severing the root, its orphaned children are coalesced via a \emph{two-pass pairing} scheme (pairing adjacent siblings left-to-right, then accumulating them right-to-left) to achieve $\mathcal{O}(\log n)$ amortised extraction. Compared to the array-backed binary heap, the pairing heap trades cache locality and per-node dynamic allocation overhead for cheap, pointer-based decrease-key operations.
+A pairing heap~\cite{fredman1986pairing} is a self-adjusting multi-way tree implemented using a Left-Child Right-Sibling (LCRS) layout. Each node stores three pointers: \code{child}, \code{next}, and \code{prev} (which references its left sibling, or its parent if the node is the leftmost child, enabling $\mathcal{O}(1)$ detachment). Tree combinations rely on \textsc{Meld}, which links the root carrying the larger key as the leftmost child of the smaller root in $\mathcal{O}(1)$ time. Consequently, \textsc{Push} melds a freshly allocated node into the root, while \textsc{Decrease-Key} cuts the target node from its siblings via $\code{pos}[v]$ and melds it into the root in $\mathcal{O}(1)$ immediate time (with an amortised cost of $o(\log n)^*$) without invalidating other vertex handles. All structural rebalancing is deferred lazily to \textsc{Pop}: after severing the root, its orphaned children are coalesced via a \emph{two-pass pairing} scheme (pairing adjacent siblings left-to-right, then accumulating them right-to-left) to achieve $\mathcal{O}(\log n)$ amortised extraction. Compared to the array-backed binary heap, the pairing heap trades cache locality and per-node dynamic allocation overhead for cheap, pointer-based decrease-key operations.
 \subsubsection{Fibonacci heap}
 \vspace{-0.2cm}
 {\small \textbf{Author:} Tung Nguyen}
 
 \vspace{0.2cm}
 \noindent
-A Fibonacci heap is a collection of min-heap-ordered trees maintained in a circular doubly-linked root list, with a direct pointer to the minimum root. Each node stores four pointers (\code{parent}, \code{child}, \code{left}, \code{right}), an integer \code{degree}, and a boolean \code{marked} flag indicating whether the node has lost a child since becoming a child of its current parent.
+A Fibonacci heap~\cite{fredman1987fibonacci} is a collection of min-heap-ordered trees maintained in a circular doubly-linked root list, with a direct pointer to the minimum root. Each node stores four pointers (\code{parent}, \code{child}, \code{left}, \code{right}), an integer \code{degree}, and a boolean \code{marked} flag indicating whether the node has lost a child since becoming a child of its current parent.
 Operations are structured around lazy consolidation. \textsc{Push} splices a new node into the root list in $\mathcal{O}(1)$ worst-case time. When \textsc{Decrease-Key} violates heap order, the node is severed and appended to the root list via \textsc{Cut}. If its parent was already marked, a \emph{cascading cut} propagates recursively up the ancestor chain until an unmarked node is encountered and marked. This mechanism preserves an exponential lower bound on subtree size relative to degree ($F_{k+2}$ for degree $k$), achieving an amortised $\mathcal{O}(1)$ decrease-key bound. Structural cleanup occurs exclusively during \textsc{Pop}, where the root's children are promoted to the root list and trees of equal degree are pairwise linked using an auxiliary array (\code{A[MAX_DEGREE]}), yielding $\mathcal{O}(\log n)$ amortised extraction. This achieves the theoretically optimal $\mathcal{O}(m + n \log n)$ bound for Dijkstra's algorithm. However, it incurs heavy per-node structures ($56\text{ bytes}$ plus handles), complex cascading cut logic, and poor cache locality.
 
 \subsubsection{Brodal-Okasaki heap}
@@ -127,9 +127,9 @@ Operations are structured around lazy consolidation. \textsc{Push} splices a new
 
 \vspace{0.2cm}
 \noindent
-Traditionally, the Brodal-Okasaki heap is a persistent pure functional heap. It is a
+Traditionally, the Brodal-Okasaki heap~\cite{brodal1996optimal} is a persistent pure functional heap. It is a
 bootstrapped skew-link binomial heap, which provides the best possible
-theoretical performance bounds for a functional heap. There is also an imperative variant
+theoretical performance bounds for a functional heap. There is also an imperative variant~\cite{brodal1996worst}
 that is more similar to the Fibonacci heap, but uses skew-links. Brodal-Okasaki
 achieves \textsc{Push} in $\mathcal{O}(1)$ and \textsc{Pop} in $\mathcal{O}(\log n)$;
 \textsc{Decrease-Key} is more complex, but fits in $\mathcal{O}(\log n)$.
