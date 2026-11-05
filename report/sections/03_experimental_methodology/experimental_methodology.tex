@@ -45,9 +45,19 @@ measuring the running time of Dijkstras over the heap implementation, and that
 we were not including static overheads due to test initialisation or additional
 allocations into the benchmarks.
 
+The runtime and \code{perf} benchmarks are pinned to a single CPU with
+\code{taskset}. On a hybrid processor such as the Core Ultra 7 165U the type of
+core decides the caches a run sees (a P-core has a 48~KiB L1 data cache and its
+own 2~MiB L2, while the E-cores have smaller L1 caches and share an L2), so
+\code{src/bench/bench_cpu.py} selects a performance core automatically. On
+machines without \code{taskset}, such as macOS, the benchmarks run unpinned.
+
 On Linux, we use the \code{perf} tool to measure data about the cycles, branching,
-and cache loads and misses that occur as Dijkstra runs. These tests are more
-expensive but we only run them a single time. We were interested in measuring
+and cache loads and misses that occur as Dijkstra runs. \code{perf} starts with
+its counters disabled, and the benchmark binary enables them only around the
+timed Dijkstra loop, so process start-up, graph construction and a warm-up run
+are excluded. Each configuration is measured over 50 runs and the counts are
+reported per run. We were interested in measuring
 the reasons behind the performance differences, and in modern processors cache
 locality has a massive impact on program performance. This is where the
 difference between the theoretical big-$\mathcal{O}$ performance of each heap and the
